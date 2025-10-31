@@ -1,0 +1,68 @@
+[
+  {
+    "id": "p01",
+    "make": "Porsche",
+    "model": "911 Carrera",
+    "year": 2022,
+    "price": "€180,000",
+    "mileage": "5,200 km",
+    "transmission": "Automatic",
+  "image": "/img/porsche911carr.png",
+    "description": "Classic sports car — precision and style."
+  },
+  {
+    "id": "b01",
+    "make": "BMW",
+    "model": "M8 Competition",
+    "year": 2023,
+    "price": "€160,000",
+    "mileage": "3,100 km",
+    "transmission": "Automatic",
+  "image": "/img/bmwm8.jpg",
+    "description": "High power, luxurious finish, and sporty character."
+  },
+  {
+    "id": "l01",
+    "make": "Lamborghini",
+    "model": "Huracán",
+    "year": 2021,
+    "price": "€240,000",
+    "mileage": "7,800 km",
+    "transmission": "Automatic",
+  "image": "/img/huracan.jpg",
+  "description": "Exotic at the highest level — design and speed."
+  },
+  {
+    "id": "a01",
+    "make": "Aston Martin",
+    "model": "DB11",
+    "year": 2020,
+    "price": "€150,000",
+    "mileage": "12,000 km",
+    "transmission": "Automatic",
+  "image": "/img/db11.jpg",
+  "description": "Elegance and comfort with British character."
+  },
+  {
+    "id": "m01",
+    "make": "McLaren",
+    "model": "720S",
+    "year": 2022,
+    "price": "€300,000",
+    "mileage": "2,400 km",
+    "transmission": "Automatic",
+  "image": "/img/720s.jpg",
+  "description": "Lightweight construction and extreme performance."
+  },
+  {
+    "id": "r01",
+    "make": "Rolls-Royce",
+    "model": "Phantom",
+    "year": 2021,
+    "price": "€450,000",
+    "mileage": "6,000 km",
+    "transmission": "Automatic",
+  "image": "/img/RRPhantom.jpg",
+  "description": "Maximum comfort and prestige."
+  }
+]
