@@ -9,3 +9,33 @@ html, body, #root {
 body {
   @apply bg-gray-50;
 }
+
+/* Thinner, styled scrollbar for modern browsers */
+/* WebKit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(141, 141, 141, 0.7);
+  border-radius: 9999px;
+  border: 1px solid transparent; /* subtle padding */
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(110, 110, 110, 0.5)
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(141, 141, 141, 0.7) transparent;
+}
+
+/* Optional: make scrollbar less obtrusive on macOS when overlay scrollbars are used */
+@media (hover: none) and (pointer: coarse) {
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+}

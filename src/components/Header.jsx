@@ -1,26 +1,96 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 
 export default function Header(){
+  const [open, setOpen] = useState(false)
+
   return (
-    <header className="sticky top-0 z-40 bg-blackline/90 text-white">
-      <div className=" mx-auto px-4 py-2 flex justify-center bg-blackline">
-        <Link to="/" aria-label="Blackline Salon home">
-          <img src="/img/logo-header.png" alt="Blackline Salon" className="h-12 w-auto logo-header" />
-        </Link>
+    <header className="absolute inset-x-0 top-0 z-10 text-white bg-gradient-to-b from-black to-transparent ">
+      <div className=" mx-auto px-4 h-16 md:h-20 flex items-center justify-between relative">
+        {/* left: burger moved to viewport left */}
+        <div className="absolute left-12 md:left-16 top-1/2 transform -translate-y-1/2 flex items-center">
+          <button
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+            onClick={() => setOpen(v => !v)}
+            className="p-2 rounded-md hover:bg-blackline/30 focus:outline-none focus:ring-2 focus:ring-blackline-accent flex items-center text-white"
+          >
+            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {open ? (
+                <path d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <>
+                  <path d="M3 12h18" />
+                  <path d="M3 6h18" />
+                  <path d="M3 18h18" />
+                </>
+              )}
+            </svg>
+            <span className="ml-2 font-semibold">Menu</span>
+          </button>
+        </div>
+
+        {/* center: brand title */}
+        <div className="flex-1 flex justify-center">
+          <Link to="/" aria-label="Blackline Salon home">
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-widest uppercase" style={{ fontFamily: '\"Playfair Display\", serif' }}>
+              Blackline
+            </h1>
+          </Link>
+        </div>
+
+        {/* right spacer to keep title centered */}
+        <div className="w-8" />
+
+        {/* thin silver separator placed under the header */}
       </div>
 
-      {/* thin silver separator placed under the logo to visually separate it from navigation */}
-      <div className="w-full">
-        <div className="h-px w-full bg-gradient-to-r from-blackline-accent/80 via-blackline-accent/60 to-blackline-accent/80" />
-      </div>
+      {/* menu/backdrop rendered in a portal so it can't be covered by transformed stacking contexts */}
+      {createPortal(
+        <>
+          <div
+            className={`fixed inset-y-0 left-0 z-50 w-80 md:w-96 transform bg-white p-8 transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+            aria-hidden={!open}
+          >
+            <nav className="space-y-6 mt-6">
+              <Link to="/" className="block text-2xl md:text-3xl text-black font-semibold" onClick={() => setOpen(false)}>Home</Link>
+              <Link to="/inventory" className="block text-2xl md:text-3xl text-black font-semibold" onClick={() => setOpen(false)}>Inventory</Link>
+              <Link to="/contact" className="block text-2xl md:text-3xl text-black font-semibold" onClick={() => setOpen(false)}>Contact</Link>
+            </nav>
 
-      {/* navigation block with subtle translucent background for readability */}
-      <nav className="max-w-7xl mx-auto px-4 py-3 flex justify-center gap-8  backdrop-blur-sm">
-        <Link to="/" className="text-lg text-blackline-muted/85 hover:text-white">Home</Link>
-        <Link to="/inventory" className="text-lg text-blackline-muted/85 hover:text-white">Inventory</Link>
-        <Link to="/contact" className="text-lg text-blackline-muted/85 hover:text-white">Contact</Link>
-      </nav>
+            {/* close button positioned just outside the menu (moves with the menu) */}
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Close menu"
+              className={`absolute top-6 right-[-3rem] md:right-[-3.5rem] z-50 p-3 bg-transparent text-black shadow-lg transition-all duration-200 ${open ? 'opacity-100 translate-x-0 pointer-events-auto' : 'opacity-0 -translate-x-6 pointer-events-none'}`}
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* close button (inside portal) */}
+              <button
+                onClick={() => setOpen(false)}
+                aria-label="Close menu"
+                className={`fixed top-6 left-[20rem] md:left-[24rem] z-50 p-3 bg-transparent text-white shadow-lg transition-all duration-200 ${open ? 'opacity-100 translate-x-0 pointer-events-auto' : 'opacity-0 -translate-x-6 pointer-events-none'}`}
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+          {/* backdrop when menu is open */}
+          <div
+            className={`fixed inset-0 z-40 bg-black/40 transition-opacity ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+            onClick={() => setOpen(false)}
+            aria-hidden={!open}
+          />
+        </>,
+        document.body
+      )}
     </header>
   )
 }
