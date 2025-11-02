@@ -63,24 +63,13 @@ export default function Header(){
             <button
               onClick={() => setOpen(false)}
               aria-label="Close menu"
-              className={`absolute top-6 right-[-3rem] md:right-[-3.5rem] z-50 p-3 bg-transparent text-black shadow-lg transition-all duration-200 ${open ? 'opacity-100 translate-x-0 pointer-events-auto' : 'opacity-0 -translate-x-6 pointer-events-none'}`}
+              className={`absolute top-6 right-[-3rem] md:right-[-3.5rem] z-50 p-3 text-white shadow-lg transition-all duration-200 ${open ? 'opacity-100 translate-x-0 pointer-events-auto' : 'opacity-0 -translate-x-6 pointer-events-none'}`}
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
-
-          {/* close button (inside portal) */}
-              <button
-                onClick={() => setOpen(false)}
-                aria-label="Close menu"
-                className={`fixed top-6 left-[20rem] md:left-[24rem] z-50 p-3 bg-transparent text-white shadow-lg transition-all duration-200 ${open ? 'opacity-100 translate-x-0 pointer-events-auto' : 'opacity-0 -translate-x-6 pointer-events-none'}`}
-              >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
 
           {/* backdrop when menu is open */}
           <div
