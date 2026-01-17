@@ -7,9 +7,9 @@ export default function Header(){
 
   return (
     <header className="absolute inset-x-0 top-0 z-10 text-white bg-gradient-to-b from-black to-transparent ">
-      <div className=" mx-auto px-4 h-16 md:h-20 flex items-center justify-between relative">
-        {/* left: burger moved to viewport left */}
-        <div className="absolute left-12 md:left-16 top-1/2 transform -translate-y-1/2 flex items-center">
+      <div className=" mx-auto px-4 h-16 md:h-20 grid grid-cols-3 items-center relative">
+        {/* left: burger aligned to grid start */}
+        <div className="flex items-center justify-start">
           <button
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
@@ -27,12 +27,12 @@ export default function Header(){
                 </>
               )}
             </svg>
-            <span className="ml-2 font-semibold">Menu</span>
+            <span className="ml-2 font-semibold hidden md:inline">Menu</span>
           </button>
         </div>
 
         {/* center: brand title */}
-        <div className="flex-1 flex justify-center">
+        <div className="flex justify-center">
           <Link to="/" aria-label="Blackline Salon home">
             <h1 className="text-3xl md:text-5xl font-extrabold tracking-widest uppercase" style={{ fontFamily: '\"Playfair Display\", serif' }}>
               Blackline
@@ -41,7 +41,9 @@ export default function Header(){
         </div>
 
         {/* right spacer to keep title centered */}
-        <div className="w-8" />
+        <div className="flex justify-end">
+          <div className="w-10 md:w-16" />
+        </div>
 
         {/* thin silver separator placed under the header */}
       </div>
