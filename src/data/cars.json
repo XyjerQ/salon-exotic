@@ -7,7 +7,8 @@
     "price": "€180,000",
     "mileage": "5,200 km",
     "transmission": "Automatic",
-  "image": "/img/porsche911carr.png",
+    "horsepower": 750,
+    "image": "/img/porsche911carr.png",
     "description": "Classic sports car — precision and style."
   },
   {
@@ -18,7 +19,8 @@
     "price": "€160,000",
     "mileage": "3,100 km",
     "transmission": "Automatic",
-  "image": "/img/bmwm8.jpg",
+    "horsepower": 840,
+    "image": "/img/bmwm8.png",
     "description": "High power, luxurious finish, and sporty character."
   },
   {
@@ -29,8 +31,9 @@
     "price": "€240,000",
     "mileage": "7,800 km",
     "transmission": "Automatic",
-  "image": "/img/huracan.jpg",
-  "description": "Exotic at the highest level — design and speed."
+    "horsepower": 1230,
+    "image": "/img/huracan.png",
+    "description": "Exotic at the highest level — design and speed."
   },
   {
     "id": "a01",
@@ -40,8 +43,9 @@
     "price": "€150,000",
     "mileage": "12,000 km",
     "transmission": "Automatic",
-  "image": "/img/db11.jpg",
-  "description": "Elegance and comfort with British character."
+    "horsepower": 630,
+    "image": "/img/db11.png",
+    "description": "Elegance and comfort with British character."
   },
   {
     "id": "m01",
@@ -51,8 +55,9 @@
     "price": "€300,000",
     "mileage": "2,400 km",
     "transmission": "Automatic",
-  "image": "/img/720s.jpg",
-  "description": "Lightweight construction and extreme performance."
+    "horsepower": 940,
+    "image": "/img/720s.png",
+    "description": "Lightweight construction and extreme performance."
   },
   {
     "id": "r01",
@@ -62,7 +67,8 @@
     "price": "€450,000",
     "mileage": "6,000 km",
     "transmission": "Automatic",
-  "image": "/img/RRPhantom.jpg",
-  "description": "Maximum comfort and prestige."
+    "horsepower": 912,
+    "image": "/img/RRPhantom.png",
+    "description": "Maximum comfort and prestige."
   }
 ]
