@@ -6,6 +6,7 @@ export default function FeaturedCarousel({ cars = [] }){
   const [perPage, setPerPage] = useState(1)
   const trackRef = useRef(null)
   const [cardWidth, setCardWidth] = useState(0)
+  const [cardStride, setCardStride] = useState(0) // width plus gap for accurate slide distance
 
   useEffect(() => {
     function update() {
@@ -37,8 +38,10 @@ export default function FeaturedCarousel({ cars = [] }){
       if (!track) return
       const children = Array.from(track.children)
       if (children.length === 0) return
-      // use the first child's width (includes its share of gap via flex-basis)
-      setCardWidth(children[0].getBoundingClientRect().width)
+      const childWidth = children[0].getBoundingClientRect().width
+      const gapPx = parseFloat(getComputedStyle(track).columnGap || '0')
+      setCardWidth(childWidth)
+      setCardStride(childWidth + gapPx)
     }
 
     measure()
@@ -71,7 +74,7 @@ export default function FeaturedCarousel({ cars = [] }){
         <div
           ref={trackRef}
           className="flex gap-3 transition-transform duration-500 ease-in-out"
-          style={{ transform: `translateX(-${index * cardWidth}px)` }}
+          style={{ transform: `translateX(-${index * (cardStride || cardWidth)}px)` }}
         >
           {cars.map((car) => (
             <div
