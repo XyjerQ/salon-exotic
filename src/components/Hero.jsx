@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from 'react'
 
 export default function Hero() {
-  // Hardcoded defaults (no props required)
+  
   const title = 'Blackline Salon'
   const ctaText = 'See our inventory'
   const ctaHref = '/inventory'
   const image = '/img/gt3rs.png'
   const video = '/vid/bgCars.mp4'
 
-  // default subtitle list (two-line strings using \n)
+  
   const defaultSubtitles = [
     'Exotic Performance,\nPremium Quality.',
     'Not Just Cars,\nIcons of Passion.',
@@ -25,7 +25,7 @@ export default function Hero() {
   }, [options])
 
   return (
-    <div className="relative overflow-hidden min-h-screen bg-gradient-to-r from-blackline via-blackline-surface to-blackline text-white">
+    <div className="relative overflow-hidden min-h-screen min-h-[100dvh] h-[100dvh] md:h-auto bg-gradient-to-r from-blackline via-blackline-surface to-blackline text-white">
       {/* floating info tile - positioned relative to the hero (no background) */}
       <div
         className="absolute left-10 bottom-12 md:left-16 lg:left-20 md:bottom-16 z-30 text-left text-white"
@@ -55,7 +55,7 @@ export default function Hero() {
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         {video && !videoError ? (
           <video
-            className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none transform origin-center scale-125"
+            className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none transform origin-center scale-[1.4]"
             autoPlay
             muted
             loop
