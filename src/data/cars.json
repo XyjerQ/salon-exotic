@@ -1,5 +1,38 @@
 [
   {
+    "id": "bmw01",
+    "make": "BMW",
+    "model": "M5 (E39)",
+    "year": 2003,
+    "price": "€65,000",
+    "mileage": "125,000 km",
+    "transmission": "6-Speed Getrag Manual",
+    "horsepower": 780,
+    "engine": "4.9L V8 S62 with Supercharger",
+    "drivetrain": "Rear-Wheel Drive",
+    "fuelType": "Petrol",
+    "color": "Le Mans Blue Metallic",
+    "interiorColor": "Grey Nappa Leather",
+    "images": [
+      "/img/cars/e39 (1).png",
+      "/img/cars/e39 (2).png",
+      "/img/cars/e39 (3).png",
+      "/img/cars/e39 (4).png",
+      "/img/cars/e39 (5).png"  
+    ],
+    "description": "This exceptional BMW M5 E39 is the ultimate expression of the modern classic sports sedan. Professionally modified, it features a high-performance supercharger system that pushes the legendary S62 V8 engine to a staggering 780 horsepower. The car sits on a lowered sport suspension and deep-dish chrome wheels, perfectly complementing the Le Mans Blue Metallic paint. The build focus was a 'sleeper' aesthetic, featuring a hidden intercooler tucked behind the factory front bumper to maintain its original, iconic silhouette. It offers a perfect balance between a collector's masterpiece and raw, uncompromising performance.",
+    "features": [
+      "Vortech Supercharger Kit",
+      "Stance-Adjusted Lowered Suspension",
+      "Custom Deep Dish Chrome Alloy Wheels",
+      "Stealth Front Mount Intercooler",
+      "M-Sport Limited Slip Differential",
+      "Premium Nappa Leather Interior",
+      "Electric Sunroof and Heated Seats"
+    ],
+    "assignedEmployee": "emp02"
+  },
+  {
     "id": "p01",
     "make": "Porsche",
     "model": "911 Carrera",
@@ -14,11 +47,11 @@
     "color": "GT Green Metallic",
     "interiorColor": "Black Leather",
     "images": [
-      "/img/porsche911carr.png",
-      "/img/carr (1).png",
-      "/img/carr (3).png",
-      "/img/carr (4).png",
-      "/img/carr (2).png"  
+      "/img/cars/porsche911carr.png",
+      "/img/cars/carr (1).png",
+      "/img/cars/carr (3).png",
+      "/img/cars/carr (4).png",
+      "/img/cars/carr (2).png"  
     ],
     "description": "The iconic Porsche 911 Carrera represents the pinnacle of sports car engineering. This 2022 model features the legendary flat-six engine, delivering exhilarating performance with 750 horsepower. With only 5,200 km on the odometer, this vehicle is practically new and has been meticulously maintained. The GT Green Metallic exterior paired with black leather interior creates a timeless, sophisticated look. Equipped with Porsche's advanced PDK transmission, adaptive suspension, and state-of-the-art infotainment system, this 911 Carrera offers the perfect balance of everyday usability and track-ready performance.",
     "features": [
@@ -46,14 +79,14 @@
     "color": "Frozen Black Metallic",
     "interiorColor": "Silverstone Extended Leather",
     "images": [
-      "/img/bmwm8.png",
-      "/img/bmwm8.png",
-      "/img/bmwm8.png",
-      "/img/bmwm8.png",
-      "/img/bmwm8.png",
-      "/img/bmwm8.png",
-      "/img/bmwm8.png",
-      "/img/bmwm8.png"
+      "/img/cars/bmwm8.png",
+      "/img/cars/bmwm8.png",
+      "/img/cars/bmwm8.png",
+      "/img/cars/bmwm8.png",
+      "/img/cars/bmwm8.png",
+      "/img/cars/bmwm8.png",
+      "/img/cars/bmwm8.png",
+      "/img/cars/bmwm8.png"
     ],
     "description": "Experience the ultimate grand tourer with this stunning 2023 BMW M8 Competition. Powered by a ferocious 4.4-liter twin-turbocharged V8 engine producing 840 horsepower, this beast accelerates from 0-100 km/h in just 3.2 seconds. The M8 Competition combines brutal performance with luxurious comfort, making it perfect for both spirited driving and long-distance cruising. With barely 3,100 km on the clock, this car is in pristine condition. The Frozen Black Metallic paint gives it an aggressive, stealthy appearance, while the Silverstone leather interior offers supreme comfort. Loaded with BMW's latest technology including gesture control, head-up display, and M-specific driving modes.",
     "features": [
@@ -81,13 +114,13 @@
     "color": "Verde Mantis (Green)",
     "interiorColor": "Black Alcantara",
     "images": [
-      "/img/huracan.png",
-      "/img/huracan.png",
-      "/img/huracan.png",
-      "/img/huracan.png",
-      "/img/huracan.png",
-      "/img/huracan.png",
-      "/img/huracan.png"
+      "/img/cars/huracan.png",
+      "/img/cars/huracan.png",
+      "/img/cars/huracan.png",
+      "/img/cars/huracan.png",
+      "/img/cars/huracan.png",
+      "/img/cars/huracan.png",
+      "/img/cars/huracan.png"
     ],
     "description": "This breathtaking 2021 Lamborghini Huracán is the epitome of Italian automotive passion and engineering excellence. The naturally aspirated 5.2-liter V10 engine roars to life with 1230 horsepower, delivering an unforgettable driving experience. Finished in the striking Verde Mantis green, this Huracán turns heads wherever it goes. The advanced all-wheel-drive system ensures optimal traction and handling, while the lightweight construction and aerodynamic design provide exceptional performance. With 7,800 km of careful ownership, this supercar has been garage-kept and serviced exclusively at authorized Lamborghini service centers. The interior features premium Alcantara upholstery, carbon fiber trim, and cutting-edge technology.",
     "features": [
@@ -106,14 +139,14 @@
     "model": "DB11",
     "year": 2020,
     "images": [
-      "/img/db11.png",
-      "/img/db11.png",
-      "/img/db11.png",
-      "/img/db11.png",
-      "/img/db11.png",
-      "/img/db11.png",
-      "/img/db11.png",
-      "/img/db11.png"
+      "/img/cars/db11.png",
+      "/img/cars/db11.png",
+      "/img/cars/db11.png",
+      "/img/cars/db11.png",
+      "/img/cars/db11.png",
+      "/img/cars/db11.png",
+      "/img/cars/db11.png",
+      "/img/cars/db11.png"
     ],
     "price": "€150,000",
     "mileage": "12,000 km",
@@ -141,14 +174,14 @@
     "model": "720S",
     "year": 2022,
     "images": [
-      "/img/720s.png",
-      "/img/720s.png",
-      "/img/720s.png",
-      "/img/720s.png",
-      "/img/720s.png",
-      "/img/720s.png",
-      "/img/720s.png",
-      "/img/720s.png"
+      "/img/cars/720s.png",
+      "/img/cars/720s.png",
+      "/img/cars/720s.png",
+      "/img/cars/720s.png",
+      "/img/cars/720s.png",
+      "/img/cars/720s.png",
+      "/img/cars/720s.png",
+      "/img/cars/720s.png"
     ],
     "price": "€300,000",
     "mileage": "2,400 km",
@@ -176,14 +209,14 @@
     "model": "Phantom",
     "year": 2021,
     "images": [
-      "/img/RRPhantom.png",
-      "/img/RRPhantom.png",
-      "/img/RRPhantom.png",
-      "/img/RRPhantom.png",
-      "/img/RRPhantom.png",
-      "/img/RRPhantom.png",
-      "/img/RRPhantom.png",
-      "/img/RRPhantom.png"
+      "/img/cars/RRPhantom.png",
+      "/img/cars/RRPhantom.png",
+      "/img/cars/RRPhantom.png",
+      "/img/cars/RRPhantom.png",
+      "/img/cars/RRPhantom.png",
+      "/img/cars/RRPhantom.png",
+      "/img/cars/RRPhantom.png",
+      "/img/cars/RRPhantom.png"
     ],
     "price": "€450,000",
     "mileage": "6,000 km",

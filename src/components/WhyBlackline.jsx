@@ -3,22 +3,22 @@ import { useScrollAnimation } from '../hooks/useScrollAnimation'
 
 const items = [
   {
-    image: '/img/History.png',
+    image: '/img/ui/History.png',
     title: 'Verified history',
     desc: 'Full service records, paint-depth checks, and mileage verification on every car.',
   },
   {
-    image: '/img/Delivery.png',
+    image: '/img/ui/Delivery.png',
     title: 'Concierge delivery',
     desc: 'Door to door delivery, registration, and insurance handled for you end-to-end.',
   },
   {
-    image: '/img/Detailing.png',
+    image: '/img/ui/Detailing.png',
     title: 'Tailored detailing',
     desc: 'Ceramic, PPF, or satin conversions - prepped to match your style.',
   },
   {
-    image: '/img/Peace.png',
+    image: '/img/ui/Peace.png',
     title: '30-day peace of mind',
     desc: 'Assistance and starter coverage so you focus purely on driving.',
   },
@@ -44,7 +44,7 @@ export default function WhyBlackline() {
                   decoding="async"
                   onError={(e) => {
                     e.currentTarget.onerror = null
-                    e.currentTarget.src = '/img/fallback.svg'
+                    e.currentTarget.src = '/img/ui/fallback.svg'
                   }}
                 />
               </div>

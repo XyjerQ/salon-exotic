@@ -5,7 +5,7 @@ export default function Hero() {
   const title = 'Blackline Salon'
   const ctaText = 'See our inventory'
   const ctaHref = '/inventory'
-  const image = '/img/gt3rs.png'
+  const image = '/img/hero/gt3rs.png'
   const video = '/vid/bgCars.mp4'
 
   

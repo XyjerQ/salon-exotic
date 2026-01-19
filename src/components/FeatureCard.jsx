@@ -11,7 +11,7 @@ export default function FeatureCard({ title, desc, image, year, horsepower, mile
     >
       <div className="w-full bg-blackline-surface flex items-center justify-center">
         {image ? (
-          <img src={image} alt={title} className="w-full h-full object-cover" loading="lazy" decoding="async" onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src='/img/fallback.svg'}} />
+          <img src={image} alt={title} className="w-full h-full object-cover" loading="lazy" decoding="async" onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src='/img/ui/fallback.svg'}} />
         ) : (
           <span className="text-gray-300 text-sm">No image</span>
         )}

@@ -86,12 +86,12 @@ export default function CarDetails() {
               className="rounded-lg overflow-hidden bg-gray-900 shadow-xl cursor-pointer hover:opacity-95 transition-opacity w-full"
             >
               <img
-                src={car.images?.[selectedImage] || car.images?.[0] || '/img/fallback.svg'}
+                src={car.images?.[selectedImage] || car.images?.[0] || '/img/ui/fallback.svg'}
                 alt={`${car.make} ${car.model}`}
                 className="w-full h-[500px] object-cover"
                 loading="lazy"
                 decoding="async"
-                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/fallback.svg' }}
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/ui/fallback.svg' }}
               />
             </button>
             
@@ -111,7 +111,7 @@ export default function CarDetails() {
                     className="w-full h-24 object-cover"
                     loading="lazy"
                     decoding="async"
-                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/fallback.svg' }}
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/ui/fallback.svg' }}
                   />
                 </button>
               ))}
@@ -153,7 +153,7 @@ export default function CarDetails() {
                     className="w-full h-24 object-cover"
                     loading="lazy"
                     decoding="async"
-                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/fallback.svg' }}
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/ui/fallback.svg' }}
                   />
                 </button>
               )}

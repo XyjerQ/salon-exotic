@@ -9,12 +9,12 @@ export default function CarCard({ car, onViewDetails }) {
     >
       <div className="w-full overflow-hidden bg-gray-900 relative">
         <img
-          src={car.images?.[0] || '/img/fallback.svg'}
+          src={car.images?.[0] || '/img/ui/fallback.svg'}
           alt={`${car.make} ${car.model}`}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
           decoding="async"
-          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/fallback.svg' }}
+          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/ui/fallback.svg' }}
         />
         <div className="absolute top-3 right-3 bg-black text-blackline-accent px-3 py-1 rounded-full text-sm font-semibold">
           {car.year}

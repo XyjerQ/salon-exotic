@@ -50,7 +50,7 @@ export default function ShowcaseBands() {
                   decoding="async"
                   onError={(e) => {
                     e.currentTarget.onerror = null
-                    e.currentTarget.src = '/img/fallback.svg'
+                    e.currentTarget.src = '/img/ui/fallback.svg'
                   }}
                 />
               </div>
