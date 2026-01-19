@@ -17,6 +17,7 @@ export default function Inventory() {
   })
 
   const [visibleCount, setVisibleCount] = React.useState(6)
+  const [showFilters, setShowFilters] = React.useState(false)
 
   const parseMileage = (mileageStr) => {
     if (!mileageStr) return 0
@@ -97,11 +98,24 @@ export default function Inventory() {
         </div>
       </div>
 
-      <section className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+      <section className="max-w-7xl mx-auto px-4 md:px-8 py-2 md:py-8">
         {/* Filters */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 md:p-6 mb-10">
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm px-4 pt-4 md:p-6 mb-10">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-semibold text-gray-700">Filters</p>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 text-sm font-semibold text-gray-700 md:pointer-events-none"
+            >
+              <span>Filters</span>
+              <svg
+                className={`w-5 h-5 transition-transform md:hidden ${showFilters ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
             <button
               onClick={handleClear}
               className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-semibold text-gray-700 hover:bg-gray-50"
@@ -109,7 +123,7 @@ export default function Inventory() {
               Reset filters
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ${showFilters ? 'block' : 'hidden md:grid'}`}>
             <div>
               <label className="block text-sm text-gray-600 mb-1">Horsepower (min)</label>
               <input
@@ -146,7 +160,7 @@ export default function Inventory() {
                 type="number"
                 value={filters.yearMin}
                 onChange={handleChange('yearMin')}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blackline-accent"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blackline-accent"
                 placeholder="np. 2020"
               />
             </div>

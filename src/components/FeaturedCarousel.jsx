@@ -7,6 +7,7 @@ export default function FeaturedCarousel({ cars = [] }){
   const carouselRef = useScrollAnimation()
   const scrollerRef = useRef(null)
   const navigate = useNavigate()
+  const displayedCars = cars.slice(0, 6)
 
   const scrollByPage = (dir = 1) => {
     const el = scrollerRef.current
@@ -20,7 +21,7 @@ export default function FeaturedCarousel({ cars = [] }){
       {/* Scrollable track with snap points */}
       <div ref={scrollerRef} className="overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory">
         <div className="flex gap-3 px-1">
-          {cars.map((car) => (
+          {displayedCars.map((car) => (
             <div
               key={car.id}
               className="flex-shrink-0 w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)] snap-start"

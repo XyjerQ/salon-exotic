@@ -79,11 +79,11 @@ export default function CarDetails() {
       <section className="max-w-7xl mx-auto px-4 md:px-8 pt-8">
         <div className="grid lg:grid-cols-[1.2fr,1fr] gap-12">
           {/* Left: Image Gallery & Description */}
-          <div ref={leftContentRef} className="opacity-0-init space-y-8">
+          <div ref={leftContentRef} className="opacity-0-init flex flex-col">
             {/* Main Image - Gallery with selection */}
             <button 
               onClick={() => setIsLightboxOpen(true)}
-              className="rounded-lg overflow-hidden bg-gray-900 shadow-xl cursor-pointer hover:opacity-95 transition-opacity w-full"
+              className="rounded-lg overflow-hidden bg-gray-900 shadow-xl cursor-pointer hover:opacity-95 transition-opacity w-full mb-2"
             >
               <img
                 src={car.images?.[selectedImage] || car.images?.[0] || '/img/ui/fallback.svg'}
@@ -96,7 +96,7 @@ export default function CarDetails() {
             </button>
             
             {/* Thumbnail Gallery - Display first 4 images */}
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 mb-4">
               {car.images && car.images.slice(0, 3).map((img, index) => (
                 <button
                   key={index}
@@ -150,7 +150,7 @@ export default function CarDetails() {
                   <img
                     src={car.images[3]}
                     alt={`${car.make} ${car.model} - view 4`}
-                    className="w-full h-24 object-cover"
+                    className="w-full h-28 object-cover"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/ui/fallback.svg' }}

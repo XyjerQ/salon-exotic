@@ -108,7 +108,7 @@
     "mileage": "7,800 km",
     "transmission": "7-Speed LDF Dual-Clutch Automatic",
     "horsepower": 1230,
-    "engine": "5.2L Naturally Aspirated V10",
+    "engine": "5.2L Twin-Turbo V10",
     "drivetrain": "All-Wheel Drive",
     "fuelType": "Petrol",
     "color": "Verde Mantis (Green)",
@@ -122,7 +122,7 @@
       "/img/cars/huracan.png",
       "/img/cars/huracan.png"
     ],
-    "description": "This breathtaking 2021 Lamborghini Huracán is the epitome of Italian automotive passion and engineering excellence. The naturally aspirated 5.2-liter V10 engine roars to life with 1230 horsepower, delivering an unforgettable driving experience. Finished in the striking Verde Mantis green, this Huracán turns heads wherever it goes. The advanced all-wheel-drive system ensures optimal traction and handling, while the lightweight construction and aerodynamic design provide exceptional performance. With 7,800 km of careful ownership, this supercar has been garage-kept and serviced exclusively at authorized Lamborghini service centers. The interior features premium Alcantara upholstery, carbon fiber trim, and cutting-edge technology.",
+    "description": "This breathtaking 2021 Lamborghini Huracán is the epitome of Italian automotive passion and engineering excellence. A twin-turbo 5.2-liter V10 now roars to life with 1230 horsepower, delivering an unforgettable driving experience. Finished in the striking Verde Mantis green, this Huracán turns heads wherever it goes. The advanced all-wheel-drive system ensures optimal traction and handling, while the lightweight construction and aerodynamic design provide exceptional performance. With 7,800 km of careful ownership, this supercar has been garage-kept and serviced exclusively at authorized Lamborghini service centers. The interior features premium Alcantara upholstery, carbon fiber trim, and cutting-edge technology.",
     "features": [
       "Lamborghini Dynamic Steering",
       "Magnetorheological Suspension",
@@ -237,5 +237,145 @@
       "Night Vision & Active Cruise Control"
     ],
     "assignedEmployee": "emp01"
+  },
+  {
+    "id": "e31",
+    "make": "BMW",
+    "model": "850CSi (E31)",
+    "year": 1994,
+    "price": "€110,000",
+    "mileage": "68,000 km",
+    "transmission": "6-Speed Manual",
+    "horsepower": 380,
+    "engine": "5.6L V12 S70",
+    "drivetrain": "Rear-Wheel Drive",
+    "fuelType": "Petrol",
+    "color": "Calypso Red Metallic",
+    "interiorColor": "Black Nappa Leather",
+    "images": [
+      "/img/cars/e31.png"
+    ],
+    "description": "Collector-grade BMW 850CSi with the legendary S70 V12 and a rare 6-speed manual, presented in Calypso Red over black leather. This flagship E31 benefits from the factory AHK rear-steer system, tight original panel fit, and a recently refreshed cooling system. Interior plastics, headliner, and leather remain in excellent condition, making it a turn-key modern classic ready for tours or concours gatherings. Documented service history, clean underbody, and correct VIN-tagged panels add confidence for discerning collectors.",
+    "features": [
+      "Active Rear-Steer (AHK)",
+      "M Sport Suspension",
+      "Factory Aero Package",
+      "Heated Front Seats",
+      "Sunroof",
+      "Original Tool Kit"
+    ],
+    "assignedEmployee": "emp02"
+  },
+  {
+    "id": "e55w211",
+    "make": "Mercedes-Benz",
+    "model": "E55 AMG",
+    "year": 2006,
+    "price": "€55,000",
+    "mileage": "82,000 km",
+    "transmission": "5-Speed AMG Speedshift Automatic",
+    "horsepower": 469,
+    "engine": "5.4L Supercharged V8 (M113K)",
+    "drivetrain": "Rear-Wheel Drive",
+    "fuelType": "Petrol",
+    "color": "Obsidian Black",
+    "interiorColor": "Black Leather",
+    "images": [
+      "/img/cars/e55w211.png"
+    ],
+    "description": "Supercharged W211 E55 AMG delivering immense torque and everyday usability, finished in Obsidian Black with full leather. The hand-built M113K V8 provides tidal-wave acceleration while Airmatic and big AMG brakes keep it composed. This example features clean paint, fresh service on common wear items, and a comfortable, well-kept cabin with all the right creature comforts. Recent maintenance covers intercooler pump, transmission service, and suspension bushings, so it is ready for effortless continent-crossing.",
+    "features": [
+      "Airmatic Suspension",
+      "AMG Performance Brakes",
+      "COMAND Navigation",
+      "Heated and Ventilated Seats",
+      "Harman Kardon Audio",
+      "Quad Exhaust"
+    ],
+    "assignedEmployee": "emp02"
+  },
+  {
+    "id": "r34",
+    "make": "Nissan",
+    "model": "Skyline GT-R (R34)",
+    "year": 1999,
+    "price": "€210,000",
+    "mileage": "72,000 km",
+    "transmission": "6-Speed Getrag Manual",
+    "horsepower": 450,
+    "engine": "2.6L Twin-Turbo I6 RB26DETT",
+    "drivetrain": "All-Wheel Drive (ATTESA E-TS)",
+    "fuelType": "Petrol",
+    "color": "Bayside Blue",
+    "interiorColor": "Black Cloth",
+    "images": [
+      "/img/cars/r34.png"
+    ],
+    "description": "Iconic R34 GT-R in Bayside Blue with tasteful upgrades and the renowned RB26DETT paired to the robust Getrag 6-speed. Retains factory ATTESA all-wheel drive and Super HICAS rear-steer for sharp responses, with mild NISMO aero touches and Brembo stoppers. A well-balanced example that blends collectible originality with drivability for spirited road or track sessions. Dry, corrosion-free chassis and recent timing-belt and turbo refresh make it a worry-free halo JDM hero.",
+    "features": [
+      "ATTESA E-TS All-Wheel Drive",
+      "Super HICAS Rear-Steer",
+      "Brembo Brakes",
+      "NISMO Aero Accents",
+      "Recaro Front Seats",
+      "Multifunction Display (MFD)"
+    ],
+    "assignedEmployee": "emp01"
+  },
+  {
+    "id": "nsx90",
+    "make": "Honda",
+    "model": "NSX",
+    "year": 1995,
+    "price": "€160,000",
+    "mileage": "54,000 km",
+    "transmission": "5-Speed Manual",
+    "horsepower": 276,
+    "engine": "3.0L V6 VTEC (C30A)",
+    "drivetrain": "Rear-Wheel Drive",
+    "fuelType": "Petrol",
+    "color": "Formula Red",
+    "interiorColor": "Black Leather",
+    "images": [
+      "/img/cars/nsx.png"
+    ],
+    "description": "Lightweight aluminum-chassis NSX in classic Formula Red, pairing the rev-happy C30A VTEC V6 with a crisp 5-speed manual from the golden 90s era. Pop-up headlights, targa roof, and thin A-pillars deliver the analog supercar feel, while the Bose audio and intact interior trim underline careful ownership. Serviced on schedule, ready for weekend canyon runs or shows. Timing belt, water pump, and fluids were addressed recently, and the pop-up headlight mechanisms work flawlessly.",
+    "features": [
+      "Aluminum Monocoque",
+      "Pop-Up Headlights",
+      "Targa Roof",
+      "Bose Audio",
+      "Traction Control",
+      "Electric Seats"
+    ],
+    "assignedEmployee": "emp01"
+  },
+  {
+    "id": "e34",
+    "make": "BMW",
+    "model": "M5 (E34)",
+    "year": 1991,
+    "price": "€95,000",
+    "mileage": "98,000 km",
+    "transmission": "5-Speed Manual",
+    "horsepower": 340,
+    "engine": "3.6L Inline-6 S38",
+    "drivetrain": "Rear-Wheel Drive",
+    "fuelType": "Petrol",
+    "color": "Avus Blue",
+    "interiorColor": "Silverstone Leather",
+    "images": [
+      "/img/cars/e34.png"
+    ],
+    "description": "Hand-built E34 M5 with the high-revving S38 inline-6, finished in Avus Blue with period-correct Silverstone interior. The car retains factory Shadowline trim, self-leveling rear suspension, and a recent tune-up on ignition and cooling components. Tight panel gaps and original toolkit accompany a supple leather cabin, making this a desirable analog M sedan for collectors and drivers alike. Fresh bushings and brake service sharpen the chassis, while the paint presents deep gloss with well-preserved trim.",
+    "features": [
+      "Self-Leveling Rear Suspension",
+      "Heated Front Seats",
+      "Limited Slip Differential",
+      "M Aerodynamics Package",
+      "Shadowline Trim",
+      "Original Radio and Toolkit"
+    ],
+    "assignedEmployee": "emp02"
   }
 ]

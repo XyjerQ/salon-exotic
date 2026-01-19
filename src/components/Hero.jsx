@@ -26,7 +26,7 @@ export default function Hero() {
 
   return (
     <div className="relative overflow-hidden min-h-screen min-h-[100dvh] h-[100dvh] md:h-auto bg-gradient-to-r from-blackline via-blackline-surface to-blackline text-white">
-      {/* floating info tile - positioned relative to the hero (no background) */}
+      {/* floating info tile */}
       <div
         className="absolute left-4 bottom-20 md:left-16 lg:left-20 md:bottom-16 z-30 text-left text-white md:translate-x-[15%] md:-translate-y-[25%]"
       >
@@ -50,7 +50,7 @@ export default function Hero() {
 
       {/* full-bleed image: span entire viewport width while content stays centered */}
       {/* full-screen background (video or image) */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-black">
         {video && !videoError ? (
           <video
             className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none transform origin-center scale-[1.4]"
@@ -58,7 +58,6 @@ export default function Hero() {
             muted
             loop
             playsInline
-            poster={image}
             aria-hidden="true"
             onError={() => setVideoError(true)}
           >
