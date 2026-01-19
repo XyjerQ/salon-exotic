@@ -213,8 +213,8 @@ export default function CarDetails() {
                   <h3 className="text-xl font-semibold mb-3">Key Features</h3>
                   <ul className="space-y-2 text-gray-700">
                     {car.features && car.features.map((feature, index) => (
-                      <li key={index} className="flex items-start">
-                        <span className="text-blackline-accent mr-3 mt-1">✓</span>
+                      <li key={index} className="flex items-center">
+                        <span className="text-blackline-accent mr-3 text-lg">✓</span>
                         <span className="text-sm">{feature}</span>
                       </li>
                     ))}
