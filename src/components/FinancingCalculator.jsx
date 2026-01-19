@@ -27,7 +27,7 @@ export default function FinancingCalculator() {
   }, [price, down, rate, term])
 
   return (
-    <section className="bg-white text-black py-10 md:py-14">
+    <section className="text-black py-10 md:py-14">
       <article ref={sectionRef} className="opacity-0-init max-w-7xl mx-auto grid md:grid-cols-[1.2fr,1fr] items-stretch rounded-xl overflow-hidden bg-black border border-gray-200 shadow-xl">
         <div className="p-8 md:p-10 flex flex-col justify-center gap-6 md:order-2 text-white">
           <div>

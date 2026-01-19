@@ -17,7 +17,7 @@ export default function Home(){
     <section className="space-y-12">
       <Hero />
 
-      <div ref={featuredRef} className="opacity-0-init mx-auto px-20">
+      <div ref={featuredRef} className="opacity-0-init mx-auto px-4 md:px-8 lg:px-20">
         <h2 className="text-3xl md:text-4xl font-extrabold mb-6 text-center">Featured vehicles</h2>
         <FeaturedCarousel cars={cars} />
       </div>

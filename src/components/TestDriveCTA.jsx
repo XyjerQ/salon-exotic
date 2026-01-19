@@ -22,7 +22,7 @@ export default function TestDriveCTA() {
   }
 
   return (
-    <section className="bg-white text-black py-10 md:py-14">
+    <section className="text-black py-10 md:py-14">
       <article ref={sectionRef} className="opacity-0-init max-w-7xl mx-auto grid md:grid-cols-[1fr,1.2fr] items-stretch rounded-xl overflow-hidden bg-black border border-gray-200 shadow-xl">
         <div className="p-8 md:p-10 flex flex-col justify-center gap-4 md:order-1 text-white">
           <p className="text-sm uppercase tracking-[0.2em] text-gray-400">Book a test drive</p>

@@ -28,20 +28,18 @@ export default function Hero() {
     <div className="relative overflow-hidden min-h-screen min-h-[100dvh] h-[100dvh] md:h-auto bg-gradient-to-r from-blackline via-blackline-surface to-blackline text-white">
       {/* floating info tile - positioned relative to the hero (no background) */}
       <div
-        className="absolute left-10 bottom-12 md:left-16 lg:left-20 md:bottom-16 z-30 text-left text-white"
-        style={{ transform: 'translateX(15%) translateY(-25%)' }}
+        className="absolute left-4 bottom-20 md:left-16 lg:left-20 md:bottom-16 z-30 text-left text-white md:translate-x-[15%] md:-translate-y-[25%]"
       >
-        <div className="max-w-4xl px-6">
+        <div className="max-w-4xl px-4 md:px-6">
           <p
-            className="text-white font-bold leading-tight drop-shadow-lg tracking-wider whitespace-pre-line"
-            style={{ fontSize: 'clamp(1.5rem, 3.5vw, 4.5rem)' }}
+            className="text-white font-bold leading-tight drop-shadow-lg tracking-wider whitespace-pre-line text-4xl sm:text-5xl md:text-6xl lg:text-7xl"
           >
             {chosenSubtitle}
           </p>
 
-          <div className="mt-6">
+          <div className="mt-6 md:mt-8">
             <a
-              className="inline-block bg-transparent border-2 border-white hover:border-white/75 text-white px-6 py-3 rounded-md hover:bg-white/10 transition"
+              className="inline-block bg-transparent border-2 border-white hover:border-white/75 text-white px-6 py-3 md:px-8 md:py-4 text-base md:text-lg rounded-md hover:bg-white/10 transition font-semibold"
               href={ctaHref}
             >
               {ctaText}

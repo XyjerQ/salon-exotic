@@ -25,7 +25,7 @@ export default function FAQSection() {
   const sectionRef = useScrollAnimation()
 
   return (
-    <section ref={sectionRef} className="opacity-0-init bg-white text-black py-10 md:py-14">
+    <section ref={sectionRef} className="opacity-0-init text-black py-10 md:py-14">
       <div className="max-w-5xl mx-auto px-4 md:px-8">
         <p className="text-sm uppercase tracking-[0.2em] text-gray-500">FAQ</p>
         <h2 className="text-3xl md:text-4xl font-extrabold mt-2">Most common questions</h2>
