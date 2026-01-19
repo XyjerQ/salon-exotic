@@ -6,10 +6,30 @@
     "year": 2022,
     "price": "€180,000",
     "mileage": "5,200 km",
-    "transmission": "Automatic",
+    "transmission": "7-Speed PDK Automatic",
     "horsepower": 750,
-    "image": "/img/porsche911carr.png",
-    "description": "Classic sports car — precision and style."
+    "engine": "3.0L Twin-Turbo Flat-6",
+    "drivetrain": "Rear-Wheel Drive",
+    "fuelType": "Petrol",
+    "color": "GT Green Metallic",
+    "interiorColor": "Black Leather",
+    "images": [
+      "/img/porsche911carr.png",
+      "/img/carr (1).png",
+      "/img/carr (3).png",
+      "/img/carr (4).png",
+      "/img/carr (2).png"  
+    ],
+    "description": "The iconic Porsche 911 Carrera represents the pinnacle of sports car engineering. This 2022 model features the legendary flat-six engine, delivering exhilarating performance with 750 horsepower. With only 5,200 km on the odometer, this vehicle is practically new and has been meticulously maintained. The GT Green Metallic exterior paired with black leather interior creates a timeless, sophisticated look. Equipped with Porsche's advanced PDK transmission, adaptive suspension, and state-of-the-art infotainment system, this 911 Carrera offers the perfect balance of everyday usability and track-ready performance.",
+    "features": [
+      "Sport Chrono Package",
+      "Porsche Active Suspension Management (PASM)",
+      "Premium Audio System",
+      "Heated Sport Seats",
+      "Parking Assist with Reversing Camera",
+      "LED Matrix Headlights"
+    ],
+    "assignedEmployee": "emp01"
   },
   {
     "id": "b01",
@@ -18,10 +38,33 @@
     "year": 2023,
     "price": "€160,000",
     "mileage": "3,100 km",
-    "transmission": "Automatic",
+    "transmission": "8-Speed M Steptronic Automatic",
     "horsepower": 840,
-    "image": "/img/bmwm8.png",
-    "description": "High power, luxurious finish, and sporty character."
+    "engine": "4.4L Twin-Turbo V8",
+    "drivetrain": "All-Wheel Drive (xDrive)",
+    "fuelType": "Petrol",
+    "color": "Frozen Black Metallic",
+    "interiorColor": "Silverstone Extended Leather",
+    "images": [
+      "/img/bmwm8.png",
+      "/img/bmwm8.png",
+      "/img/bmwm8.png",
+      "/img/bmwm8.png",
+      "/img/bmwm8.png",
+      "/img/bmwm8.png",
+      "/img/bmwm8.png",
+      "/img/bmwm8.png"
+    ],
+    "description": "Experience the ultimate grand tourer with this stunning 2023 BMW M8 Competition. Powered by a ferocious 4.4-liter twin-turbocharged V8 engine producing 840 horsepower, this beast accelerates from 0-100 km/h in just 3.2 seconds. The M8 Competition combines brutal performance with luxurious comfort, making it perfect for both spirited driving and long-distance cruising. With barely 3,100 km on the clock, this car is in pristine condition. The Frozen Black Metallic paint gives it an aggressive, stealthy appearance, while the Silverstone leather interior offers supreme comfort. Loaded with BMW's latest technology including gesture control, head-up display, and M-specific driving modes.",
+    "features": [
+      "M Carbon Ceramic Brakes",
+      "M Driver's Package (305 km/h top speed)",
+      "Harman Kardon Surround Sound",
+      "Carbon Fiber Roof",
+      "Adaptive M Suspension Professional",
+      "BMW Live Cockpit Professional"
+    ],
+    "assignedEmployee": "emp02"
   },
   {
     "id": "l01",
@@ -30,45 +73,136 @@
     "year": 2021,
     "price": "€240,000",
     "mileage": "7,800 km",
-    "transmission": "Automatic",
+    "transmission": "7-Speed LDF Dual-Clutch Automatic",
     "horsepower": 1230,
-    "image": "/img/huracan.png",
-    "description": "Exotic at the highest level — design and speed."
+    "engine": "5.2L Naturally Aspirated V10",
+    "drivetrain": "All-Wheel Drive",
+    "fuelType": "Petrol",
+    "color": "Verde Mantis (Green)",
+    "interiorColor": "Black Alcantara",
+    "images": [
+      "/img/huracan.png",
+      "/img/huracan.png",
+      "/img/huracan.png",
+      "/img/huracan.png",
+      "/img/huracan.png",
+      "/img/huracan.png",
+      "/img/huracan.png"
+    ],
+    "description": "This breathtaking 2021 Lamborghini Huracán is the epitome of Italian automotive passion and engineering excellence. The naturally aspirated 5.2-liter V10 engine roars to life with 1230 horsepower, delivering an unforgettable driving experience. Finished in the striking Verde Mantis green, this Huracán turns heads wherever it goes. The advanced all-wheel-drive system ensures optimal traction and handling, while the lightweight construction and aerodynamic design provide exceptional performance. With 7,800 km of careful ownership, this supercar has been garage-kept and serviced exclusively at authorized Lamborghini service centers. The interior features premium Alcantara upholstery, carbon fiber trim, and cutting-edge technology.",
+    "features": [
+      "Lamborghini Dynamic Steering",
+      "Magnetorheological Suspension",
+      "Carbon Ceramic Brakes",
+      "Rear-View Camera & Park Sensors",
+      "Premium Audio System",
+      "Alcantara & Carbon Fiber Interior Package"
+    ],
+    "assignedEmployee": "emp03"
   },
   {
     "id": "a01",
     "make": "Aston Martin",
     "model": "DB11",
     "year": 2020,
+    "images": [
+      "/img/db11.png",
+      "/img/db11.png",
+      "/img/db11.png",
+      "/img/db11.png",
+      "/img/db11.png",
+      "/img/db11.png",
+      "/img/db11.png",
+      "/img/db11.png"
+    ],
     "price": "€150,000",
     "mileage": "12,000 km",
-    "transmission": "Automatic",
+    "transmission": "8-Speed Automatic",
     "horsepower": 630,
-    "image": "/img/db11.png",
-    "description": "Elegance and comfort with British character."
+    "engine": "5.2L Twin-Turbo V12",
+    "drivetrain": "Rear-Wheel Drive",
+    "fuelType": "Petrol",
+    "color": "Stratus White",
+    "interiorColor": "Obsidian Black Leather",
+    "description": "The Aston Martin DB11 is a masterpiece of British automotive luxury and performance. This 2020 model showcases timeless design language combined with modern technology. Under the bonnet lies a magnificent 5.2-liter twin-turbocharged V12 engine producing 630 horsepower, providing effortless acceleration and a symphonic exhaust note. The Stratus White exterior exudes elegance and sophistication, perfectly complemented by the handcrafted Obsidian Black leather interior. With 12,000 km of documented service history, this DB11 has been impeccably maintained. Features include adaptive damping, carbon ceramic brakes, and a luxurious cabin with premium materials throughout. This is not just a car; it's a work of art on wheels.",
+    "features": [
+      "Adaptive Damping System",
+      "Bang & Olufsen BeoSound Audio",
+      "360-Degree Camera System",
+      "Heated & Ventilated Seats",
+      "Carbon Fiber Interior Accents",
+      "Full Leather Headliner"
+    ],
+    "assignedEmployee": "emp02"
   },
   {
     "id": "m01",
     "make": "McLaren",
     "model": "720S",
     "year": 2022,
+    "images": [
+      "/img/720s.png",
+      "/img/720s.png",
+      "/img/720s.png",
+      "/img/720s.png",
+      "/img/720s.png",
+      "/img/720s.png",
+      "/img/720s.png",
+      "/img/720s.png"
+    ],
     "price": "€300,000",
     "mileage": "2,400 km",
-    "transmission": "Automatic",
+    "transmission": "7-Speed SSG Seamless Shift",
     "horsepower": 940,
-    "image": "/img/720s.png",
-    "description": "Lightweight construction and extreme performance."
+    "engine": "4.0L Twin-Turbo V8",
+    "drivetrain": "Rear-Wheel Drive",
+    "fuelType": "Petrol",
+    "color": "McLaren Orange",
+    "interiorColor": "Black Alcantara & Carbon Fiber",
+    "description": "Prepare for the most intense driving experience with this 2022 McLaren 720S. This British supercar represents the cutting edge of automotive technology with its lightweight carbon fiber monocoque chassis and incredibly powerful 4.0-liter twin-turbo V8 engine producing 940 horsepower. With only 2,400 km on the odometer, this 720S is essentially brand new. The iconic McLaren Orange paint finish makes a bold statement, while the dihedral doors provide that unmistakable supercar entrance. The interior is a driver-focused cockpit wrapped in premium Alcantara and exposed carbon fiber. Advanced aerodynamics, active suspension, and carbon ceramic brakes ensure this machine delivers on the track and the road.",
+    "features": [
+      "Proactive Chassis Control II",
+      "Carbon Ceramic Brakes",
+      "McLaren Track Telemetry (MTT)",
+      "Bowers & Wilkins 12-Speaker Audio",
+      "Electrochromic Roof Panel",
+      "Sports Exhaust System"
+    ],
+    "assignedEmployee": "emp03"
   },
   {
     "id": "r01",
     "make": "Rolls-Royce",
     "model": "Phantom",
     "year": 2021,
+    "images": [
+      "/img/RRPhantom.png",
+      "/img/RRPhantom.png",
+      "/img/RRPhantom.png",
+      "/img/RRPhantom.png",
+      "/img/RRPhantom.png",
+      "/img/RRPhantom.png",
+      "/img/RRPhantom.png",
+      "/img/RRPhantom.png"
+    ],
     "price": "€450,000",
     "mileage": "6,000 km",
-    "transmission": "Automatic",
+    "transmission": "8-Speed Automatic",
     "horsepower": 912,
-    "image": "/img/RRPhantom.png",
-    "description": "Maximum comfort and prestige."
+    "engine": "6.75L Twin-Turbo V12",
+    "drivetrain": "Rear-Wheel Drive",
+    "fuelType": "Petrol",
+    "color": "Diamond Black",
+    "interiorColor": "Seashell & Navy Blue Leather",
+    "description": "The Rolls-Royce Phantom is the ultimate expression of luxury and prestige. This 2021 masterpiece features the legendary 6.75-liter twin-turbocharged V12 engine producing 912 horsepower, delivering effortless power with remarkable refinement. With just 6,000 km of pampered ownership, this Phantom is in showroom condition. The Diamond Black exterior radiates authority, while the bespoke Seashell and Navy Blue leather interior creates an environment of unparalleled comfort and elegance. Every surface is handcrafted to perfection, from the lamb's wool carpets to the starlight headliner with hundreds of fiber-optic lights. The Phantom features the famous 'magic carpet ride' suspension that glides over any road surface, ensuring supreme comfort for all passengers.",
+    "features": [
+      "Starlight Headliner",
+      "Bespoke Audio System (1300W, 18 Speakers)",
+      "Self-Leveling Air Suspension",
+      "Picnic Tables with Lamb's Wool Mats",
+      "Refrigerated Champagne Holder",
+      "Night Vision & Active Cruise Control"
+    ],
+    "assignedEmployee": "emp01"
   }
 ]

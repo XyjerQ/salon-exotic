@@ -84,7 +84,7 @@ export default function FeaturedCarousel({ cars = [] }){
               className="min-w-0"
               style={{ flex: `0 0 calc((100% - ${(perPage - 1) * 0.75}rem) / ${perPage})` }}
             >
-              <FeatureCard title={`${car.make} ${car.model}`} desc={car.description} image={car.image} year={car.year} horsepower={car.horsepower} mileage={car.mileage} />
+              <FeatureCard title={`${car.make} ${car.model}`} desc={car.description} image={car.images?.[0]} year={car.year} horsepower={car.horsepower} mileage={car.mileage} />
             </div>
           ))}
         </div>

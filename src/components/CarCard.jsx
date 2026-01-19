@@ -1,36 +1,46 @@
 import React from 'react'
 
-export default function CarCard({ car }) {
+export default function CarCard({ car, onViewDetails }) {
+
   return (
-    <article className="bg-blackline-surface border border-blackline-surface rounded-lg overflow-hidden flex flex-col">
-      <div className="h-48 sm:h-56 w-full overflow-hidden bg-blackline-surface">
+    <article 
+      onClick={onViewDetails}
+      className="group cursor-pointer bg-white border border-gray-200 rounded-lg overflow-hidden flex flex-col shadow-lg hover:shadow-2xl transition-shadow h-full"
+    >
+      <div className="w-full overflow-hidden bg-gray-900 relative">
         <img
-          src={car.image}
+          src={car.images?.[0] || '/img/fallback.svg'}
           alt={`${car.make} ${car.model}`}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
           decoding="async"
           onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/fallback.svg' }}
         />
+        <div className="absolute top-3 right-3 bg-black text-blackline-accent px-3 py-1 rounded-full text-sm font-semibold">
+          {car.year}
+        </div>
       </div>
-      <div className="p-4 flex-1 flex flex-col">
-        <div className="flex items-baseline justify-between">
-          <h3 className="text-lg font-semibold text-white">
-            {car.make} {car.model}
-          </h3>
-          <span className="text-sm text-blackline-muted">{car.year}</span>
-        </div>
-        <p className="text-blackline-accent font-bold text-xl mt-2">{car.price}</p>
-        <p className="text-sm text-blackline-muted mt-2 flex-1">{car.description}</p>
-        <ul className="text-xs text-gray-400 mt-3 space-y-1">
-          <li>Mileage: {car.mileage}</li>
-          <li>Transmission: {car.transmission}</li>
+      <div className="p-6 flex-1 flex flex-col">
+        <h3 className="text-2xl font-extrabold text-black">
+          {car.make} {car.model}
+        </h3>
+        <p className="text-blackline-accent font-bold text-2xl mt-3">{car.price}</p>
+        
+        <ul className="text-sm text-gray-700 mt-4 space-y-2 border-t border-gray-200 pt-4">
+          <li className="flex justify-between"><span className="text-gray-500">Mileage:</span> <strong>{car.mileage}</strong></li>
+          <li className="flex justify-between"><span className="text-gray-500">Engine:</span> <strong>{car.engine}</strong></li>
+          <li className="flex justify-between"><span className="text-gray-500">Horsepower:</span> <strong>{car.horsepower} HP</strong></li>
         </ul>
-        <div className="mt-4">
-          <button className="w-full bg-blackline-accent hover:opacity-90 text-black py-2 rounded-md">
-            View details
-          </button>
-        </div>
+        
+        <button 
+          onClick={(e) => {
+            e.stopPropagation()
+            onViewDetails()
+          }}
+          className="w-full bg-black hover:bg-blackline-accent text-white hover:text-black py-3 rounded-md font-semibold mt-6 transition-colors"
+        >
+          View details
+        </button>
       </div>
     </article>
   )

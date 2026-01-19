@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import Inventory from './pages/Inventory'
+import CarDetails from './pages/CarDetails'
 import Header from './components/Header'
 import Footer from './components/Footer'
 // import Contact from './pages/Contact'
@@ -26,6 +27,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/inventory" element={<Inventory />} />
+          <Route path="/car/:id" element={<CarDetails />} />
           {/* <Route path="/contact" element={<Contact />} /> */}
         </Routes>
       </main>

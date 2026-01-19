@@ -1,0 +1,32 @@
+[
+  {
+    "id": "emp01",
+    "firstName": "Piotr",
+    "lastName": "Kowalski",
+    "position": "Senior Sales Consultant",
+    "phone": "+48 601 234 567",
+    "email": "piotr.kowalski@blackline.com",
+    "photo": "/img/employees/michael.jpg",
+    "specialization": "Luxury Sports Cars"
+  },
+  {
+    "id": "emp02",
+    "firstName": "Anna",
+    "lastName": "Wiśniewska",
+    "position": "Premium Vehicles Specialist",
+    "phone": "+48 602 345 678",
+    "email": "anna.wisniewska@blackline.com",
+    "photo": "/img/employees/sarah.jpg",
+    "specialization": "British & German Luxury"
+  },
+  {
+    "id": "emp03",
+    "firstName": "Jakub",
+    "lastName": "Nowak",
+    "position": "Exotic Cars Expert",
+    "phone": "+48 603 456 789",
+    "email": "jakub.nowak@blackline.com",
+    "photo": "/img/employees/james.jpg",
+    "specialization": "Italian Supercars"
+  }
+]
