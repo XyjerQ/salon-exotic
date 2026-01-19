@@ -1,12 +1,14 @@
 import React, { useState, useMemo } from 'react'
 
+const withBase = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
+
 export default function Hero() {
   
   const title = 'Blackline Salon'
   const ctaText = 'See our inventory'
-  const ctaHref = '/inventory'
-  const image = '/img/hero/gt3rs.png'
-  const video = '/vid/bgCars.mp4'
+  const ctaHref = `${import.meta.env.BASE_URL}inventory`
+  const image = withBase('img/hero/gt3rs.png')
+  const video = withBase('vid/bgCars.mp4')
 
   
   const defaultSubtitles = [

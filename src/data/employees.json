@@ -6,7 +6,7 @@
     "position": "Senior Sales Consultant",
     "phone": "+48 601 234 567",
     "email": "piotr.kowalski@blackline.com",
-    "photo": "/img/employees/piotr.png",
+    "photo": "img/employees/piotr.png",
     "specialization": "Luxury Sports Cars"
   },
   {
@@ -16,7 +16,7 @@
     "position": "Premium Vehicles Specialist",
     "phone": "+48 602 345 678",
     "email": "anna.wisniewska@blackline.com",
-    "photo": "/img/employees/anna.png",
+    "photo": "img/employees/anna.png",
     "specialization": "British & German Luxury"
   },
   {
@@ -26,7 +26,8 @@
     "position": "Exotic Cars Expert",
     "phone": "+48 603 456 789",
     "email": "jakub.nowak@blackline.com",
-    "photo": "/img/employees/jakub.png",
+    "photo": "img/employees/jakub.png",
     "specialization": "Italian Supercars"
   }
 ]
+

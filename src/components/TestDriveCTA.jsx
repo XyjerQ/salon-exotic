@@ -83,7 +83,7 @@ export default function TestDriveCTA() {
         </div>
 
         <div className="hidden md:flex md:order-2 items-center justify-center bg-gradient-to-br from-black/40 via-blackline-surface to-black/60 rounded-r-xl overflow-hidden">
-          <img src="/img/ui/TESTDRIVE.png" alt="Test drive car" className="w-full h-full object-cover" />
+          <img src="img/ui/TESTDRIVE.png" alt="Test drive car" className="w-full h-full object-cover" />
         </div>
       </article>
     </section>

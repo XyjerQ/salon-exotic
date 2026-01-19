@@ -14,11 +14,11 @@
     "color": "Le Mans Blue Metallic",
     "interiorColor": "Grey Nappa Leather",
     "images": [
-      "/img/cars/e39 (1).webp",
-      "/img/cars/e39 (2).webp",
-      "/img/cars/e39 (3).webp",
-      "/img/cars/e39 (4).webp",
-      "/img/cars/e39 (5).webp"  
+      "img/cars/e39 (1).webp",
+      "img/cars/e39 (2).webp",
+      "img/cars/e39 (3).webp",
+      "img/cars/e39 (4).webp",
+      "img/cars/e39 (5).webp"  
     ],
     "description": "This exceptional BMW M5 E39 is the ultimate expression of the modern classic sports sedan. Professionally modified, it features a high-performance supercharger system that pushes the legendary S62 V8 engine to a staggering 780 horsepower. The car sits on a lowered sport suspension and deep-dish chrome wheels, perfectly complementing the Le Mans Blue Metallic paint. The build focus was a 'sleeper' aesthetic, featuring a hidden intercooler tucked behind the factory front bumper to maintain its original, iconic silhouette. It offers a perfect balance between a collector's masterpiece and raw, uncompromising performance.",
     "features": [
@@ -47,11 +47,11 @@
     "color": "GT Green Metallic",
     "interiorColor": "Black Leather",
     "images": [
-      "/img/cars/porsche911carr.webp",
-      "/img/cars/carr (1).webp",
-      "/img/cars/carr (3).webp",
-      "/img/cars/carr (4).webp",
-      "/img/cars/carr (2).webp"  
+      "img/cars/porsche911carr.webp",
+      "img/cars/carr (1).webp",
+      "img/cars/carr (3).webp",
+      "img/cars/carr (4).webp",
+      "img/cars/carr (2).webp"  
     ],
     "description": "The iconic Porsche 911 Carrera represents the pinnacle of sports car engineering. This 2022 model features the legendary flat-six engine, delivering exhilarating performance with 750 horsepower. With only 5,200 km on the odometer, this vehicle is practically new and has been meticulously maintained. The GT Green Metallic exterior paired with black leather interior creates a timeless, sophisticated look. Equipped with Porsche's advanced PDK transmission, adaptive suspension, and state-of-the-art infotainment system, this 911 Carrera offers the perfect balance of everyday usability and track-ready performance.",
     "features": [
@@ -79,14 +79,14 @@
     "color": "Frozen Black Metallic",
     "interiorColor": "Silverstone Extended Leather",
     "images": [
-      "/img/cars/bmwm8.webp",
-      "/img/cars/bmwm8.webp",
-      "/img/cars/bmwm8.webp",
-      "/img/cars/bmwm8.webp",
-      "/img/cars/bmwm8.webp",
-      "/img/cars/bmwm8.webp",
-      "/img/cars/bmwm8.webp",
-      "/img/cars/bmwm8.webp"
+      "img/cars/bmwm8.webp",
+      "img/cars/bmwm8.webp",
+      "img/cars/bmwm8.webp",
+      "img/cars/bmwm8.webp",
+      "img/cars/bmwm8.webp",
+      "img/cars/bmwm8.webp",
+      "img/cars/bmwm8.webp",
+      "img/cars/bmwm8.webp"
     ],
     "description": "Experience the ultimate grand tourer with this stunning 2023 BMW M8 Competition. Powered by a ferocious 4.4-liter twin-turbocharged V8 engine producing 840 horsepower, this beast accelerates from 0-100 km/h in just 3.2 seconds. The M8 Competition combines brutal performance with luxurious comfort, making it perfect for both spirited driving and long-distance cruising. With barely 3,100 km on the clock, this car is in pristine condition. The Frozen Black Metallic paint gives it an aggressive, stealthy appearance, while the Silverstone leather interior offers supreme comfort. Loaded with BMW's latest technology including gesture control, head-up display, and M-specific driving modes.",
     "features": [
@@ -114,13 +114,13 @@
     "color": "Verde Mantis (Green)",
     "interiorColor": "Black Alcantara",
     "images": [
-      "/img/cars/huracan.webp",
-      "/img/cars/huracan.webp",
-      "/img/cars/huracan.webp",
-      "/img/cars/huracan.webp",
-      "/img/cars/huracan.webp",
-      "/img/cars/huracan.webp",
-      "/img/cars/huracan.webp"
+      "img/cars/huracan.webp",
+      "img/cars/huracan.webp",
+      "img/cars/huracan.webp",
+      "img/cars/huracan.webp",
+      "img/cars/huracan.webp",
+      "img/cars/huracan.webp",
+      "img/cars/huracan.webp"
     ],
     "description": "This breathtaking 2021 Lamborghini Huracán is the epitome of Italian automotive passion and engineering excellence. A twin-turbo 5.2-liter V10 now roars to life with 1230 horsepower, delivering an unforgettable driving experience. Finished in the striking Verde Mantis green, this Huracán turns heads wherever it goes. The advanced all-wheel-drive system ensures optimal traction and handling, while the lightweight construction and aerodynamic design provide exceptional performance. With 7,800 km of careful ownership, this supercar has been garage-kept and serviced exclusively at authorized Lamborghini service centers. The interior features premium Alcantara upholstery, carbon fiber trim, and cutting-edge technology.",
     "features": [
@@ -139,14 +139,14 @@
     "model": "DB11",
     "year": 2020,
     "images": [
-      "/img/cars/db11.webp",
-      "/img/cars/db11.webp",
-      "/img/cars/db11.webp",
-      "/img/cars/db11.webp",
-      "/img/cars/db11.webp",
-      "/img/cars/db11.webp",
-      "/img/cars/db11.webp",
-      "/img/cars/db11.webp"
+      "img/cars/db11.webp",
+      "img/cars/db11.webp",
+      "img/cars/db11.webp",
+      "img/cars/db11.webp",
+      "img/cars/db11.webp",
+      "img/cars/db11.webp",
+      "img/cars/db11.webp",
+      "img/cars/db11.webp"
     ],
     "price": "€150,000",
     "mileage": "12,000 km",
@@ -174,14 +174,14 @@
     "model": "720S",
     "year": 2022,
     "images": [
-      "/img/cars/720s.webp",
-      "/img/cars/720s.webp",
-      "/img/cars/720s.webp",
-      "/img/cars/720s.webp",
-      "/img/cars/720s.webp",
-      "/img/cars/720s.webp",
-      "/img/cars/720s.webp",
-      "/img/cars/720s.webp"
+      "img/cars/720s.webp",
+      "img/cars/720s.webp",
+      "img/cars/720s.webp",
+      "img/cars/720s.webp",
+      "img/cars/720s.webp",
+      "img/cars/720s.webp",
+      "img/cars/720s.webp",
+      "img/cars/720s.webp"
     ],
     "price": "€300,000",
     "mileage": "2,400 km",
@@ -209,14 +209,14 @@
     "model": "Phantom",
     "year": 2021,
     "images": [
-      "/img/cars/RRPhantom.webp",
-      "/img/cars/RRPhantom.webp",
-      "/img/cars/RRPhantom.webp",
-      "/img/cars/RRPhantom.webp",
-      "/img/cars/RRPhantom.webp",
-      "/img/cars/RRPhantom.webp",
-      "/img/cars/RRPhantom.webp",
-      "/img/cars/RRPhantom.webp"
+      "img/cars/RRPhantom.webp",
+      "img/cars/RRPhantom.webp",
+      "img/cars/RRPhantom.webp",
+      "img/cars/RRPhantom.webp",
+      "img/cars/RRPhantom.webp",
+      "img/cars/RRPhantom.webp",
+      "img/cars/RRPhantom.webp",
+      "img/cars/RRPhantom.webp"
     ],
     "price": "€450,000",
     "mileage": "6,000 km",
@@ -253,7 +253,7 @@
     "color": "Calypso Red Metallic",
     "interiorColor": "Black Nappa Leather",
     "images": [
-      "/img/cars/e31.webp"
+      "img/cars/e31.webp"
     ],
     "description": "Collector-grade BMW 850CSi with the legendary S70 V12 and a rare 6-speed manual, presented in Calypso Red over black leather. This flagship E31 benefits from the factory AHK rear-steer system, tight original panel fit, and a recently refreshed cooling system. Interior plastics, headliner, and leather remain in excellent condition, making it a turn-key modern classic ready for tours or concours gatherings. Documented service history, clean underbody, and correct VIN-tagged panels add confidence for discerning collectors.",
     "features": [
@@ -281,7 +281,7 @@
     "color": "Obsidian Black",
     "interiorColor": "Black Leather",
     "images": [
-      "/img/cars/e55w211.webp"
+      "img/cars/e55w211.webp"
     ],
     "description": "Supercharged W211 E55 AMG delivering immense torque and everyday usability, finished in Obsidian Black with full leather. The hand-built M113K V8 provides tidal-wave acceleration while Airmatic and big AMG brakes keep it composed. This example features clean paint, fresh service on common wear items, and a comfortable, well-kept cabin with all the right creature comforts. Recent maintenance covers intercooler pump, transmission service, and suspension bushings, so it is ready for effortless continent-crossing.",
     "features": [
@@ -309,7 +309,7 @@
     "color": "Bayside Blue",
     "interiorColor": "Black Cloth",
     "images": [
-      "/img/cars/r34.webp"
+      "img/cars/r34.webp"
     ],
     "description": "Iconic R34 GT-R in Bayside Blue with tasteful upgrades and the renowned RB26DETT paired to the robust Getrag 6-speed. Retains factory ATTESA all-wheel drive and Super HICAS rear-steer for sharp responses, with mild NISMO aero touches and Brembo stoppers. A well-balanced example that blends collectible originality with drivability for spirited road or track sessions. Dry, corrosion-free chassis and recent timing-belt and turbo refresh make it a worry-free halo JDM hero.",
     "features": [
@@ -337,7 +337,7 @@
     "color": "Formula Red",
     "interiorColor": "Black Leather",
     "images": [
-      "/img/cars/nsx.webp"
+      "img/cars/nsx.webp"
     ],
     "description": "Lightweight aluminum-chassis NSX in classic Formula Red, pairing the rev-happy C30A VTEC V6 with a crisp 5-speed manual from the golden 90s era. Pop-up headlights, targa roof, and thin A-pillars deliver the analog supercar feel, while the Bose audio and intact interior trim underline careful ownership. Serviced on schedule, ready for weekend canyon runs or shows. Timing belt, water pump, and fluids were addressed recently, and the pop-up headlight mechanisms work flawlessly.",
     "features": [
@@ -365,7 +365,7 @@
     "color": "Avus Blue",
     "interiorColor": "Silverstone Leather",
     "images": [
-      "/img/cars/e34.webp"
+      "img/cars/e34.webp"
     ],
     "description": "Hand-built E34 M5 with the high-revving S38 inline-6, finished in Avus Blue with period-correct Silverstone interior. The car retains factory Shadowline trim, self-leveling rear suspension, and a recent tune-up on ignition and cooling components. Tight panel gaps and original toolkit accompany a supple leather cabin, making this a desirable analog M sedan for collectors and drivers alike. Fresh bushings and brake service sharpen the chassis, while the paint presents deep gloss with well-preserved trim.",
     "features": [

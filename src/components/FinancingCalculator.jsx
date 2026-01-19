@@ -90,7 +90,7 @@ export default function FinancingCalculator() {
         </div>
 
          <div className="hidden md:flex md:order-1 items-center justify-center bg-gradient-to-br from-black/40 via-blackline-surface to-black/60 rounded-l-xl overflow-hidden">
-          <img src="/img/ui/LEASING.png" alt="Financing visual" className="w-full h-full object-cover" />
+          <img src="img/ui/LEASING.png" alt="Financing visual" className="w-full h-full object-cover" />
         </div>
       </article>
     </section>
