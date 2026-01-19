@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from 'react'
+import { useScrollAnimation } from '../hooks/useScrollAnimation'
 
 export default function FinancingCalculator() {
   const [price, setPrice] = useState('35000')
   const [down, setDown] = useState('5000')
   const [rate, setRate] = useState('6.5')
   const [term, setTerm] = useState('48')
+  const sectionRef = useScrollAnimation()
 
   const { monthly, totalInterest } = useMemo(() => {
     const p = Math.max(0, Number(price) || 0)
@@ -26,7 +28,7 @@ export default function FinancingCalculator() {
 
   return (
     <section className="bg-white text-black py-10 md:py-14">
-      <article className="max-w-7xl mx-auto grid md:grid-cols-[1.2fr,1fr] items-stretch rounded-xl overflow-hidden bg-black border border-gray-200 shadow-xl">
+      <article ref={sectionRef} className="opacity-0-init max-w-7xl mx-auto grid md:grid-cols-[1.2fr,1fr] items-stretch rounded-xl overflow-hidden bg-black border border-gray-200 shadow-xl">
         <div className="p-8 md:p-10 flex flex-col justify-center gap-6 md:order-2 text-white">
           <div>
             <p className="text-sm uppercase tracking-[0.2em] text-gray-400">Financing & leasing</p>

@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
+import { useScrollAnimation } from '../hooks/useScrollAnimation'
 
 export default function NewsletterCTA() {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState(null)
+  const sectionRef = useScrollAnimation()
 
   const onSubmit = (e) => {
     e.preventDefault()
@@ -15,7 +17,7 @@ export default function NewsletterCTA() {
   }
 
   return (
-    <section className="bg-blackline-surface text-white py-10 md:py-14">
+    <section ref={sectionRef} className="opacity-0-init bg-blackline-surface text-white py-10 md:py-14">
       <div className="max-w-6xl mx-auto px-4 md:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div>
           <p className="text-sm uppercase tracking-[0.2em] text-gray-400">Alerts & newsletter</p>

@@ -10,6 +10,43 @@ body {
   @apply bg-gray-50;
 }
 
+/* Scroll animation */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.8s ease-out forwards;
+}
+
+.opacity-0-init {
+  opacity: 0;
+}
+
+/* Animation delays for staggered effect */
+.animate-delay-100 {
+  animation-delay: 100ms;
+}
+
+.animate-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animate-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animate-delay-400 {
+  animation-delay: 400ms;
+}
+
 /* Thinner, styled scrollbar for modern browsers */
 /* WebKit (Chrome, Edge, Safari) */
 ::-webkit-scrollbar {

@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react'
 import FeatureCard from './FeatureCard'
+import { useScrollAnimation } from '../hooks/useScrollAnimation'
 
 export default function FeaturedCarousel({ cars = [] }){
   const [index, setIndex] = useState(0)
   const [perPage, setPerPage] = useState(1)
   const trackRef = useRef(null)
+  const carouselRef = useScrollAnimation()
   const [cardWidth, setCardWidth] = useState(0)
   const [cardStride, setCardStride] = useState(0) // width plus gap for accurate slide distance
 
@@ -55,7 +57,7 @@ export default function FeaturedCarousel({ cars = [] }){
   }, [perPage, cars.length])
 
   return (
-    <div className="relative py-6 md:py-8">
+    <div ref={carouselRef} className="opacity-0-init relative py-6 md:py-8">
       {/* arrows */}
       <button
         onClick={prev}
