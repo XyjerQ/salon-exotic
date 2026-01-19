@@ -1,0 +1,154 @@
+[
+  {
+    "category": "Buying Process",
+    "icon": "🛒",
+    "questions": [
+      {
+        "q": "How do I purchase a vehicle from Blackline?",
+        "a": "Our process is simple: browse our inventory online or visit our showroom, schedule a test drive, discuss financing options with our team, and complete the purchase with our dedicated sales consultant. We handle all paperwork and can arrange delivery anywhere in Europe."
+      },
+      {
+        "q": "Do you offer test drives?",
+        "a": "Yes! We encourage test drives for all vehicles. You can book a test drive online or by calling us directly. We offer flexible scheduling, including weekends and evenings. For exotic vehicles, we require a valid driver's license and insurance verification."
+      },
+      {
+        "q": "Can I reserve a vehicle before viewing it?",
+        "a": "Absolutely. We accept reservation deposits to secure a vehicle. The deposit is fully refundable if the vehicle doesn't meet your expectations during inspection. We can also arrange virtual tours and detailed video walkarounds for remote buyers."
+      },
+      {
+        "q": "What if I find a defect after purchase?",
+        "a": "All our vehicles undergo rigorous pre-delivery inspection. If any issues arise within the warranty period, they're covered. We also offer a 14-day exchange policy for vehicles purchased remotely, giving you peace of mind."
+      },
+      {
+        "q": "Do you accept trade-ins?",
+        "a": "Yes, we accept trade-ins for luxury and exotic vehicles. Our team provides competitive valuations based on current market conditions. We handle all transfer paperwork, making the process seamless for you."
+      }
+    ]
+  },
+  {
+    "category": "Financing & Payment",
+    "icon": "💳",
+    "questions": [
+      {
+        "q": "What financing options do you offer?",
+        "a": "We work with premium banks and leasing companies to offer tailored financing solutions. Options include traditional auto loans, leasing, and balloon financing. Our financial advisors can structure plans from 12 to 84 months with competitive rates."
+      },
+      {
+        "q": "What is the minimum down payment required?",
+        "a": "Down payment requirements vary by vehicle and your credit profile, typically ranging from 20% to 40% for exotic vehicles. Lower percentages may be available for qualified buyers with excellent credit history."
+      },
+      {
+        "q": "Can I get pre-approved for financing?",
+        "a": "Yes! Pre-approval is quick and doesn't impact your credit score significantly. Contact our finance team with basic information, and we'll provide pre-approval within 24 hours, helping you shop with confidence."
+      },
+      {
+        "q": "Do you offer leasing for exotic cars?",
+        "a": "Yes, we offer leasing programs for most vehicles in our inventory. Leasing allows you to drive your dream car with lower monthly payments and the flexibility to upgrade every few years. Terms typically range from 24 to 48 months."
+      },
+      {
+        "q": "What payment methods do you accept?",
+        "a": "We accept bank transfers, certified checks, and financing through our partner institutions. For deposits and smaller amounts, credit cards are accepted. All payments are processed securely with full documentation."
+      }
+    ]
+  },
+  {
+    "category": "Warranty & Service",
+    "icon": "🔧",
+    "questions": [
+      {
+        "q": "Do vehicles come with a warranty?",
+        "a": "Most vehicles come with remaining factory warranty. For out-of-warranty vehicles, we offer extended warranty packages covering major components. Warranty terms vary by manufacturer and vehicle age."
+      },
+      {
+        "q": "What does your warranty cover?",
+        "a": "Our warranties typically cover engine, transmission, drivetrain, electrical systems, and major mechanical components. Specific coverage depends on the warranty package selected. We provide detailed warranty documentation with each vehicle."
+      },
+      {
+        "q": "Do you provide servicing and maintenance?",
+        "a": "While we don't operate our own service center, we partner with authorized service centers and independent specialists for each brand. We can arrange maintenance packages and recommend trusted technicians."
+      },
+      {
+        "q": "What if my car needs repairs?",
+        "a": "For warranty-covered repairs, contact us and we'll coordinate with authorized service centers. For out-of-warranty repairs, we can recommend specialists and help facilitate the process. Our customer support team is always available to assist."
+      },
+      {
+        "q": "Do you offer extended warranty options?",
+        "a": "Yes, we partner with leading warranty providers to offer comprehensive extended warranty plans. Coverage can be customized based on your driving habits and preferences, extending from 1 to 5 years beyond factory warranty."
+      }
+    ]
+  },
+  {
+    "category": "Delivery & Logistics",
+    "icon": "🚚",
+    "questions": [
+      {
+        "q": "Can you deliver the vehicle to my location?",
+        "a": "Yes! We offer enclosed transport delivery throughout Poland and Europe. Delivery costs vary based on distance. We use only insured, specialized carriers experienced with exotic and luxury vehicles."
+      },
+      {
+        "q": "How long does delivery take?",
+        "a": "Local deliveries within Poland typically take 3-7 days. International deliveries to other European countries can take 1-3 weeks depending on destination. We provide tracking and keep you updated throughout the process."
+      },
+      {
+        "q": "Is the vehicle insured during delivery?",
+        "a": "Absolutely. All vehicles are fully insured during transport with comprehensive coverage. Our carriers are bonded and insured specifically for high-value vehicles."
+      },
+      {
+        "q": "Can I pick up the vehicle myself?",
+        "a": "Of course! Many clients prefer to pick up their vehicle personally. We can arrange pickup at our showroom at your convenience and provide a complete vehicle orientation before you drive away."
+      },
+      {
+        "q": "Do you handle international shipping?",
+        "a": "Yes, we facilitate international shipping worldwide. We work with logistics partners experienced in customs clearance, international documentation, and overseas transport. We can arrange door-to-door delivery to most destinations."
+      }
+    ]
+  },
+  {
+    "category": "Vehicle History & Documentation",
+    "icon": "📋",
+    "questions": [
+      {
+        "q": "Are all vehicles history-checked?",
+        "a": "Yes, every vehicle in our inventory undergoes comprehensive history verification including accident checks, service records, ownership history, and mileage verification through Carfax, AutoCheck, and manufacturer databases."
+      },
+      {
+        "q": "Can I see the service history?",
+        "a": "Absolutely. We provide complete available service records with each vehicle. For vehicles with comprehensive service history, we include detailed documentation showing all maintenance and repairs performed."
+      },
+      {
+        "q": "Do you provide pre-purchase inspections?",
+        "a": "Yes, we encourage pre-purchase inspections. You can hire an independent inspector of your choice, or we can arrange inspection by a qualified technician. We provide full access and cooperation during inspections."
+      },
+      {
+        "q": "What documents come with the vehicle?",
+        "a": "You'll receive title/registration documents, owner's manual, service records (where available), warranty documentation, original purchase invoice (if available), and a detailed vehicle history report. We ensure all paperwork is complete and legally compliant."
+      },
+      {
+        "q": "How do you verify mileage authenticity?",
+        "a": "We verify mileage through multiple sources: service records, inspection reports, manufacturer databases, and third-party history reports. Any discrepancies are clearly disclosed. We guarantee the accuracy of reported mileage."
+      }
+    ]
+  },
+  {
+    "category": "Insurance & Registration",
+    "icon": "📄",
+    "questions": [
+      {
+        "q": "Do you assist with insurance?",
+        "a": "While we don't sell insurance directly, we work with specialized insurance brokers who understand exotic and luxury vehicles. We can provide referrals and help you get competitive quotes before purchase."
+      },
+      {
+        "q": "Can you help with vehicle registration?",
+        "a": "Yes! We handle all registration paperwork and can complete the process on your behalf. For local buyers, registration is typically completed within 7-10 days. We coordinate with relevant authorities to ensure smooth processing."
+      },
+      {
+        "q": "What about temporary plates for test driving?",
+        "a": "Test drives are conducted with our dealer plates and insurance. If you purchase a vehicle, we can provide temporary registration allowing you to drive legally while permanent registration is processed."
+      },
+      {
+        "q": "Do I need special insurance for exotic cars?",
+        "a": "Exotic vehicles often require specialized insurance policies with agreed-value coverage. Standard policies may not adequately cover high-performance or rare vehicles. We recommend discussing your specific vehicle with an exotic car insurance specialist."
+      }
+    ]
+  }
+]

@@ -3,9 +3,10 @@ import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-do
 import Home from './pages/Home'
 import Inventory from './pages/Inventory'
 import CarDetails from './pages/CarDetails'
+import Contact from './pages/Contact'
+import FAQ from './pages/FAQ'
 import Header from './components/Header'
 import Footer from './components/Footer'
-// import Contact from './pages/Contact'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -28,7 +29,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/car/:id" element={<CarDetails />} />
-          {/* <Route path="/contact" element={<Contact />} /> */}
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/faq" element={<FAQ />} />
         </Routes>
       </main>
 

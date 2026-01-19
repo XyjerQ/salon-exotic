@@ -58,6 +58,7 @@ export default function Header(){
             <nav className="space-y-6 mt-6">
               <Link to="/" className="block text-2xl md:text-3xl text-black font-semibold" onClick={() => setOpen(false)}>Home</Link>
               <Link to="/inventory" className="block text-2xl md:text-3xl text-black font-semibold" onClick={() => setOpen(false)}>Inventory</Link>
+              <Link to="/faq" className="block text-2xl md:text-3xl text-black font-semibold" onClick={() => setOpen(false)}>FAQ</Link>
               <Link to="/contact" className="block text-2xl md:text-3xl text-black font-semibold" onClick={() => setOpen(false)}>Contact</Link>
             </nav>
 

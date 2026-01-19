@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 export default function CarCard({ car, onViewDetails }) {
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   return (
     <article 
@@ -8,13 +9,19 @@ export default function CarCard({ car, onViewDetails }) {
       className="group cursor-pointer bg-white border border-gray-200 rounded-lg overflow-hidden flex flex-col shadow-lg hover:shadow-2xl transition-shadow h-full"
     >
       <div className="w-full overflow-hidden bg-gray-900 relative">
+        {!imageLoaded && (
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-pulse z-10" />
+        )}
         <img
           src={car.images?.[0] || '/img/ui/fallback.svg'}
           alt={`${car.make} ${car.model}`}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${
+            imageLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
           loading="lazy"
           decoding="async"
-          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/ui/fallback.svg' }}
+          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/ui/fallback.svg'; setImageLoaded(true) }}
+          onLoad={() => setImageLoaded(true)}
         />
         <div className="absolute top-3 right-3 bg-black text-blackline-accent px-3 py-1 rounded-full text-sm font-semibold">
           {car.year}

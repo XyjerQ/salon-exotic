@@ -88,7 +88,7 @@ export default function CarDetails() {
               <img
                 src={car.images?.[selectedImage] || car.images?.[0] || '/img/ui/fallback.svg'}
                 alt={`${car.make} ${car.model}`}
-                className="w-full h-[500px] object-cover"
+                className="w-full max-w-full h-[500px] object-cover"
                 loading="lazy"
                 decoding="async"
                 onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/ui/fallback.svg' }}
@@ -108,7 +108,7 @@ export default function CarDetails() {
                   <img
                     src={img}
                     alt={`${car.make} ${car.model} - view ${index + 1}`}
-                    className="w-full h-24 object-cover"
+                    className="w-full h-32 object-cover"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/ui/fallback.svg' }}
@@ -128,7 +128,7 @@ export default function CarDetails() {
                   <img
                     src={car.images[3]}
                     alt="View more"
-                    className="w-full h-24 object-cover opacity-40 group-hover:opacity-60 transition-opacity"
+                    className="w-full h-32 object-cover opacity-40 group-hover:opacity-60 transition-opacity"
                     loading="lazy"
                     decoding="async"
                   />
@@ -150,7 +150,7 @@ export default function CarDetails() {
                   <img
                     src={car.images[3]}
                     alt={`${car.make} ${car.model} - view 4`}
-                    className="w-full h-28 object-cover"
+                    className="w-full h-32 object-cover"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/ui/fallback.svg' }}
@@ -294,12 +294,12 @@ export default function CarDetails() {
 
           {/* Main Image */}
           <div 
-            className="max-w-6xl max-h-[90vh] w-full px-16"
+            className="max-w-[95vw] max-h-[80vh] w-full px-4 md:px-16 mx-auto"
           >
             <img
               src={car.images[selectedImage]}
               alt={`${car.make} ${car.model}`}
-              className="w-full h-full object-contain"
+              className="w-full h-full max-w-full max-h-[80vh] object-contain"
             />
             <p className="text-center text-white mt-4 text-lg">
               {selectedImage + 1} / {car.images.length}
