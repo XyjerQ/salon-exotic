@@ -5,9 +5,11 @@ CREATE TABLE IF NOT EXISTS employees (
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
+  phone TEXT,
   role TEXT DEFAULT 'sales',
   description TEXT,
   specialization TEXT,
+  photo_path TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
