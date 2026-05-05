@@ -60,6 +60,8 @@ export default function Header(){
               <Link to="/inventory" className="block text-2xl md:text-3xl text-black font-semibold" onClick={() => setOpen(false)}>Inventory</Link>
               <Link to="/faq" className="block text-2xl md:text-3xl text-black font-semibold" onClick={() => setOpen(false)}>FAQ</Link>
               <Link to="/contact" className="block text-2xl md:text-3xl text-black font-semibold" onClick={() => setOpen(false)}>Contact</Link>
+              <hr className="my-4" />
+              <Link to="/employee/login" className="block text-2xl md:text-3xl text-blackline-accent font-semibold" onClick={() => setOpen(false)}>Login</Link>
             </nav>
 
             {/* close button positioned just outside the menu (moves with the menu) */}
