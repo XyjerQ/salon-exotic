@@ -1,0 +1,58 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS employees (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  role TEXT DEFAULT 'sales',
+  description TEXT,
+  specialization TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS cars (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  make TEXT,
+  model TEXT,
+  year INTEGER,
+  price REAL,
+  description TEXT,
+  image_path TEXT,
+  advisor_id INTEGER,
+  featured INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(advisor_id) REFERENCES employees(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS test_drives (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_name TEXT NOT NULL,
+  customer_email TEXT NOT NULL,
+  customer_phone TEXT,
+  car_id INTEGER NOT NULL,
+  requested_date DATETIME NOT NULL,
+  status TEXT DEFAULT 'pending',
+  notes TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(car_id) REFERENCES cars(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS contacts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  message TEXT NOT NULL,
+  status TEXT DEFAULT 'new',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT UNIQUE NOT NULL,
+  active INTEGER DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

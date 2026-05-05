@@ -1,0 +1,319 @@
+# Backend API Test Guide (Postman)
+
+## 1. Start projektu
+
+Uruchom backend:
+
+```bash
+npm run init-db
+npm run dev
+```
+
+Domyslny serwer:
+
+- `http://localhost:4000`
+
+## 2. Zmienne w Postman
+
+Utworz Collection Variables:
+
+- `baseUrl` = `http://localhost:4000`
+- `adminToken` = ``
+- `salesToken` = ``
+- `salesUserId` = ``
+- `carId` = ``
+
+Naglowki dla requestow JSON:
+
+- `Content-Type: application/json`
+
+## 3. Ważne zasady uprawnień
+
+- Publicznie dostepne: `GET /api/cars`, `GET /api/cars/:id`, `POST /api/contact`, `POST /api/auth/login`
+- Tylko admin moze tworzyc konta pracownikow (`POST /api/auth/register` i `POST /api/employees`)
+- Tworzone konto pracownika ma zawsze role `sales`
+- `sales` moze tworzyc/edytowac/usuwac tylko swoje auta
+- `admin` moze zarzadzac wszystkimi autami i przypisywac `advisor_id`
+
+## 4. Przygotowanie pierwszego admina
+
+Jeśli nie masz jeszcze konta admina, dodaj je recznie do SQLite (np. przez sqlite-web/DB Browser):
+
+1. Wygeneruj hash hasla w terminalu:
+
+```bash
+node -e "require('bcrypt').hash('Admin123!', 10).then(h => console.log(h))"
+```
+
+2. Wstaw admina do tabeli `employees`:
+
+```sql
+INSERT INTO employees (name, email, password_hash, role)
+VALUES ('Admin', 'admin@test.com', 'TU_WKLEJ_HASH', 'admin');
+```
+
+## 5. Requesty do testow
+
+### A) Auth
+
+#### 1) Login admin
+
+- `POST {{baseUrl}}/api/auth/login`
+
+Body:
+
+```json
+{
+  "email": "admin@test.com",
+  "password": "Admin123!"
+}
+```
+
+Po requestcie ustaw `adminToken = response.token`.
+
+#### 2) Register sales (admin only)
+
+- `POST {{baseUrl}}/api/auth/register`
+
+Headers:
+
+- `Authorization: Bearer {{adminToken}}`
+
+Body:
+
+```json
+{
+  "name": "Jan Sales",
+  "email": "sales1@test.com",
+  "password": "Sales123!"
+}
+```
+
+Oczekiwane: user ma role `sales`.
+
+#### 3) Login sales
+
+- `POST {{baseUrl}}/api/auth/login`
+
+Body:
+
+```json
+{
+  "email": "sales1@test.com",
+  "password": "Sales123!"
+}
+```
+
+Po requestcie ustaw:
+
+- `salesToken = response.token`
+- `salesUserId = response.user.id`
+
+### B) Employees
+
+#### 4) Lista pracownikow (admin only)
+
+- `GET {{baseUrl}}/api/employees`
+
+Headers:
+
+- `Authorization: Bearer {{adminToken}}`
+
+#### 5) Szczegoly siebie (sales/admin)
+
+- `GET {{baseUrl}}/api/employees/{{salesUserId}}`
+
+Headers:
+
+- `Authorization: Bearer {{salesToken}}`
+
+#### 6) Dodanie sales przez admina
+
+- `POST {{baseUrl}}/api/employees`
+
+Headers:
+
+- `Authorization: Bearer {{adminToken}}`
+
+Body:
+
+```json
+{
+  "name": "Anna Sales",
+  "email": "sales2@test.com",
+  "password": "Sales123!",
+  "description": "Specjalistka od SUV",
+  "specialization": "SUV, Audi"
+}
+```
+
+Oczekiwane: utworzony user ma role `sales`.
+
+#### 7) Edycja pracownika (admin only)
+
+- `PUT {{baseUrl}}/api/employees/{{salesUserId}}`
+
+Headers:
+
+- `Authorization: Bearer {{adminToken}}`
+
+Body:
+
+```json
+{
+  "name": "Jan Sales Updated",
+  "description": "Opiekun aut sportowych",
+  "specialization": "BMW, Mercedes"
+}
+```
+
+### C) Cars
+
+#### 8) Publiczna lista aut
+
+- `GET {{baseUrl}}/api/cars`
+
+Opcjonalne query:
+
+- `q`
+- `advisor_id`
+- `minPrice`
+- `maxPrice`
+
+Przyklad:
+
+- `GET {{baseUrl}}/api/cars?q=bmw&minPrice=100000&maxPrice=500000`
+
+#### 9) Sales dodaje auto (advisor ustawia sie automatycznie na niego)
+
+- `POST {{baseUrl}}/api/cars`
+
+Headers:
+
+- `Authorization: Bearer {{salesToken}}`
+
+Body:
+
+```json
+{
+  "make": "BMW",
+  "model": "M4",
+  "year": 2022,
+  "price": 320000,
+  "description": "Auto testowe"
+}
+```
+
+Po requestcie ustaw `carId = response.id`.
+
+#### 10) Admin dodaje auto i przypisuje advisor_id
+
+- `POST {{baseUrl}}/api/cars`
+
+Headers:
+
+- `Authorization: Bearer {{adminToken}}`
+
+Body:
+
+```json
+{
+  "make": "Audi",
+  "model": "RS6",
+  "year": 2021,
+  "price": 450000,
+  "description": "Auto od admina",
+  "advisor_id": {{salesUserId}}
+}
+```
+
+#### 11) Szczegoly auta
+
+- `GET {{baseUrl}}/api/cars/{{carId}}`
+
+#### 12) Sales edytuje swoje auto
+
+- `PUT {{baseUrl}}/api/cars/{{carId}}`
+
+Headers:
+
+- `Authorization: Bearer {{salesToken}}`
+
+Body:
+
+```json
+{
+  "price": 329000,
+  "description": "Cena po aktualizacji"
+}
+```
+
+#### 13) Admin zmienia advisor auta
+
+- `PUT {{baseUrl}}/api/cars/{{carId}}`
+
+Headers:
+
+- `Authorization: Bearer {{adminToken}}`
+
+Body:
+
+```json
+{
+  "advisor_id": {{salesUserId}}
+}
+```
+
+#### 14) Sales usuwa swoje auto
+
+- `DELETE {{baseUrl}}/api/cars/{{carId}}`
+
+Headers:
+
+- `Authorization: Bearer {{salesToken}}`
+
+#### 15) Admin usuwa dowolne auto
+
+- `DELETE {{baseUrl}}/api/cars/{{carId}}`
+
+Headers:
+
+- `Authorization: Bearer {{adminToken}}`
+
+### D) Contact
+
+#### 16) Formularz kontaktowy
+
+- `POST {{baseUrl}}/api/contact`
+
+Body:
+
+```json
+{
+  "name": "Klient Test",
+  "email": "klient@test.com",
+  "message": "Czesc, prosze o kontakt"
+}
+```
+
+Oczekiwane:
+
+```json
+{
+  "ok": true
+}
+```
+
+## 6. Szybkie testy negatywne (uprawnienia)
+
+1. `POST /api/auth/register` bez `adminToken` -> `403`
+2. `POST /api/employees` z `salesToken` -> `403`
+3. `POST /api/cars` bez tokena -> `401`
+4. `PUT /api/cars/:id` przez innego `sales` (nie wlasciciela) -> `403`
+
+## 7. Najczestsze problemy
+
+- `Cannot GET /api/api/...`: masz podwojne `/api` w URL
+- `401 Invalid token`: brak naglowka `Authorization: Bearer <token>`
+- `403 Admin only`: token jest poprawny, ale user nie ma roli `admin`
+- `500` przy SQL: sprawdz, czy odpaliles `npm run init-db`

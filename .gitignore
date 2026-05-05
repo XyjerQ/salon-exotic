@@ -1,4 +1,16 @@
-node_modules/
-dist/
-.env
+# Backend
+backend/node_modules/
+backend/data/db.sqlite
+backend/.env
+backend/public/uploads/
+
+# Frontend
+salon-exotic/node_modules/
+salon-exotic/dist/
+salon-exotic/.env
+
+
+# IDE
 .vscode/
+.idea/
+*.swp
