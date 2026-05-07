@@ -21,12 +21,55 @@ CREATE TABLE IF NOT EXISTS cars (
   year INTEGER,
   price REAL,
   description TEXT,
+  vin TEXT UNIQUE,
+  vehicle_type TEXT DEFAULT 'inventory', -- 'inventory' | 'customer'
+  owner_name TEXT,
+  owner_contact TEXT,
+
+  engine TEXT,
+  mileage_km INTEGER,
+  horsepower_hp INTEGER,
+  exterior_color TEXT,
+  interior_color TEXT,
+
   image_path TEXT,
   advisor_id INTEGER,
   featured INTEGER DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY(advisor_id) REFERENCES employees(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS car_images (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  car_id INTEGER NOT NULL,
+  image_path TEXT NOT NULL,
+  is_primary INTEGER DEFAULT 0,
+  sort_order INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(car_id) REFERENCES cars(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS car_features (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  car_id INTEGER NOT NULL,
+  feature TEXT NOT NULL,
+  sort_order INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(car_id) REFERENCES cars(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS car_service_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  car_id INTEGER NOT NULL,
+  service_date DATETIME NOT NULL,
+  service_type TEXT NOT NULL,
+  description TEXT,
+  mileage_km INTEGER,
+  cost REAL,
+  provider TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(car_id) REFERENCES cars(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS test_drives (
@@ -58,3 +101,8 @@ CREATE TABLE IF NOT EXISTS newsletter_subscribers (
   active INTEGER DEFAULT 1,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_car_images_car_id ON car_images(car_id);
+CREATE INDEX IF NOT EXISTS idx_car_features_car_id ON car_features(car_id);
+CREATE INDEX IF NOT EXISTS idx_car_service_history_car_id ON car_service_history(car_id);
+CREATE INDEX IF NOT EXISTS idx_cars_vin ON cars(vin);
