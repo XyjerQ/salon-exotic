@@ -1,6 +1,7 @@
 [
   {
     "id": "bmw01",
+    "vin": "WBSX530902G847219",
     "make": "BMW",
     "model": "M5 (E39)",
     "year": 2003,
@@ -34,6 +35,7 @@
   },
   {
     "id": "p01",
+    "vin": "WP0ZZZ99ZNS782045",
     "make": "Porsche",
     "model": "911 Carrera",
     "year": 2022,
@@ -66,6 +68,7 @@
   },
   {
     "id": "b01",
+    "vin": "WBS33AY08PC192847",
     "make": "BMW",
     "model": "M8 Competition",
     "year": 2023,
@@ -101,6 +104,7 @@
   },
   {
     "id": "l01",
+    "vin": "ZHWUA2ZF9MLA10938",
     "make": "Lamborghini",
     "model": "Huracán",
     "year": 2021,
@@ -135,6 +139,7 @@
   },
   {
     "id": "a01",
+    "vin": "SCFAMW520LGL04921",
     "make": "Aston Martin",
     "model": "DB11",
     "year": 2020,
@@ -170,6 +175,7 @@
   },
   {
     "id": "m01",
+    "vin": "SBM11DAE5NW062914",
     "make": "McLaren",
     "model": "720S",
     "year": 2022,
@@ -205,6 +211,7 @@
   },
   {
     "id": "r01",
+    "vin": "SCA685S59MX582013",
     "make": "Rolls-Royce",
     "model": "Phantom",
     "year": 2021,
@@ -240,6 +247,7 @@
   },
   {
     "id": "e31",
+    "vin": "WBEEG2109RCB84019",
     "make": "BMW",
     "model": "850CSi (E31)",
     "year": 1994,
@@ -268,6 +276,7 @@
   },
   {
     "id": "e55w211",
+    "vin": "WDBUF76X36A891234",
     "make": "Mercedes-Benz",
     "model": "E55 AMG",
     "year": 2006,
@@ -296,6 +305,7 @@
   },
   {
     "id": "r34",
+    "vin": "BNR34-002491X",
     "make": "Nissan",
     "model": "Skyline GT-R (R34)",
     "year": 1999,
@@ -324,6 +334,7 @@
   },
   {
     "id": "nsx90",
+    "vin": "JHNAA1153ST004812",
     "make": "Honda",
     "model": "NSX",
     "year": 1995,
@@ -352,6 +363,7 @@
   },
   {
     "id": "e34",
+    "vin": "WBSHD9103MGG20194",
     "make": "BMW",
     "model": "M5 (E34)",
     "year": 1991,

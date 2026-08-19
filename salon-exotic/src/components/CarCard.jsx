@@ -1,21 +1,33 @@
 import React, { useState } from 'react'
 
 const withBase = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
+const mediaBase = (import.meta.env.VITE_API_URL || 'http://localhost:4000/api').replace(/\/?api\/?$/, '')
+
+const resolveImageUrl = (imagePath) => {
+  if (!imagePath) return withBase('img/ui/fallback.svg')
+
+  const path = typeof imagePath === 'string' ? imagePath : imagePath?.image_path
+  if (!path) return withBase('img/ui/fallback.svg')
+  if (path.startsWith('http')) return path
+  if (path.startsWith('/uploads/')) return `${mediaBase}${path}`
+  return withBase(path)
+}
 
 export default function CarCard({ car, onViewDetails }) {
   const [imageLoaded, setImageLoaded] = useState(false)
+  const imagePath = car.primary_image || car.images?.[0]?.image_path || car.images?.[0]
 
   return (
     <article 
       onClick={onViewDetails}
       className="group cursor-pointer bg-white border border-gray-200 rounded-lg overflow-hidden flex flex-col shadow-lg hover:shadow-2xl transition-shadow h-full"
     >
-      <div className="w-full overflow-hidden bg-gray-900 relative">
+      <div className="w-full overflow-hidden bg-gray-900 relative aspect-[4/3]">
         {!imageLoaded && (
           <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-pulse z-10" />
         )}
         <img
-          src={withBase(car.images?.[0] || 'img/ui/fallback.svg')}
+          src={resolveImageUrl(imagePath)}
           alt={`${car.make} ${car.model}`}
           className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
@@ -33,12 +45,23 @@ export default function CarCard({ car, onViewDetails }) {
         <h3 className="text-2xl font-extrabold text-black">
           {car.make} {car.model}
         </h3>
-        <p className="text-blackline-accent font-bold text-2xl mt-3">{car.price}</p>
+        <p className="text-blackline-accent font-bold text-2xl mt-3">
+          €{car.price.toLocaleString('pl-PL')}
+        </p>
         
         <ul className="text-sm text-gray-700 mt-4 space-y-2 border-t border-gray-200 pt-4">
-          <li className="flex justify-between"><span className="text-gray-500">Mileage:</span> <strong>{car.mileage}</strong></li>
-          <li className="flex justify-between"><span className="text-gray-500">Engine:</span> <strong>{car.engine}</strong></li>
-          <li className="flex justify-between"><span className="text-gray-500">Horsepower:</span> <strong>{car.horsepower} HP</strong></li>
+          <li className="flex justify-between">
+            <span className="text-gray-500">Mileage:</span> 
+            <strong>{car.mileage_km ? `${car.mileage_km.toLocaleString('pl-PL')} km` : '-'}</strong>
+          </li>
+          <li className="flex justify-between">
+            <span className="text-gray-500">Engine:</span> 
+            <strong>{car.engine || '-'}</strong>
+          </li>
+          <li className="flex justify-between">
+            <span className="text-gray-500">Horsepower:</span> 
+            <strong>{car.horsepower_hp ? `${car.horsepower_hp} HP` : '-'}</strong>
+          </li>
         </ul>
         
         <button 

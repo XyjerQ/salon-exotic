@@ -106,7 +106,6 @@ router.put('/:id', auth, async (req, res) => {
   const db = req.app.get('db');
   const id = Number(req.params.id);
   
-  // pracownik może edytować tylko siebie, admin może edytować każdego
   if (!isAdmin(req) && req.user.id !== id) {
     return res.status(403).json({ error: 'Forbidden' });
   }
@@ -121,6 +120,7 @@ router.put('/:id', auth, async (req, res) => {
     specialization,
     phone,
     photo_path,
+    password,          // <-- Obsługujemy pole password z frontendu
     currentPassword,
     newPassword,
     confirmNewPassword
@@ -128,7 +128,12 @@ router.put('/:id', auth, async (req, res) => {
 
   let password_hash = existing.password_hash;
 
-  if (newPassword || confirmNewPassword || currentPassword) {
+  // SCENARIUSZ A: Administrator wpisuje bezpośrednio nowe hasło
+  if (isAdmin(req) && password) {
+    password_hash = await bcrypt.hash(password, 10);
+  }
+  // SCENARIUSZ B: Użytkownik zmienia swoje własne hasło (stare + nowe)
+  else if (newPassword || confirmNewPassword || currentPassword) {
     if (!currentPassword) {
       return res.status(400).json({ error: 'Current password is required' });
     }

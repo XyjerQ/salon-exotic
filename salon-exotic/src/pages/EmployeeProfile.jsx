@@ -27,6 +27,7 @@ export default function EmployeeProfile() {
 
   const token = localStorage.getItem('employeeToken')
   const currentUser = JSON.parse(localStorage.getItem('employeeUser') || '{}')
+  const mediaBase = (import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/?api\/?$/, '')
 
   useEffect(() => {
     if (!token) {
@@ -252,7 +253,7 @@ export default function EmployeeProfile() {
               <div className="mb-4">
                 {employee?.photo_path ? (
                   <img
-                    src={`${API_BASE}${employee.photo_path}`}
+                    src={`${mediaBase}${employee.photo_path}`}
                     alt={employee.name}
                     className="w-full h-auto rounded-lg object-cover"
                     onError={(e) => { e.target.src = 'https://via.placeholder.com/300x300/1a1a1a/ffffff?text=' + employee.name.charAt(0) }}

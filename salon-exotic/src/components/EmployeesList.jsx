@@ -1,6 +1,8 @@
 import React from 'react'
 
 export default function EmployeesList({ employees, onEdit, onAdd, loading }) {
+  const mediaBase = (import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/?api\/?$/, '')
+
   const getInitials = (name = '') => {
     const parts = String(name).trim().split(/\s+/).filter(Boolean)
     if (parts.length === 0) return 'EP'
@@ -27,11 +29,25 @@ export default function EmployeesList({ employees, onEdit, onAdd, loading }) {
         <div className="grid gap-5">
           {employees.map(emp => (
             <div key={emp.id} className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-xl">
-              <div className="grid gap-0 md:grid-cols-[96px_minmax(0,1fr)_auto]">
-                <div className="flex items-center justify-center bg-gradient-to-br from-black via-gray-800 to-gray-700 p-5 text-white">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white/15 bg-white/10 text-xl font-bold tracking-wide">
-                    {getInitials(emp.name)}
-                  </div>
+              {/* Zmieniono grid na poziomie kafelka: lewa kolumna ma teraz np. 160px na desktopie lub pełną szerokość na mobile */}
+              <div className="grid gap-0 md:grid-cols-[200px_minmax(0,1fr)_auto]">
+                
+                {/* SEKCJA ZDJĘCIA / INICJAŁÓW NA CAŁĄ WYSOKOŚĆ I SZEROKOŚĆ KAFELKA */}
+                <div className="relative min-h-[200px] md:min-h-full w-full bg-gradient-to-br from-black via-gray-800 to-gray-700 flex items-center justify-center overflow-hidden">
+                  {emp.photo_path ? (
+                    <img
+                      src={`${mediaBase}${emp.photo_path}`}
+                      alt={emp.name}
+                      className="absolute inset-0 h-full w-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                      }}
+                    />
+                  ) : (
+                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/10 border border-white/15 text-white text-2xl font-bold tracking-wide">
+                      {getInitials(emp.name)}
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-6 md:p-7">

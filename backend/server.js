@@ -24,6 +24,9 @@ app.use('/uploads', express.static(uploadDir));
 // ensure upload dir exists
 fs.mkdirSync(uploadDir, { recursive: true });
 
+const frontendPublicDir = path.resolve(__dirname, '../salon-exotic/public');
+app.use(express.static(frontendPublicDir));
+
 // init DB and attach to req
 init().then(db => {
   app.set('db', db);

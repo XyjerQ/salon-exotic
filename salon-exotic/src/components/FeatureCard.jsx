@@ -9,7 +9,7 @@ export default function FeatureCard({ title, desc, image, year, horsepower, mile
       role={onViewDetails ? 'button' : undefined}
       tabIndex={onViewDetails ? 0 : undefined}
     >
-      <div className="w-full bg-blackline-surface flex items-center justify-center">
+      <div className="w-full aspect-[16/10] bg-blackline-surface overflow-hidden flex items-center justify-center">
         {image ? (
           <img src={`${import.meta.env.BASE_URL}${image.replace(/^\//,'')}`} alt={title} className="w-full h-full object-cover" loading="lazy" decoding="async" onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=`${import.meta.env.BASE_URL}img/ui/fallback.svg`}} />
         ) : (

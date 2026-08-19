@@ -62,12 +62,30 @@ async function getCarWithRelations(db, carId) {
     [carId]
   );
 
+  const primaryImage = await db.get(
+    'SELECT image_path FROM car_images WHERE car_id = ? ORDER BY is_primary DESC, sort_order ASC, id ASC LIMIT 1',
+    [carId]
+  );
+
+  const featureCountRow = await db.get(
+    'SELECT COUNT(*) AS count FROM car_features WHERE car_id = ?',
+    [carId]
+  );
+
+  const serviceCountRow = await db.get(
+    'SELECT COUNT(*) AS count FROM car_service_history WHERE car_id = ?',
+    [carId]
+  );
+
   return {
     ...car,
     images,
+    primary_image: primaryImage?.image_path || car.image_path || null,
     features: features.map((f) => f.feature),
     features_detailed: features,
-    service_history
+    service_history,
+    features_count: featureCountRow?.count || 0,
+    service_history_count: serviceCountRow?.count || 0
   };
 }
 
@@ -381,6 +399,9 @@ router.post(
       description,
       featured,
       advisor_id: advisorBody,
+      transmission,
+      drivetrain,
+      fuel_type,
       engine,
       mileage_km,
       horsepower_hp,
@@ -407,13 +428,16 @@ router.post(
     await db.exec('BEGIN');
     try {
       const result = await db.run(
-        'INSERT INTO cars (make, model, year, price, description, engine, mileage_km, horsepower_hp, exterior_color, interior_color, image_path, advisor_id, featured, vin, vehicle_type, owner_name, owner_contact) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO cars (make, model, year, price, description, transmission, drivetrain, fuel_type, engine, mileage_km, horsepower_hp, exterior_color, interior_color, image_path, advisor_id, featured, vin, vehicle_type, owner_name, owner_contact) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
           make ?? null,
           model ?? null,
           maybeNumber(year),
           maybeNumber(price),
           description ?? null,
+          transmission ?? null,
+          drivetrain ?? null,
+          fuel_type ?? null,
           engine ?? null,
           maybeNumber(mileage_km),
           maybeNumber(horsepower_hp),
@@ -478,6 +502,9 @@ router.put(
       description,
       featured,
       advisor_id: advisorBody,
+      transmission,
+      drivetrain,
+      fuel_type,
       engine,
       mileage_km,
       horsepower_hp,
@@ -518,13 +545,16 @@ router.put(
     await db.exec('BEGIN');
     try {
       await db.run(
-        'UPDATE cars SET make=?, model=?, year=?, price=?, description=?, engine=?, mileage_km=?, horsepower_hp=?, exterior_color=?, interior_color=?, advisor_id=?, featured=?, vin=?, vehicle_type=?, owner_name=?, owner_contact=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
+        'UPDATE cars SET make=?, model=?, year=?, price=?, description=?, transmission=?, drivetrain=?, fuel_type=?, engine=?, mileage_km=?, horsepower_hp=?, exterior_color=?, interior_color=?, advisor_id=?, featured=?, vin=?, vehicle_type=?, owner_name=?, owner_contact=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
         [
           make ?? existing.make,
           model ?? existing.model,
           maybeNumber(year) ?? existing.year,
           maybeNumber(price) ?? existing.price,
           description ?? existing.description,
+          transmission ?? existing.transmission,
+          drivetrain ?? existing.drivetrain,
+          fuel_type ?? existing.fuel_type,
           engine ?? existing.engine,
           maybeNumber(mileage_km) ?? existing.mileage_km,
           maybeNumber(horsepower_hp) ?? existing.horsepower_hp,

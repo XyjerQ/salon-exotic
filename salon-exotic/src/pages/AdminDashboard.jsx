@@ -193,6 +193,7 @@ export default function AdminDashboard() {
               cars={cars}
               employees={employees}
               isAdmin={isAdmin}
+              onViewDetails={(id) => navigate(`/car/${id}`)}
               onEdit={(id) => {
                 setEditingCarId(id)
                 setView('car-form')

@@ -1,13 +1,18 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import CarCard from '../components/CarCard'
-import cars from '../data/cars.json'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
 export default function Inventory() {
   const gridRef = useScrollAnimation({ staggerChildren: true })
   const navigate = useNavigate()
   const sentinelRef = React.useRef(null)
+
+  const [cars, setCars] = React.useState([])
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState('')
 
   const [filters, setFilters] = React.useState({
     hpMin: '',
@@ -19,15 +24,52 @@ export default function Inventory() {
   const [visibleCount, setVisibleCount] = React.useState(6)
   const [showFilters, setShowFilters] = React.useState(false)
 
+  React.useEffect(() => {
+    let cancelled = false
+
+    const loadCars = async () => {
+      setLoading(true)
+      setError('')
+
+      try {
+        const res = await fetch(`${API_BASE}/cars`)
+        if (!res.ok) {
+          throw new Error('Failed to load inventory')
+        }
+
+        const data = await res.json()
+        if (!cancelled) {
+          setCars(Array.isArray(data) ? data : [])
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message)
+          setCars([])
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadCars()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const parseMileage = (mileageStr) => {
-    if (!mileageStr) return 0
-    return Number(mileageStr.replace(/[^0-9]/g, '')) || 0
+    if (mileageStr === undefined || mileageStr === null || mileageStr === '') return 0
+    if (typeof mileageStr === 'number') return mileageStr
+    return Number(String(mileageStr).replace(/[^0-9]/g, '')) || 0
   }
 
   const filteredCars = React.useMemo(() => {
     return cars.filter((car) => {
-      const hp = Number(car.horsepower) || 0
-      const mileage = parseMileage(car.mileage)
+      const hp = Number(car.horsepower_hp ?? car.horsepower) || 0
+      const mileage = parseMileage(car.mileage_km ?? car.mileage)
       const year = Number(car.year) || 0
 
       const hpMinOk = filters.hpMin === '' || hp >= Number(filters.hpMin)
@@ -167,17 +209,23 @@ export default function Inventory() {
           </div>
         </div>
 
-        <div ref={gridRef} className="opacity-0-init grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredCars.length === 0 ? (
-            <div className="col-span-full text-center text-gray-500">No cars match current filters.</div>
-          ) : (
-            filteredCars.slice(0, visibleCount).map((car) => (
-              <div key={car.id} className="opacity-0-init inventory-item">
-                <CarCard car={car} onViewDetails={() => handleViewDetails(car.id)} />
-              </div>
-            ))
-          )}
-        </div>
+        {loading ? (
+          <div className="py-16 text-center text-gray-500">Loading inventory...</div>
+        ) : error ? (
+          <div className="py-16 text-center text-red-600">{error}</div>
+        ) : (
+          <div ref={gridRef} className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredCars.length === 0 ? (
+              <div className="col-span-full text-center text-gray-500">No cars match current filters.</div>
+            ) : (
+              filteredCars.slice(0, visibleCount).map((car) => (
+                <div key={car.id} className="inventory-item">
+                  <CarCard car={car} onViewDetails={() => handleViewDetails(car.id)} />
+                </div>
+              ))
+            )}
+          </div>
+        )}
         {filteredCars.length > 0 && visibleCount < filteredCars.length && (
           <div ref={sentinelRef} className="mt-8 h-12 flex items-center justify-center text-sm text-gray-500">
             Loading more cars...

@@ -1,8 +1,12 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 export default function FeaturesEditor({ value = [], onChange }) {
   const [items, setItems] = useState(Array.isArray(value) ? value : [])
   const [input, setInput] = useState('')
+
+  useEffect(() => {
+    setItems(Array.isArray(value) ? value : [])
+  }, [value])
 
   const add = () => {
     const v = input.trim()
@@ -21,6 +25,7 @@ export default function FeaturesEditor({ value = [], onChange }) {
 
   return (
     <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">Features included with this car</label>
       <div className="flex gap-2">
         <input value={input} onChange={(e) => setInput(e.target.value)} className="flex-1 border px-3 py-2 rounded" placeholder="Add feature" />
         <button type="button" onClick={add} className="bg-blackline-accent text-black px-4 py-2 rounded">Add</button>
