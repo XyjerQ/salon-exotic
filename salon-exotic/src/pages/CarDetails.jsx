@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import cars from '../data/cars.json'
 import employees from '../data/employees.json'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 
@@ -41,17 +40,12 @@ export default function CarDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [car, setCar] = useState(null)
-  const [legacyCar, setLegacyCar] = useState(null)
   const [selectedImage, setSelectedImage] = useState(0)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const leftContentRef = useScrollAnimation()
   const rightContentRef = useScrollAnimation()
-
-  useEffect(() => {
-    setLegacyCar(cars.find((entry) => entry.id === id) || cars.find((entry) => entry.vin === id) || null)
-  }, [id])
 
   useEffect(() => {
     let cancelled = false
@@ -66,12 +60,11 @@ export default function CarDetails() {
           if (!cancelled) {
             setCar(data)
             setSelectedImage(0)
-            return
           }
-        }
-
-        if (!cancelled) {
-          setCar(null)
+        } else {
+          if (!cancelled) {
+            setCar(null)
+          }
         }
       } catch (err) {
         if (!cancelled) {
@@ -91,16 +84,15 @@ export default function CarDetails() {
     }
   }, [id])
 
-  const displayCar = car || legacyCar
   const consultantSource = car
     ? employees.find((employee) => String(employee.id) === String(car.advisor_id)) || null
-    : legacyCar
-      ? employees.find((employee) => String(employee.id) === String(legacyCar.assignedEmployee)) || null
-      : null
-  const imageList = ((car?.images?.length ? car.images : legacyCar?.images) || [])
+    : null
+
+  const imageList = (car?.images || [])
     .map((image) => (typeof image === 'string' ? image : image?.image_path))
     .filter(Boolean)
-  const featuresList = car?.features?.length ? car.features : legacyCar?.features || []
+
+  const featuresList = car?.features || []
 
   useEffect(() => {
     if (!isLightboxOpen || imageList.length === 0) return
@@ -127,7 +119,7 @@ export default function CarDetails() {
     )
   }
 
-  if (!displayCar) {
+  if (!car) {
     return (
       <main className="bg-gray-50 min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -150,9 +142,9 @@ export default function CarDetails() {
       <div className="bg-black text-white pt-20 pb-8">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-[0.2em] text-gray-400">Vehicle Details</p>
-          <h1 className="text-4xl md:text-6xl font-extrabold mt-2">{displayCar.make} {displayCar.model}</h1>
+          <h1 className="text-4xl md:text-6xl font-extrabold mt-2">{car.make} {car.model}</h1>
           <div className="flex items-center gap-6 mt-6">
-            <p className="text-3xl md:text-4xl text-blackline-accent font-bold">{formatMoney(displayCar.price)}</p>
+            <p className="text-3xl md:text-4xl text-blackline-accent font-bold">{formatMoney(car.price)}</p>
           </div>
         </div>
       </div>
@@ -178,7 +170,7 @@ export default function CarDetails() {
             >
               <img
                 src={resolveImageUrl(selectedImagePath || 'img/ui/fallback.svg')}
-                alt={`${displayCar.make} ${displayCar.model}`}
+                alt={`${car.make} ${car.model}`}
                 className="w-full max-w-full h-[500px] object-cover"
                 loading="lazy"
                 decoding="async"
@@ -197,7 +189,7 @@ export default function CarDetails() {
                 >
                   <img
                     src={resolveImageUrl(img)}
-                    alt={`${displayCar.make} ${displayCar.model} - view ${index + 1}`}
+                    alt={`${car.make} ${car.model} - view ${index + 1}`}
                     className="w-full h-32 object-cover"
                     loading="lazy"
                     decoding="async"
@@ -237,7 +229,7 @@ export default function CarDetails() {
                 >
                   <img
                     src={resolveImageUrl(imageList[3])}
-                    alt={`${displayCar.make} ${displayCar.model} - view 4`}
+                    alt={`${car.make} ${car.model} - view 4`}
                     className="w-full h-32 object-cover"
                     loading="lazy"
                     decoding="async"
@@ -249,7 +241,7 @@ export default function CarDetails() {
 
             <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-lg">
               <h3 className="text-2xl font-extrabold mb-4">About this vehicle</h3>
-              <p className="text-gray-700 leading-relaxed">{displayCar.description}</p>
+              <p className="text-gray-700 leading-relaxed">{car.description}</p>
             </div>
           </div>
 
@@ -261,35 +253,35 @@ export default function CarDetails() {
                 <div className="grid grid-cols-2 gap-6 pb-6 border-b border-gray-200">
                   <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wider">Year</p>
-                    <p className="text-2xl font-bold text-black mt-1">{displayCar.year}</p>
+                    <p className="text-2xl font-bold text-black mt-1">{car.year}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wider">Mileage</p>
-                    <p className="text-2xl font-bold text-black mt-1">{formatMileage(displayCar.mileage_km ?? displayCar.mileage)}</p>
+                    <p className="text-2xl font-bold text-black mt-1">{formatMileage(car.mileage_km)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wider">Transmission</p>
-                    <p className="text-xl font-bold text-black mt-1">{displayCar.transmission}</p>
+                    <p className="text-xl font-bold text-black mt-1">{car.transmission}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wider">Horsepower</p>
-                    <p className="text-2xl font-bold text-black mt-1">{formatHorsepower(displayCar.horsepower_hp ?? displayCar.horsepower)}</p>
+                    <p className="text-2xl font-bold text-black mt-1">{formatHorsepower(car.horsepower_hp)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wider">Engine</p>
-                    <p className="text-lg font-bold text-black mt-1">{displayCar.engine}</p>
+                    <p className="text-lg font-bold text-black mt-1">{car.engine}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wider">Drivetrain</p>
-                    <p className="text-lg font-bold text-black mt-1">{displayCar.drivetrain}</p>
+                    <p className="text-lg font-bold text-black mt-1">{car.drivetrain}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wider">Exterior Color</p>
-                    <p className="text-lg font-bold text-black mt-1">{displayCar.exterior_color ?? displayCar.color}</p>
+                    <p className="text-lg font-bold text-black mt-1">{car.exterior_color}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wider">Interior</p>
-                    <p className="text-lg font-bold text-black mt-1">{displayCar.interior_color ?? displayCar.interiorColor}</p>
+                    <p className="text-lg font-bold text-black mt-1">{car.interior_color}</p>
                   </div>
                 </div>
 
@@ -334,7 +326,7 @@ export default function CarDetails() {
                 )}
 
                 <button
-                  onClick={() => document.getElementById('contact-form').scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
                   className="w-full bg-blackline-accent hover:opacity-90 text-black font-bold py-4 rounded-lg mt-4 transition-opacity"
                 >
                   Inquire about this vehicle
@@ -352,7 +344,7 @@ export default function CarDetails() {
         >
           <img
             src={resolveImageUrl(imageList[selectedImage])}
-            alt={`${displayCar.make} ${displayCar.model}`}
+            alt={`${car.make} ${car.model}`}
             className="max-h-full max-w-full object-contain"
             onClick={(e) => e.stopPropagation()}
             onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = withBase('img/ui/fallback.svg') }}
