@@ -155,6 +155,36 @@ router.get('/', async (req, res) => {
   const db = req.app.get('db');
   const { q, advisor_id, minPrice, maxPrice, featured, vin } = req.query;
 
+  if (vin) {
+    let sql = 'SELECT c.id FROM cars c WHERE c.vin = ?';
+    const params = [vin];
+
+    if (q) {
+      sql += ' AND (c.make LIKE ? OR c.model LIKE ? OR c.description LIKE ?)';
+      params.push('%' + q + '%', '%' + q + '%', '%' + q + '%');
+    }
+    if (advisor_id) {
+      sql += ' AND c.advisor_id = ?';
+      params.push(advisor_id);
+    }
+    if (minPrice) {
+      sql += ' AND c.price >= ?';
+      params.push(minPrice);
+    }
+    if (maxPrice) {
+      sql += ' AND c.price <= ?';
+      params.push(maxPrice);
+    }
+    if (featured !== undefined) {
+      sql += ' AND c.featured = ?';
+      params.push(featured === 'true' || featured === '1' ? 1 : 0);
+    }
+
+    const rows = await db.all(sql, params);
+    const enriched = await Promise.all(rows.map((row) => getCarWithRelations(db, row.id)));
+    return res.json(enriched.filter(Boolean));
+  }
+
   let sql = 'SELECT c.* FROM cars c WHERE 1=1';
   const params = [];
 
@@ -230,14 +260,29 @@ router.post('/:id/service', auth, async (req, res) => {
   }
 
   try {
+    await db.exec('BEGIN');
     const result = await db.run(
       'INSERT INTO car_service_history (car_id, service_date, service_type, description, mileage_km, cost, provider) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [carId, service_date, service_type, description ?? null, maybeNumber(mileage_km), maybeNumber(cost), provider ?? null]
     );
+    
+    const car = await db.get('SELECT mileage_km FROM cars WHERE id = ?', [carId])
+    const currentMileage = maybeNumber(car?.mileage_km)
+    const nextMileage = maybeNumber(mileage_km)
+
+    if (nextMileage !== null && (currentMileage === null || nextMileage > currentMileage)) {
+      await db.run(
+        'UPDATE cars SET mileage_km = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        [nextMileage, carId]
+      )
+    }
+
+    await db.exec('COMMIT');
 
     const inserted = await db.get('SELECT * FROM car_service_history WHERE id = ?', [result.lastID]);
     res.status(201).json(inserted);
   } catch (err) {
+    await db.exec('ROLLBACK');
     res.status(500).json({ error: 'Failed to add service entry', details: err.message });
   }
 });
@@ -260,14 +305,29 @@ router.put('/service/:id', auth, async (req, res) => {
   if (!service_date || !service_type) return res.status(400).json({ error: 'service_date and service_type required' });
 
   try {
+    await db.exec('BEGIN');
     await db.run(
       'UPDATE car_service_history SET service_date=?, service_type=?, description=?, mileage_km=?, cost=?, provider=? WHERE id=?',
       [service_date, service_type, description ?? null, maybeNumber(mileage_km), maybeNumber(cost), provider ?? null, id]
     );
 
+    const car = await db.get('SELECT mileage_km FROM cars WHERE id = ?', [existing.car_id]);
+    const currentMileage = maybeNumber(car?.mileage_km);
+    const nextMileage = maybeNumber(mileage_km);
+
+    if (nextMileage !== null && (currentMileage === null || nextMileage > currentMileage)) {
+      await db.run(
+        'UPDATE cars SET mileage_km = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        [nextMileage, existing.car_id]
+      );
+    }
+
+    await db.exec('COMMIT');
+
     const updated = await db.get('SELECT * FROM car_service_history WHERE id = ?', [id]);
     res.json(updated);
   } catch (err) {
+    await db.exec('ROLLBACK');
     res.status(500).json({ error: 'Update failed', details: err.message });
   }
 });

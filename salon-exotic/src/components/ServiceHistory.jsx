@@ -44,8 +44,8 @@ export default function ServiceHistory({ initialVin = '' }) {
     setLoading(false)
   }
 
-  const handleEntryAdded = (newEntry) => {
-    setHistory(prev => [newEntry, ...prev])
+  const handleEntryAdded = async () => {
+    await lookupByVin()
   }
 
   const startEdit = (e) => {
@@ -68,9 +68,9 @@ export default function ServiceHistory({ initialVin = '' }) {
         body: JSON.stringify(editingEntry)
       })
       if (res.ok) {
-        const updated = await res.json()
-        setHistory(prev => prev.map(h => (h.id === updated.id ? updated : h)))
+        await res.json()
         cancelEdit()
+        await lookupByVin()
       } else {
         const data = await res.json().catch(() => ({}))
         setError(data.error || 'Failed to update')
@@ -90,7 +90,7 @@ export default function ServiceHistory({ initialVin = '' }) {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (res.status === 204) {
-        setHistory(prev => prev.filter(h => h.id !== id))
+        await lookupByVin()
       } else {
         setError('Failed to delete')
       }

@@ -139,13 +139,13 @@ export default function EmployeeProfile() {
 
       if (hasPasswordChange) {
         if (!formData.currentPassword) {
-          throw new Error('Podaj stare hasło')
+          throw new Error('Please enter your current password')
         }
         if (!formData.newPassword || !formData.confirmNewPassword) {
-          throw new Error('Wpisz nowe hasło dwa razy')
+          throw new Error('Please enter the new password twice')
         }
         if (formData.newPassword !== formData.confirmNewPassword) {
-          throw new Error('Nowe hasła muszą być takie same')
+          throw new Error('New passwords must match')
         }
       }
 
