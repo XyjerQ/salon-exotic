@@ -191,6 +191,7 @@ export default function AdminDashboard() {
             </div>
             <CarList
               cars={cars}
+              employees={employees}
               isAdmin={isAdmin}
               onEdit={(id) => {
                 setEditingCarId(id)
