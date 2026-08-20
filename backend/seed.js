@@ -87,6 +87,8 @@ async function seedCars(db, employeeMap) {
 
   for (const car of cars) {
     const advisorId = employeeMap.get(car.assignedEmployee) || null;
+    const isFeatured = car.featured ? 1 : 0;
+
     const existing = car.vin
       ? await db.get('SELECT * FROM cars WHERE vin = ?', [car.vin])
       : await db.get(
@@ -122,7 +124,7 @@ async function seedCars(db, employeeMap) {
           car.color || existing.exterior_color || null,
           car.interiorColor || existing.interior_color || null,
           advisorId || existing.advisor_id || null,
-          0,
+          isFeatured,
           existing.id
         ]
       );
@@ -153,7 +155,7 @@ async function seedCars(db, employeeMap) {
           car.interiorColor || null,
           null,
           advisorId,
-          0
+          isFeatured
         ]
       );
       carId = result.lastID;

@@ -31,7 +31,8 @@
       "Premium Nappa Leather Interior",
       "Electric Sunroof and Heated Seats"
     ],
-    "assignedEmployee": "emp02"
+    "assignedEmployee": "emp02",
+    "featured": true
   },
   {
     "id": "p01",
@@ -64,7 +65,8 @@
       "Parking Assist with Reversing Camera",
       "LED Matrix Headlights"
     ],
-    "assignedEmployee": "emp01"
+    "assignedEmployee": "emp01",
+    "featured": true
   },
   {
     "id": "b01",
@@ -100,7 +102,8 @@
       "Adaptive M Suspension Professional",
       "BMW Live Cockpit Professional"
     ],
-    "assignedEmployee": "emp02"
+    "assignedEmployee": "emp02",
+    "featured": true
   },
   {
     "id": "l01",
@@ -135,7 +138,8 @@
       "Premium Audio System",
       "Alcantara & Carbon Fiber Interior Package"
     ],
-    "assignedEmployee": "emp03"
+    "assignedEmployee": "emp03",
+    "featured": true
   },
   {
     "id": "a01",
@@ -171,7 +175,8 @@
       "Carbon Fiber Interior Accents",
       "Full Leather Headliner"
     ],
-    "assignedEmployee": "emp02"
+    "assignedEmployee": "emp02",
+    "featured": true
   },
   {
     "id": "m01",
@@ -207,7 +212,8 @@
       "Electrochromic Roof Panel",
       "Sports Exhaust System"
     ],
-    "assignedEmployee": "emp03"
+    "assignedEmployee": "emp03",
+    "featured": true
   },
   {
     "id": "r01",

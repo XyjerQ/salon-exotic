@@ -1,13 +1,54 @@
-import React, { useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import FeatureCard from './FeatureCard'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 
-export default function FeaturedCarousel({ cars = [] }){
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
+
+const formatMileage = (value) => {
+  if (value === undefined || value === null || value === '') return '—'
+  const numeric = Number(value)
+  if (!Number.isFinite(numeric)) return String(value)
+  return `${new Intl.NumberFormat('pl-PL').format(numeric)} km`
+}
+
+export default function FeaturedCarousel() {
+  const [cars, setCars] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
   const carouselRef = useScrollAnimation()
   const scrollerRef = useRef(null)
   const navigate = useNavigate()
-  const displayedCars = cars.slice(0, 6)
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadFeaturedCars = async () => {
+      setLoading(true)
+      try {
+        const res = await fetch(`${API_BASE}/cars?featured=1`)
+        if (res.ok) {
+          const data = await res.json()
+          if (!cancelled) {
+            setCars(Array.isArray(data) ? data.slice(0, 6) : [])
+          }
+        } else {
+          if (!cancelled) setError('Nie udało się pobrać wyróżnionych samochodów.')
+        }
+      } catch (err) {
+        if (!cancelled) setError('Wystąpił błąd sieci.')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    loadFeaturedCars()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const scrollByPage = (dir = 1) => {
     const el = scrollerRef.current
@@ -16,23 +57,35 @@ export default function FeaturedCarousel({ cars = [] }){
     el.scrollBy({ left: dir * amount, behavior: 'smooth' })
   }
 
+  if (loading) {
+    return <div className="py-8 text-center text-gray-400">Ładowanie wyróżnionych ofert...</div>
+  }
+
+  if (error) {
+    return <div className="py-8 text-center text-red-500">{error}</div>
+  }
+
+  if (cars.length === 0) {
+    return null // Jeśli brak wyróżnionych aut, nie wyświetlamy komponentu
+  }
+
   return (
-    <div ref={carouselRef} className="opacity-0-init relative py-6 md:py-8">
+    <div ref={carouselRef} className="relative py-6 md:py-8">
       {/* Scrollable track with snap points */}
       <div ref={scrollerRef} className="overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory">
         <div className="flex gap-3 px-1">
-          {displayedCars.map((car) => (
+          {cars.map((car) => (
             <div
               key={car.id}
               className="flex-shrink-0 w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)] snap-start"
             >
               <FeatureCard
-                title={`${car.make} ${car.model}`}
+                title={`${car.brand || ''} ${car.model || ''}`.trim()}
                 desc={car.description}
-                image={car.images?.[0]}
+                image={car.image_path}
                 year={car.year}
-                horsepower={car.horsepower}
-                mileage={car.mileage}
+                horsepower={car.horsepower_hp}
+                mileage={formatMileage(car.mileage_km)}
                 onViewDetails={() => navigate(`/car/${car.id}`)}
               />
             </div>
