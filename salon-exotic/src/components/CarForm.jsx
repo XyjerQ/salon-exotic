@@ -143,6 +143,8 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
     }
   }
 
+  const isCustomerVehicle = formData.vehicle_type === 'customer'
+
   return (
     <div className="max-w-3xl bg-white border border-gray-200 rounded-lg p-8">
       <h2 className="text-2xl font-bold mb-2">{carId ? 'Edit' : 'Add'} Car</h2>
@@ -181,28 +183,49 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
             </div>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
-              <input name="price" type="number" value={formData.price} onChange={handleInputChange} className="border px-3 py-2 rounded w-full" />
+          {isCustomerVehicle ? (
+            <div className="grid md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Exterior color</label>
+                <input name="exterior_color" value={formData.exterior_color} onChange={handleInputChange} placeholder="Exterior color" className="border px-3 py-2 rounded w-full" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Mileage</label>
+                <input name="mileage_km" type="number" value={formData.mileage_km} onChange={handleInputChange} className="border px-3 py-2 rounded w-full" placeholder="Mileage (km)" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Engine</label>
+                <input name="engine" value={formData.engine} onChange={handleInputChange} placeholder="Engine" className="border px-3 py-2 rounded w-full" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Fuel type</label>
+                <input name="fuel_type" value={formData.fuel_type} onChange={handleInputChange} placeholder="Petrol / Diesel" className="border px-3 py-2 rounded w-full" />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Mileage</label>
-              <input name="mileage_km" type="number" value={formData.mileage_km} onChange={handleInputChange} className="border px-3 py-2 rounded w-full" placeholder="Mileage (km)" />
+          ) : (
+            <div className="grid md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
+                <input name="price" type="number" value={formData.price} onChange={handleInputChange} className="border px-3 py-2 rounded w-full" placeholder="Price (€)" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Mileage</label>
+                <input name="mileage_km" type="number" value={formData.mileage_km} onChange={handleInputChange} className="border px-3 py-2 rounded w-full" placeholder="Mileage (km)" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Horsepower</label>
+                <input name="horsepower_hp" type="number" value={formData.horsepower_hp} onChange={handleInputChange} className="border px-3 py-2 rounded w-full" placeholder="HP" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Fuel type</label>
+                <input name="fuel_type" value={formData.fuel_type} onChange={handleInputChange} placeholder="Petrol / Diesel" className="border px-3 py-2 rounded w-full" />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Horsepower</label>
-              <input name="horsepower_hp" type="number" value={formData.horsepower_hp} onChange={handleInputChange} className="border px-3 py-2 rounded w-full" placeholder="HP" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Fuel type</label>
-              <input name="fuel_type" value={formData.fuel_type} onChange={handleInputChange} placeholder="Petrol / Diesel / Hybrid" className="border px-3 py-2 rounded w-full" />
-            </div>
-          </div>
+          )}
         </section>
 
         <section className="space-y-4">
-          <h3 className="text-lg font-semibold">Drivetrain and body</h3>
+          <h3 className="text-lg font-semibold">{isCustomerVehicle ? 'Owner Info' : 'Drivetrain and body'}</h3>
           {formData.vehicle_type === 'inventory' ? (
             <>
               <div className="grid md:grid-cols-3 gap-4">
