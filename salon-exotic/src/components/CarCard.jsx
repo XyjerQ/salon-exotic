@@ -14,6 +14,11 @@ const resolveImageUrl = (imagePath) => {
 }
 
 export default function CarCard({ car, onViewDetails }) {
+  // Jeśli pojazd to customer vehicle, w ogóle go nie wyświetlaj w inventory
+  if (car.vehicle_type === 'customer') {
+    return null
+  }
+
   const [imageLoaded, setImageLoaded] = useState(false)
   const imagePath = car.primary_image || car.images?.[0]?.image_path || car.images?.[0]
 
@@ -46,7 +51,7 @@ export default function CarCard({ car, onViewDetails }) {
           {car.make} {car.model}
         </h3>
         <p className="text-blackline-accent font-bold text-2xl mt-3">
-          €{car.price.toLocaleString('pl-PL')}
+          {car.price != null ? `€${car.price.toLocaleString('pl-PL')}` : 'On request'}
         </p>
         
         <ul className="text-sm text-gray-700 mt-4 space-y-2 border-t border-gray-200 pt-4">

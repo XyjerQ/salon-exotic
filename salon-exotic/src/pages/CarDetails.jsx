@@ -18,9 +18,9 @@ const resolveImageUrl = (imagePath) => {
 }
 
 const formatMoney = (value) => {
-  if (value === undefined || value === null || value === '') return '—'
+  if (value === undefined || value === null || value === '') return 'On Request'
   const numeric = Number(value)
-  if (!Number.isFinite(numeric)) return String(value)
+  if (!Number.isFinite(numeric)) return 'On Request'
   return `€${new Intl.NumberFormat('pl-PL').format(numeric)}`
 }
 

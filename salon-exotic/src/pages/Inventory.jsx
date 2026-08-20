@@ -67,7 +67,9 @@ export default function Inventory() {
   }
 
   const filteredCars = React.useMemo(() => {
-    return cars.filter((car) => {
+    return cars
+    .filter((car) => car.vehicle_type !== 'customer')
+    .filter((car) => {
       const hp = Number(car.horsepower_hp ?? car.horsepower) || 0
       const mileage = parseMileage(car.mileage_km ?? car.mileage)
       const year = Number(car.year) || 0

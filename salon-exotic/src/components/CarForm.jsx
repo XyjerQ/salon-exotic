@@ -93,6 +93,8 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
         setFormError('Files selected will be ignored. Provide image paths or use image upload endpoint.')
       }
 
+      const isCustomerVehicle = formData.vehicle_type === 'customer'
+
       const payload = {
         make: formData.make,
         model: formData.model,
@@ -116,7 +118,7 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
       }
 
       if (isAdmin) {
-        payload.featured = formData.featured
+        payload.featured = isCustomerVehicle ? false : formData.featured
         payload.advisor_id = formData.advisor_id
       }
 
@@ -284,7 +286,7 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
         {isAdmin && (
           <section className="space-y-4">
             <h3 className="text-lg font-semibold">Admin options</h3>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className={`grid ${isCustomerVehicle ? 'md:grid-cols-1' : 'md:grid-cols-2'} gap-4`}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Advisor</label>
                 <select name="advisor_id" value={formData.advisor_id} onChange={handleInputChange} className="border px-3 py-2 rounded w-full">
@@ -292,9 +294,11 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
                   {employees.map((employee) => <option key={employee.id} value={employee.id}>{employee.name}</option>)}
                 </select>
               </div>
-              <label className="flex items-center gap-2 pt-8">
-                <input type="checkbox" name="featured" checked={formData.featured} onChange={handleInputChange} /> Featured
-              </label>
+              {!isCustomerVehicle && (
+                <label className="flex items-center gap-2 pt-8">
+                  <input type="checkbox" name="featured" checked={formData.featured} onChange={handleInputChange} /> Featured
+                </label>
+              )}
             </div>
           </section>
         )}
