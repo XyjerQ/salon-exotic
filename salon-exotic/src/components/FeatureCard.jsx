@@ -11,7 +11,14 @@ export default function FeatureCard({ title, desc, image, year, horsepower, mile
     >
       <div className="w-full aspect-[16/10] bg-blackline-surface overflow-hidden flex items-center justify-center">
         {image ? (
-          <img src={`${import.meta.env.BASE_URL}${image.replace(/^\//,'')}`} alt={title} className="w-full h-full object-cover" loading="lazy" decoding="async" onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=`${import.meta.env.BASE_URL}img/ui/fallback.svg`}} />
+          <img 
+            src={`${import.meta.env.BASE_URL}${image.replace(/^\//,'')}`} 
+            alt={title} 
+            className="w-full h-full object-cover object-[center_80%]" 
+            loading="lazy" 
+            decoding="async" 
+            onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=`${import.meta.env.BASE_URL}img/ui/fallback.svg`}} 
+          />
         ) : (
           <span className="text-gray-300 text-sm">No image</span>
         )}

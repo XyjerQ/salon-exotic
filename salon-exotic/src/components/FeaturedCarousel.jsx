@@ -31,7 +31,8 @@ export default function FeaturedCarousel() {
         if (res.ok) {
           const data = await res.json()
           if (!cancelled) {
-            setCars(Array.isArray(data) ? data.slice(0, 6) : [])
+            const fetchedCars = Array.isArray(data) ? data.slice(0, 6) : []
+            setCars(fetchedCars)
           }
         } else {
           if (!cancelled) setError('Nie udało się pobrać wyróżnionych samochodów.')
@@ -50,6 +51,34 @@ export default function FeaturedCarousel() {
     }
   }, [])
 
+  // Potrójna tablica dla uzyskania płynnego efektu "nieskończoności"
+  const extendedCars = [...cars, ...cars, ...cars]
+
+  // Ustawienie scrolla na środkowy zestaw po załadowaniu danych
+  useEffect(() => {
+    if (cars.length > 0 && scrollerRef.current) {
+      const el = scrollerRef.current
+      el.scrollLeft = el.scrollWidth / 3
+    }
+  }, [cars])
+
+  // Obsługa zapętlania przy przewijaniu manualnym (myszką / touchpadem)
+  const handleScroll = () => {
+    const el = scrollerRef.current
+    if (!el) return
+
+    const thirdWidth = el.scrollWidth / 3
+
+    // Jeśli użytkownik zescrollował za daleko w lewo (w pierwszą replikę)
+    if (el.scrollLeft <= 10) {
+      el.scrollLeft += thirdWidth
+    } 
+    // Jeśli użytkownik zescrollował za daleko w prawo (w trzecią replikę)
+    else if (el.scrollLeft >= el.scrollWidth - el.clientWidth - 10) {
+      el.scrollLeft -= thirdWidth
+    }
+  }
+
   const scrollByPage = (dir = 1) => {
     const el = scrollerRef.current
     if (!el) return
@@ -66,17 +95,21 @@ export default function FeaturedCarousel() {
   }
 
   if (cars.length === 0) {
-    return null // Jeśli brak wyróżnionych aut, nie wyświetlamy komponentu
+    return null
   }
 
   return (
     <div ref={carouselRef} className="relative py-6 md:py-8">
       {/* Scrollable track with snap points */}
-      <div ref={scrollerRef} className="overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory">
+      <div 
+        ref={scrollerRef} 
+        onScroll={handleScroll}
+        className="overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory"
+      >
         <div className="flex gap-3 px-1">
-          {cars.map((car) => (
+          {extendedCars.map((car, index) => (
             <div
-              key={car.id}
+              key={`${car.id}-${index}`}
               className="flex-shrink-0 w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)] snap-start"
             >
               <FeatureCard
