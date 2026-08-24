@@ -4,7 +4,7 @@ export const useScrollAnimation = (options = {}) => {
   const ref = useRef(null)
   const {
     threshold = 0.1,
-    rootMargin = '0px 0px -100px 0px',
+    rootMargin = '0px 0px -20px 0px',
     delay = 0,
     staggerChildren = false,
   } = options
