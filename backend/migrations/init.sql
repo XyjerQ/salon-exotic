@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS cars (
   status TEXT DEFAULT 'available' CHECK(status IN ('available', 'reserved', 'sold')),
   owner_name TEXT,
   owner_contact TEXT,
+  owner_email TEXT,
 
   engine TEXT,
   mileage_km INTEGER,
@@ -118,6 +119,13 @@ CREATE TABLE IF NOT EXISTS newsletter_subscribers (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS site_settings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  key TEXT UNIQUE NOT NULL,
+  value TEXT,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indeksy dla optymalizacji zapytań
 CREATE INDEX IF NOT EXISTS idx_car_images_car_id ON car_images(car_id);
 CREATE INDEX IF NOT EXISTS idx_car_features_car_id ON car_features(car_id);
@@ -126,3 +134,4 @@ CREATE INDEX IF NOT EXISTS idx_transactions_car_id ON transactions(car_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_employee_id ON transactions(employee_id);
 CREATE INDEX IF NOT EXISTS idx_cars_vin ON cars(vin);
 CREATE INDEX IF NOT EXISTS idx_cars_status ON cars(status);
+CREATE INDEX IF NOT EXISTS idx_site_settings_key ON site_settings(key);
