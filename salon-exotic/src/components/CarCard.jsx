@@ -13,6 +13,19 @@ const resolveImageUrl = (imagePath) => {
   return withBase(path)
 }
 
+const formatPrice = (price) => {
+  if (price === undefined || price === null || price === '') return 'On request'
+  const numeric = Number(price)
+  if (!Number.isFinite(numeric)) return String(price)
+  
+  const formatted = new Intl.NumberFormat('pl-PL', {
+    useGrouping: true,
+    maximumFractionDigits: 0
+  }).format(numeric)
+
+  return `${formatted} €`
+}
+
 export default function CarCard({ car, onViewDetails }) {
   // Jeśli pojazd to customer vehicle, w ogóle go nie wyświetlaj w inventory
   if (car.vehicle_type === 'customer') {
@@ -51,7 +64,7 @@ export default function CarCard({ car, onViewDetails }) {
           {car.make} {car.model}
         </h3>
         <p className="text-blackline-accent font-bold text-2xl mt-3">
-          {car.price != null ? `€${car.price.toLocaleString('pl-PL')}` : 'On request'}
+          {formatPrice(car.price)}
         </p>
         
         <ul className="text-sm text-gray-700 mt-4 space-y-2 border-t border-gray-200 pt-4">

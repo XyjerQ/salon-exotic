@@ -82,8 +82,16 @@ export default function FeaturedCarousel() {
   const scrollByPage = (dir = 1) => {
     const el = scrollerRef.current
     if (!el) return
-    const amount = el.clientWidth * 0.9
-    el.scrollBy({ left: dir * amount, behavior: 'smooth' })
+
+    // Pobieramy pierwszą kartę, żeby sprawdzić jej faktyczną szerokość w pikselach
+    const firstCard = el.querySelector(':scope > div > div')
+    if (!firstCard) return
+
+    const cardWidth = firstCard.offsetWidth
+    const gap = 12 // Odpowiada klasie gap-3 (12px)
+    const scrollAmount = cardWidth + gap
+
+    el.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
   }
 
   if (loading) {

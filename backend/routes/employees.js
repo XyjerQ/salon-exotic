@@ -35,6 +35,19 @@ const upload = multer({
   }
 });
 
+// NOWY PUBLICZNY ENDPOINT: Dostępny dla niezalogowanych klientów (potrzebny w CarDetails)
+router.get('/public', async (req, res) => {
+  const db = req.app.get('db');
+  try {
+    const rows = await db.all(
+      'SELECT id, name, email, phone, role, description, specialization, photo_path FROM employees'
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 router.get('/', auth, async (req, res) => {
   const allowedRoles = ['admin', 'manager', 'service', 'sales'];
   if (!allowedRoles.includes(req.user?.role)) {
@@ -227,6 +240,7 @@ router.post('/:id/upload-photo', auth, upload.single('photo'), async (req, res) 
   const photo_path = `/uploads/${req.file.filename}`;
 
   try {
+    name = undefined; // safety
     await db.run(
       'UPDATE employees SET photo_path = ? WHERE id = ?',
       [photo_path, id]

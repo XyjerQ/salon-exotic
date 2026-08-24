@@ -175,8 +175,7 @@
       "Carbon Fiber Interior Accents",
       "Full Leather Headliner"
     ],
-    "assignedEmployee": "emp02",
-    "featured": true
+    "assignedEmployee": "emp02"
   },
   {
     "id": "m01",
@@ -212,8 +211,7 @@
       "Electrochromic Roof Panel",
       "Sports Exhaust System"
     ],
-    "assignedEmployee": "emp03",
-    "featured": true
+    "assignedEmployee": "emp03"
   },
   {
     "id": "r01",
@@ -252,148 +250,89 @@
     "assignedEmployee": "emp01"
   },
   {
-    "id": "e31",
-    "vin": "WBEEG2109RCB84019",
-    "make": "BMW",
-    "model": "850CSi (E31)",
-    "year": 1994,
-    "price": "€110,000",
-    "mileage": "68,000 km",
-    "transmission": "6-Speed Manual",
-    "horsepower": 380,
-    "engine": "5.6L V12 S70",
-    "drivetrain": "Rear-Wheel Drive",
-    "fuelType": "Petrol",
-    "color": "Calypso Red Metallic",
-    "interiorColor": "Black Nappa Leather",
-    "images": [
-      "img/cars/e31.webp"
-    ],
-    "description": "Collector-grade BMW 850CSi with the legendary S70 V12 and a rare 6-speed manual, presented in Calypso Red over black leather. This flagship E31 benefits from the factory AHK rear-steer system, tight original panel fit, and a recently refreshed cooling system. Interior plastics, headliner, and leather remain in excellent condition, making it a turn-key modern classic ready for tours or concours gatherings. Documented service history, clean underbody, and correct VIN-tagged panels add confidence for discerning collectors.",
-    "features": [
-      "Active Rear-Steer (AHK)",
-      "M Sport Suspension",
-      "Factory Aero Package",
-      "Heated Front Seats",
-      "Sunroof",
-      "Original Tool Kit"
-    ],
-    "assignedEmployee": "emp02"
-  },
-  {
-    "id": "e55w211",
-    "vin": "WDBUF76X36A891234",
-    "make": "Mercedes-Benz",
-    "model": "E55 AMG",
-    "year": 2006,
-    "price": "€55,000",
-    "mileage": "82,000 km",
-    "transmission": "5-Speed AMG Speedshift Automatic",
-    "horsepower": 469,
-    "engine": "5.4L Supercharged V8 (M113K)",
-    "drivetrain": "Rear-Wheel Drive",
-    "fuelType": "Petrol",
-    "color": "Obsidian Black",
-    "interiorColor": "Black Leather",
-    "images": [
-      "img/cars/e55w211.webp"
-    ],
-    "description": "Supercharged W211 E55 AMG delivering immense torque and everyday usability, finished in Obsidian Black with full leather. The hand-built M113K V8 provides tidal-wave acceleration while Airmatic and big AMG brakes keep it composed. This example features clean paint, fresh service on common wear items, and a comfortable, well-kept cabin with all the right creature comforts. Recent maintenance covers intercooler pump, transmission service, and suspension bushings, so it is ready for effortless continent-crossing.",
-    "features": [
-      "Airmatic Suspension",
-      "AMG Performance Brakes",
-      "COMAND Navigation",
-      "Heated and Ventilated Seats",
-      "Harman Kardon Audio",
-      "Quad Exhaust"
-    ],
-    "assignedEmployee": "emp02"
-  },
-  {
-    "id": "r34",
-    "vin": "BNR34-002491X",
-    "make": "Nissan",
-    "model": "Skyline GT-R (R34)",
-    "year": 1999,
-    "price": "€210,000",
-    "mileage": "72,000 km",
-    "transmission": "6-Speed Getrag Manual",
-    "horsepower": 450,
-    "engine": "2.6L Twin-Turbo I6 RB26DETT",
-    "drivetrain": "All-Wheel Drive (ATTESA E-TS)",
-    "fuelType": "Petrol",
-    "color": "Bayside Blue",
-    "interiorColor": "Black Cloth",
-    "images": [
-      "img/cars/r34.webp"
-    ],
-    "description": "Iconic R34 GT-R in Bayside Blue with tasteful upgrades and the renowned RB26DETT paired to the robust Getrag 6-speed. Retains factory ATTESA all-wheel drive and Super HICAS rear-steer for sharp responses, with mild NISMO aero touches and Brembo stoppers. A well-balanced example that blends collectible originality with drivability for spirited road or track sessions. Dry, corrosion-free chassis and recent timing-belt and turbo refresh make it a worry-free halo JDM hero.",
-    "features": [
-      "ATTESA E-TS All-Wheel Drive",
-      "Super HICAS Rear-Steer",
-      "Brembo Brakes",
-      "NISMO Aero Accents",
-      "Recaro Front Seats",
-      "Multifunction Display (MFD)"
-    ],
-    "assignedEmployee": "emp01"
-  },
-  {
-    "id": "nsx90",
-    "vin": "JHNAA1153ST004812",
-    "make": "Honda",
-    "model": "NSX",
-    "year": 1995,
-    "price": "€160,000",
-    "mileage": "54,000 km",
+    "id": "peug40601",
+    "vin": "VF38CXFXF81294821",
+    "make": "Peugeot",
+    "model": "406 Coupe",
+    "year": 2002,
+    "price": "€9,900",
+    "mileage": "215,000 km",
     "transmission": "5-Speed Manual",
-    "horsepower": 276,
-    "engine": "3.0L V6 VTEC (C30A)",
-    "drivetrain": "Rear-Wheel Drive",
+    "horsepower": 210,
+    "engine": "3.0L V6 ES9J4S",
+    "drivetrain": "Front-Wheel Drive",
     "fuelType": "Petrol",
-    "color": "Formula Red",
-    "interiorColor": "Black Leather",
+    "color": "Custom Individual Metallic Red",
+    "interiorColor": "Full Black Leather Custom Upholstery",
     "images": [
-      "img/cars/nsx.webp"
+      "img/cars/406c (1).webp",
+      "img/cars/406c (2).webp",
+      "img/cars/406c (3).webp",
+      "img/cars/406c (4).webp"
     ],
-    "description": "Lightweight aluminum-chassis NSX in classic Formula Red, pairing the rev-happy C30A VTEC V6 with a crisp 5-speed manual from the golden 90s era. Pop-up headlights, targa roof, and thin A-pillars deliver the analog supercar feel, while the Bose audio and intact interior trim underline careful ownership. Serviced on schedule, ready for weekend canyon runs or shows. Timing belt, water pump, and fluids were addressed recently, and the pop-up headlight mechanisms work flawlessly.",
+    "description": "This stunning 2002 Peugeot 406 Coupe is a masterpiece of Pininfarina design, elevated to an exceptional level through meticulous custom modifications. Coated in a striking, individual custom red paint that brilliantly accentuates its iconic silhouette, it sits 4 cm lower on sport lowering springs for an aggressive, planted stance. Beneath the bonnet lies the potent 3.0-liter V6 engine mated to a 5-speed manual transmission, enhanced with performance exhaust manifolds borrowed from an Alfa Romeo Busso V6. It breathes through a custom 3-inch exhaust system featuring an X-pipe and massive 110mm straight-through tips, producing an unforgettable, thunderous V6 soundtrack. The car sits perfectly on 18-inch Japan Racing 9J alloy wheels. The cabin is an absolute work of art, featuring full custom black leather upholstery that extends across the seats, the dashboard, and the steering wheel, combining luxury with pure driving passion.",
     "features": [
-      "Aluminum Monocoque",
-      "Pop-Up Headlights",
-      "Targa Roof",
-      "Bose Audio",
-      "Traction Control",
-      "Electric Seats"
+      "Custom Individual Red Paint",
+      "3.0L V6 Engine with 5-Speed Manual Gearbox",
+      "Alfa Romeo Busso V6 Exhaust Manifolds",
+      "3-Inch Exhaust System with X-Pipe",
+      "110mm Straight-Through Tailpipes",
+      "Sport Lowering Springs (-4 cm)",
+      "18-Inch Japan Racing 9J Alloy Wheels",
+      "Full Custom Black Leather Interior (Seats, Dashboard, and Steering Wheel)",
+      "Pininfarina Aerodynamic Styling",
+      "Automatic Climate Control",
+      "Upgraded Sound System with Modern Connectivity",
+      "Electric Windows and Mirrors",
+      "Fog Lights with Angel Eye Styling",
+      "Dark Tinted Rear Tail Lights"
     ],
-    "assignedEmployee": "emp01"
+    "assignedEmployee": "emp03",
+    "featured": true
   },
   {
-    "id": "e34",
-    "vin": "WBSHD9103MGG20194",
+    "id": "bmw02",
+    "vin": "WBADL00000GV12739",
     "make": "BMW",
-    "model": "M5 (E34)",
-    "year": 1991,
-    "price": "€95,000",
-    "mileage": "98,000 km",
-    "transmission": "5-Speed Manual",
-    "horsepower": 340,
-    "engine": "3.6L Inline-6 S38",
+    "model": "530d",
+    "year": 2001,
+    "price": "€13,500",
+    "mileage": "348,500 km",
+    "transmission": "5-Speed ZF Manual",
+    "horsepower": 350,
+    "engine": "2.9L R6 M57 Diesel",
     "drivetrain": "Rear-Wheel Drive",
-    "fuelType": "Petrol",
-    "color": "Avus Blue",
-    "interiorColor": "Silverstone Leather",
+    "fuelType": "Diesel",
+    "color": "Black Sapphire Metallic",
+    "interiorColor": "Black Highline Leather (V6SW)",
     "images": [
-      "img/cars/e34.webp"
+      "img/cars/Bmw530D (1).webp",
+      "img/cars/Bmw530D (2).webp",
+      "img/cars/Bmw530D (3).webp",
+      "img/cars/Bmw530D (4).webp"
     ],
-    "description": "Hand-built E34 M5 with the high-revving S38 inline-6, finished in Avus Blue with period-correct Silverstone interior. The car retains factory Shadowline trim, self-leveling rear suspension, and a recent tune-up on ignition and cooling components. Tight panel gaps and original toolkit accompany a supple leather cabin, making this a desirable analog M sedan for collectors and drivers alike. Fresh bushings and brake service sharpen the chassis, while the paint presents deep gloss with well-preserved trim.",
+    "description": "This exceptional 2001 BMW 530d E39 Edition Exclusive is a heavily modified, high-performance turbodiesel cruiser built to deliver serious power wrapped in an understated executive aesthetic. At its heart lies a legendary M57 inline-six upgraded with 219 injectors, a CP3 R90 high-pressure fuel pump, and a hybrid GT2260V turbocharger, pushing a massive 350 horsepower and 700 Nm to the rear wheels through a heavy-duty Sachs Kevlar clutch and a 5-speed ZF manual gearbox. The exhaust breathes freely through a full straight-through system paired with a sport rear muffler, producing a deep, aggressive diesel note. It sits low and aggressive on height-adjustable coilover suspension and iconic 19-inch Style 37 wheels wrapped in stretched tires, complemented by dark tinted privacy windows. Inside, the Exclusive Highline Black leather interior features a wealth of luxury and tech options, including electric memory seats with heating, dynamic stability control with gyro, full Park Distance Control (PDC), an electronic rear window sunblind, integrated TV navigation, onboard telephone with voice input, and a Webasto auxiliary parking heater (Standheizung) for cold mornings.",
     "features": [
-      "Self-Leveling Rear Suspension",
-      "Heated Front Seats",
-      "Limited Slip Differential",
-      "M Aerodynamics Package",
-      "Shadowline Trim",
-      "Original Radio and Toolkit"
+      "Edition Exclusive",
+      "Hybrid GT2260V Turbocharger",
+      "219 High-Flow Fuel Injectors",
+      "CP3 R90 High-Pressure Fuel Pump",
+      "Sachs Kevlar Performance Clutch",
+      "Full Straight-Through Exhaust with Custom Rear Muffler",
+      "19-Inch Style 37 Wheels with Stretched Tires",
+      "Adjustable Coilover Suspension",
+      "Dynamic Stability Control (DSC) with Gyro",
+      "Park Distance Control (PDC, Front & Rear)",
+      "Electric Rear Window Sunblind",
+      "Privacy Dark Tinted Windows",
+      "Rearview Backup Camera",
+      "Electric Memory Seats with Heating",
+      "Onboard Monitor with TV & Professional Navigation",
+      "BMW Cellular Phone Prep with Voice Input",
+      "Webasto Auxiliary Parking Heater (Standheizung)",
+      "Servotronic"
     ],
-    "assignedEmployee": "emp02"
-  }
+    "assignedEmployee": "emp01",
+    "featured": true
+}
 ]

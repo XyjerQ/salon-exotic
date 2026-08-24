@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import employees from '../data/employees.json'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
@@ -21,12 +20,24 @@ const formatMoney = (value) => {
   if (value === undefined || value === null || value === '') return 'On Request'
   const numeric = Number(value)
   if (!Number.isFinite(numeric)) return 'On Request'
-  return `€${new Intl.NumberFormat('pl-PL').format(numeric)}`
+  
+  const formatted = new Intl.NumberFormat('pl-PL', {
+    useGrouping: true,
+    maximumFractionDigits: 0
+  }).format(numeric)
+
+  return `${formatted} €`
 }
 
 const formatMileage = (value) => {
   if (value === undefined || value === null || value === '') return '—'
-  if (typeof value === 'number') return `${new Intl.NumberFormat('pl-PL').format(value)} km`
+  if (typeof value === 'number') {
+    const formatted = new Intl.NumberFormat('pl-PL', {
+      useGrouping: true,
+      maximumFractionDigits: 0
+    }).format(value)
+    return `${formatted} km`
+  }
   return String(value)
 }
 
@@ -34,6 +45,7 @@ export default function CarDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [car, setCar] = useState(null)
+  const [employees, setEmployees] = useState([])
   const [selectedImage, setSelectedImage] = useState(0)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -44,21 +56,29 @@ export default function CarDetails() {
   useEffect(() => {
     let cancelled = false
 
-    const loadCar = async () => {
+    const loadData = async () => {
       setLoading(true)
 
       try {
-        const res = await fetch(`${API_BASE}/cars/${encodeURIComponent(id)}`)
-        if (res.ok) {
-          const data = await res.json()
+        // Pobieramy auto oraz listę pracowników równolegle z API
+        const [carRes, empRes] = await Promise.all([
+          fetch(`${API_BASE}/cars/${encodeURIComponent(id)}`),
+          fetch(`${API_BASE}/employees/public`) // Używamy ścieżki /public
+        ])
+
+        if (carRes.ok) {
+          const carData = await carRes.json()
           if (!cancelled) {
-            setCar(data)
+            setCar(carData)
             setSelectedImage(0)
           }
         } else {
-          if (!cancelled) {
-            setCar(null)
-          }
+          if (!cancelled) setCar(null)
+        }
+
+        if (empRes.ok) {
+          const empData = await empRes.json()
+          if (!cancelled) setEmployees(empData)
         }
       } catch (err) {
         if (!cancelled) {
@@ -71,7 +91,7 @@ export default function CarDetails() {
       }
     }
 
-    loadCar()
+    loadData()
 
     return () => {
       cancelled = true
@@ -80,8 +100,8 @@ export default function CarDetails() {
 
   const isCustomerVehicle = car && (car.vehicle_type || '').toLowerCase() === 'customer'
 
-  const consultantSource = car
-    ? employees.find((employee) => String(employee.id) === String(car.advisor_id)) || null
+  const consultantSource = car && car.advisor_id
+    ? employees.find((employee) => String(employee.id).trim() === String(car.advisor_id).trim()) || null
     : null
 
   const imageList = (car?.images || [])
@@ -323,40 +343,46 @@ export default function CarDetails() {
                   </div>
                 )}
 
-                {consultantSource && (
+                {!isCustomerVehicle && consultantSource && (
                   <div className="border-t border-gray-200 pt-6">
                     <h3 className="text-xl font-semibold mb-4">Your Sales Consultant</h3>
-                    <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg">
-                      <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-3xl font-bold text-white overflow-hidden">
+                    <div className="flex items-center gap-4 bg-gray-50 border border-gray-100 p-4 rounded-xl">
+                      <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-bold text-gray-600 overflow-hidden flex-shrink-0">
                         {consultantSource.photo_path ? (
                           <img src={resolveImageUrl(consultantSource.photo_path)} alt={consultantSource.name} className="w-full h-full object-cover" />
                         ) : (
                           <span>{(consultantSource.name || 'E').charAt(0)}</span>
                         )}
                       </div>
-                      <div className="flex-1">
-                        <p className="text-xl font-bold text-black">{consultantSource.name}</p>
-                        <p className="text-sm text-gray-600 mb-2">{consultantSource.role || consultantSource.position || 'Sales'}</p>
-                        <p className="text-sm text-gray-700"><strong>Specialization:</strong> {consultantSource.specialization || '—'}</p>
-                        <div className="mt-2 space-y-1">
-                          <p className="text-sm text-gray-700">
-                            <a href={`tel:${consultantSource.phone}`} className="text-blackline-accent hover:underline font-semibold">{consultantSource.phone}</a>
-                          </p>
-                          <p className="text-sm text-gray-700">
-                            <a href={`mailto:${consultantSource.email}`} className="text-blackline-accent hover:underline">{consultantSource.email}</a>
-                          </p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-lg font-bold text-gray-900 truncate">{consultantSource.name}</p>
+                        <p className="text-sm text-gray-700 truncate">
+                          <span className="font-semibold text-gray-900">Specialization:</span> {consultantSource.specialization || '—'}
+                        </p>
+                        <div className="mt-1 space-y-0.5">
+                          {consultantSource.phone && (
+                            <p className="text-sm text-gray-400">
+                              <a href={`tel:${consultantSource.phone}`} className="hover:underline">{consultantSource.phone}</a>
+                            </p>
+                          )}
+                          {consultantSource.email && (
+                            <p className="text-sm text-gray-400 truncate">
+                              <a href={`mailto:${consultantSource.email}`} className="hover:underline">{consultantSource.email}</a>
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
+
                 {!isCustomerVehicle && (
-                <button
-                  onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="w-full bg-blackline-accent hover:opacity-90 text-black font-bold py-4 rounded-lg mt-4 transition-opacity"
-                >
-                  Inquire about this vehicle
-                </button>
+                  <button
+                    onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="w-full bg-gray-300 hover:bg-blackline-accent text-black font-bold py-4 rounded-lg mt-4 transition-colors"
+                  >
+                    Inquire about this vehicle
+                  </button>
                 )}
               </div>
             </div>
@@ -369,6 +395,37 @@ export default function CarDetails() {
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
           onClick={() => setIsLightboxOpen(false)}
         >
+          {/* Przycisk zamknięcia (krzyżyk) w prawym górnym rogu */}
+          <button
+            onClick={() => setIsLightboxOpen(false)}
+            className="absolute top-6 right-6 text-white bg-black/50 hover:bg-black/80 p-3 rounded-full transition-colors z-20"
+            aria-label="Close lightbox"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Opcjonalny licznik w lewym górnym rogu (lub na środku u góry) */}
+          <div className="absolute top-6 left-6 text-white/80 text-sm font-medium z-10">
+            {selectedImage + 1} / {imageList.length}
+          </div>
+
+          {/* Przycisk w lewo */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setSelectedImage((prev) => (prev > 0 ? prev - 1 : imageList.length - 1))
+            }}
+            className="absolute left-6 text-white bg-black/50 hover:bg-black/80 p-3 rounded-full transition-colors z-10"
+            aria-label="Previous image"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          {/* Wyświetlane zdjęcie */}
           <img
             src={resolveImageUrl(imageList[selectedImage])}
             alt={`${car.make} ${car.model}`}
@@ -376,6 +433,20 @@ export default function CarDetails() {
             onClick={(e) => e.stopPropagation()}
             onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = withBase('img/ui/fallback.svg') }}
           />
+
+          {/* Przycisk w prawo */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setSelectedImage((prev) => (prev < imageList.length - 1 ? prev + 1 : 0))
+            }}
+            className="absolute right-6 text-white bg-black/50 hover:bg-black/80 p-3 rounded-full transition-colors z-10"
+            aria-label="Next image"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
       )}
     </main>

@@ -33,7 +33,13 @@ export default function CarList({ cars = [], employees = [], userRole, onEdit, o
     if (price === undefined || price === null || price === '') return '—'
     const numeric = Number(price)
     if (!Number.isFinite(numeric)) return String(price)
-    return new Intl.NumberFormat('pl-PL').format(numeric)
+    
+    const formatted = new Intl.NumberFormat('pl-PL', {
+      useGrouping: true,
+      maximumFractionDigits: 0
+    }).format(numeric)
+
+    return `${formatted} €`
   }
 
   return (
@@ -106,16 +112,19 @@ export default function CarList({ cars = [], employees = [], userRole, onEdit, o
                           {Boolean(car.featured) && <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800">Featured</span>}
                           <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">{car.vehicle_type || 'inventory'}</span>
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900">{car.make} {car.model}</h3>
-                        <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600 line-clamp-2">{car.description || 'No description provided.'}</p>
                       </div>
 
                       {!isCustomerVehicle && (
-                        <div className="rounded-xl bg-black px-4 py-3 text-right text-white">
-                          <div className="text-[11px] uppercase tracking-[0.2em] text-gray-300">Price</div>
-                          <div className="text-xl font-bold">{formatPrice(car.price)}</div>
+                        <div className="rounded-xl bg-black px-4 py-2 text-right text-white shadow-sm">
+                          <div className="text-[10px] uppercase tracking-[0.2em] text-gray-400">Price</div>
+                          <div className="text-lg font-bold">{formatPrice(car.price)}</div>
                         </div>
                       )}
+                    </div>
+
+                    <div className="mt-1">
+                      <h3 className="text-2xl font-bold text-gray-900">{car.make} {car.model}</h3>
+                      <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600 line-clamp-2">{car.description || 'No description provided.'}</p>
                     </div>
 
                     <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -125,7 +134,7 @@ export default function CarList({ cars = [], employees = [], userRole, onEdit, o
                       </div>
                       <div className="rounded-xl bg-gray-50 px-4 py-3">
                         <div className="text-xs uppercase tracking-wide text-gray-500">Mileage</div>
-                        <div className="mt-1 text-sm font-semibold text-gray-900">{car.mileage_km ? `${new Intl.NumberFormat('pl-PL').format(car.mileage_km)} km` : '—'}</div>
+                        <div className="mt-1 text-sm font-semibold text-gray-900">{car.mileage_km ? `${new Intl.NumberFormat('pl-PL', { useGrouping: true }).format(car.mileage_km)} km` : '—'}</div>
                       </div>
                       <div className="rounded-xl bg-gray-50 px-4 py-3">
                         <div className="text-xs uppercase tracking-wide text-gray-500">VIN</div>

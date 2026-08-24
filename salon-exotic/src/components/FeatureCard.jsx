@@ -12,6 +12,16 @@ const resolveImageUrl = (imagePath) => {
   return withBase(path)
 }
 
+// Pomocnicza funkcja formatująca przebieg po polsku
+const formatMileagePL = (value) => {
+  if (value === undefined || value === null || value === '') return null
+  // Jeśli wartość ma już w sobie "km", zwracamy ją lub parsujemy samą liczbę
+  const cleanVal = typeof value === 'string' ? value.replace(/[^\d]/g, '') : value
+  const numeric = Number(cleanVal)
+  if (!Number.isFinite(numeric)) return String(value)
+  return `${new Intl.NumberFormat('pl-PL').format(numeric)} km`
+}
+
 export default function FeatureCard({ 
   car, 
   make, 
@@ -24,17 +34,18 @@ export default function FeatureCard({
   mileage, 
   onViewDetails 
 }) {
-  // Wyciąganie danych niezależnie od tego czy przychodzą w obiekcie car, czy osobno
   const vehicleMake = car?.make || car?.brand || make
   const vehicleModel = car?.model || car?.car_model || model
 
-  // Tworzenie tytułu: najpierw make+model, jak brak to stary title, jak brak to 'Vehicle'
   const displayTitle = [vehicleMake, vehicleModel].filter(Boolean).join(' ') || title || 'Vehicle'
 
   const vehicleImage = car?.image_path || car?.image || image
   const vehicleYear = car?.year || year
   const vehicleHp = car?.horsepower_hp || car?.horsepower || horsepower
-  const vehicleMileage = car?.mileage_km || car?.mileage || mileage
+  
+  // Pobieramy przebieg z obiektu car lub propsa i formatujemy po polsku
+  const rawMileage = car?.mileage_km || car?.mileage || mileage
+  const vehicleMileage = formatMileagePL(rawMileage)
 
   return (
     <article
@@ -48,7 +59,7 @@ export default function FeatureCard({
           <img 
             src={resolveImageUrl(vehicleImage)} 
             alt={displayTitle} 
-            className="w-full h-full object-cover object-[center_80%]" 
+            className="w-full h-full object-cover object-[center_60%]" 
             loading="lazy" 
             decoding="async" 
             onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=withBase('img/ui/fallback.svg')}} 
@@ -69,6 +80,7 @@ export default function FeatureCard({
 
         <div className="mt-3">
           <button
+            type="button"
             className="w-full bg-blackline-accent text-black py-2 rounded-md font-medium hover:opacity-90 transition-opacity"
             onClick={(e) => { e.stopPropagation(); onViewDetails && onViewDetails() }}
           >
