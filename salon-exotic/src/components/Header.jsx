@@ -1,9 +1,24 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 
 export default function Header(){
   const [open, setOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  // Sprawdzamy stan logowania przy montowaniu komponentu oraz otwarciu menu
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('token') || localStorage.getItem('employeeToken')
+      const user = localStorage.getItem('employeeUser')
+      setIsLoggedIn(Boolean(token || user))
+    }
+    
+    checkAuth()
+    // Opcjonalnie: nasłuchiwanie zmian w localStorage, gdyby logowanie odbywało się w innej zakładce
+    window.addEventListener('storage', checkAuth)
+    return () => window.removeEventListener('storage', checkAuth)
+  }, [])
 
   return (
     <header className="absolute inset-x-0 top-0 z-10 text-white bg-gradient-to-b from-black to-transparent ">
@@ -44,11 +59,9 @@ export default function Header(){
         <div className="flex justify-end">
           <div className="w-10 md:w-16" />
         </div>
-
-        {/* thin silver separator placed under the header */}
       </div>
 
-      {/* menu/backdrop rendered in a portal so it can't be covered by transformed stacking contexts */}
+      {/* menu/backdrop rendered in a portal */}
       {createPortal(
         <>
           <div
@@ -61,10 +74,16 @@ export default function Header(){
               <Link to="/faq" className="block text-2xl md:text-3xl text-black font-semibold" onClick={() => setOpen(false)}>FAQ</Link>
               <Link to="/contact" className="block text-2xl md:text-3xl text-black font-semibold" onClick={() => setOpen(false)}>Contact</Link>
               <hr className="my-4" />
-              <Link to="/employee/login" className="block text-2xl md:text-3xl text-blackline-accent font-semibold" onClick={() => setOpen(false)}>Login</Link>
+              
+              {/* Dynamiczny przycisk: Dashboard jeśli zalogowany, Login jeśli niezalogowany */}
+              {isLoggedIn ? (
+                <Link to="/admin/dashboard" className="block text-2xl md:text-3xl text-blackline-accent font-semibold" onClick={() => setOpen(false)}>Dashboard</Link>
+              ) : (
+                <Link to="/employee/login" className="block text-2xl md:text-3xl text-blackline-accent font-semibold" onClick={() => setOpen(false)}>Login</Link>
+              )}
             </nav>
 
-            {/* close button positioned just outside the menu (moves with the menu) */}
+            {/* close button */}
             <button
               onClick={() => setOpen(false)}
               aria-label="Close menu"
@@ -76,7 +95,7 @@ export default function Header(){
             </button>
           </div>
 
-          {/* backdrop when menu is open */}
+          {/* backdrop */}
           <div
             className={`fixed inset-0 z-40 bg-black/40 transition-opacity ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
             onClick={() => setOpen(false)}

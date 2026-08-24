@@ -2,16 +2,31 @@ import React, { useEffect, useState } from 'react'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
-export default function EmployeeForm({ empId, token, onSave, onCancel, loading }) {
+export default function EmployeeForm({ empId, token, currentUserRole, onSave, onCancel, loading }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
+    role: 'sales', 
     description: '',
     specialization: '',
     password: ''
   })
   const [formError, setFormError] = useState('')
+
+  // Bezpieczne pobranie roli: sprawdza prop, a w razie braku sięga do 'employeeUser' w localStorage
+  const getUserRole = () => {
+    if (currentUserRole) return currentUserRole
+    try {
+      const storedUser = JSON.parse(localStorage.getItem('employeeUser') || '{}')
+      return storedUser.role || ''
+    } catch {
+      return ''
+    }
+  }
+
+  const activeRole = getUserRole()
+  const canManageRoles = activeRole === 'admin' || activeRole === 'manager'
 
   useEffect(() => {
     if (empId) {
@@ -27,9 +42,10 @@ export default function EmployeeForm({ empId, token, onSave, onCancel, loading }
       if (response.ok) {
         const data = await response.json()
         setFormData({
-          name: data.name,
-          email: data.email,
+          name: data.name || '',
+          email: data.email || '',
           phone: data.phone || '',
+          role: data.role || 'sales',
           description: data.description || '',
           specialization: data.specialization || '',
           password: ''
@@ -55,7 +71,8 @@ export default function EmployeeForm({ empId, token, onSave, onCancel, loading }
         email: formData.email,
         phone: formData.phone,
         description: formData.description,
-        specialization: formData.specialization
+        specialization: formData.specialization,
+        role: formData.role // Zawsze wysyłamy rolę (jeśli select jest zablokowany, wyśle aktualną wartość z formularza)
       }
 
       if (formData.password) payload.password = formData.password
@@ -135,6 +152,26 @@ export default function EmployeeForm({ empId, token, onSave, onCancel, loading }
             />
           </div>
         </div>
+
+        {/* Wybór roli widoczny tylko dla admina lub managera */}
+        {canManageRoles && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blackline-accent bg-white"
+            >
+              <option value="sales">Sales</option>
+              <option value="service">Service</option>
+              <option value="manager">Manager</option>
+              {activeRole === 'admin' && (
+                <option value="admin">Admin</option>
+              )}
+            </select>
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Specialization</label>

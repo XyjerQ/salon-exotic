@@ -57,9 +57,13 @@ export default function EmployeesList({ employees, onEdit, onAdd, loading }) {
                         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
                           emp.role === 'admin'
                             ? 'bg-red-100 text-red-800'
+                            : emp.role === 'manager'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : emp.role === 'service'
+                            ? 'bg-green-100 text-green-800'
                             : 'bg-blue-100 text-blue-800'
                         }`}>
-                          {emp.role || 'employee'}
+                          {emp.role}
                         </span>
                         <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
                           ID: {emp.id}

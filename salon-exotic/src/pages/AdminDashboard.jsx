@@ -24,14 +24,14 @@ export default function AdminDashboard() {
 
   const token = localStorage.getItem('employeeToken')
   const user = JSON.parse(localStorage.getItem('employeeUser') || '{}')
-  const isAdmin = user.role === 'admin'
+  const isAdminOrManager = user.role === 'admin' || user.role === 'manager'
 
   useEffect(() => {
     if (!token) {
       navigate('/employee/login')
       return
     }
-    if (user.role !== 'admin' && user.role !== 'sales') {
+    if (user.role !== 'admin' && user.role !== 'sales' && user.role !== 'service' && user.role !== 'manager') {
       navigate('/employee/login')
       return
     }
@@ -46,13 +46,13 @@ export default function AdminDashboard() {
       const carsRes = await fetch(`${API_BASE}/cars${q}`)
       const carsData = await carsRes.json()
       
-      if (!isAdmin) {
+      if (!isAdminOrManager) {
         setCars(carsData.filter(car => car.advisor_id === user.id))
       } else {
         setCars(carsData)
       }
 
-      if (isAdmin) {
+      if (isAdminOrManager) {
         const empRes = await fetch(`${API_BASE}/employees`, {
           headers: { Authorization: `Bearer ${token}` }
         })
@@ -107,13 +107,21 @@ export default function AdminDashboard() {
     fetchData()
   }
 
+  // Pomocnicza nazwa panelu w zależności od roli
+  const getDashboardTitle = () => {
+    if (user.role === 'admin') return 'Admin Dashboard'
+    if (user.role === 'manager') return 'Management Dashboard'
+    if (user.role === 'service') return 'Service Dashboard'
+    return 'Sales Dashboard'
+  }
+
   return (
     <main className="bg-gray-50 text-black min-h-screen">
       {/* Header */}
       <div className="bg-black text-white py-6 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-extrabold">{isAdmin ? 'Admin' : 'Sales'} Dashboard</h1>
+            <h1 className="text-3xl font-extrabold">{getDashboardTitle()}</h1>
             <p className="text-gray-400 text-sm">Welcome, {user.name}</p>
           </div>
           <div className="flex gap-3">
@@ -147,7 +155,7 @@ export default function AdminDashboard() {
             >
               Cars ({cars.length})
             </button>
-            {isAdmin && (
+            {isAdminOrManager && (
               <button
                 onClick={() => setView('employees-list')}
                 className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
@@ -192,7 +200,7 @@ export default function AdminDashboard() {
             <CarList
               cars={cars}
               employees={employees}
-              isAdmin={isAdmin}
+              isAdmin={isAdminOrManager}
               onViewDetails={(id) => navigate(`/car/${id}`)}
               onEdit={(id) => {
                 setEditingCarId(id)
@@ -205,7 +213,6 @@ export default function AdminDashboard() {
               }}
               loading={loading}
               onViewHistory={(id) => {
-                // open Service History tab for this car's VIN
                 const c = cars.find(ca => ca.id === id)
                 setServiceVin(c?.vin || '')
                 setView('service-history')
@@ -217,7 +224,7 @@ export default function AdminDashboard() {
         {view === 'car-form' && (
           <CarForm
             carId={editingCarId}
-            isAdmin={isAdmin}
+            isAdmin={isAdminOrManager}
             employees={employees}
             token={token}
             onSave={handleSaveCar}
@@ -229,7 +236,7 @@ export default function AdminDashboard() {
           />
         )}
 
-        {view === 'employees-list' && isAdmin && (
+        {view === 'employees-list' && isAdminOrManager && (
           <EmployeesList
             employees={employees}
             onEdit={(id) => {
@@ -244,7 +251,7 @@ export default function AdminDashboard() {
           />
         )}
 
-        {view === 'employee-form' && isAdmin && (
+        {view === 'employee-form' && isAdminOrManager && (
           <EmployeeForm
             empId={editingEmployeeId}
             token={token}
