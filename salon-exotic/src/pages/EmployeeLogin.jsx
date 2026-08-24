@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
@@ -9,6 +9,14 @@ export default function EmployeeLogin() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+
+  // Jeśli użytkownik jest już zalogowany, zablokuj widok logowania i przekieruj na dashboard
+  useEffect(() => {
+    const token = localStorage.getItem('employeeToken')
+    if (token) {
+      navigate('/admin/dashboard', { replace: true })
+    }
+  }, [navigate])
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -31,12 +39,8 @@ export default function EmployeeLogin() {
       localStorage.setItem('employeeToken', data.token)
       localStorage.setItem('employeeUser', JSON.stringify(data.user))
       
-      // Kieruj na podstawie roli
-      if (data.user.role === 'admin' || data.user.role === 'sales') {
-        navigate('/admin/dashboard')
-      } else {
-        navigate(`/employee/profile/${data.user.id}`)
-      }
+      // Zawsze kieruj na dashboard po zalogowaniu
+      navigate('/admin/dashboard')
     } catch (err) {
       setError(err.message)
     } finally {

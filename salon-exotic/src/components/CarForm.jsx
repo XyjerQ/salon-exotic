@@ -5,6 +5,10 @@ import ImagesUploader from './ImagesUploader'
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
 export default function CarForm({ carId, isAdmin, employees = [], token, onSave, onCancel, loading }) {
+  const user = JSON.parse(localStorage.getItem('employeeUser') || '{}')
+  const userRole = (user.role || '').toLowerCase()
+  const isService = userRole === 'service'
+
   const [formData, setFormData] = useState({
     make: '',
     model: '',
@@ -12,7 +16,7 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
     price: '',
     description: '',
     featured: false,
-    advisor_id: '',
+    advisor_id: isService ? user.id : '',
     transmission: '',
     drivetrain: '',
     fuel_type: '',
@@ -22,7 +26,7 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
     exterior_color: '',
     interior_color: '',
     vin: '',
-    vehicle_type: 'inventory',
+    vehicle_type: isService && !carId ? 'customer' : 'inventory',
     owner_name: '',
     owner_contact: ''
   })
@@ -30,11 +34,13 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
   const [imagesPayload, setImagesPayload] = useState({ files: [], paths: [] })
   const [formError, setFormError] = useState('')
 
-  const user = JSON.parse(localStorage.getItem('employeeUser') || '{}')
-
   useEffect(() => {
     if (!carId) {
-      if (!isAdmin) setFormData((prev) => ({ ...prev, advisor_id: user.id }))
+      setFormData((prev) => ({
+        ...prev,
+        advisor_id: !isAdmin || isService ? user.id : prev.advisor_id,
+        vehicle_type: isService ? 'customer' : prev.vehicle_type
+      }))
       setFeatures([])
       setImagesPayload({ files: [], paths: [] })
       return
@@ -93,7 +99,9 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
         setFormError('Files selected will be ignored. Provide image paths or use image upload endpoint.')
       }
 
-      const isCustomerVehicle = formData.vehicle_type === 'customer'
+      const currentAdvisorId = isService ? user.id : formData.advisor_id
+      const currentVehicleType = isService ? 'customer' : formData.vehicle_type
+      const isCustomerVehicle = currentVehicleType === 'customer'
 
       const payload = {
         make: formData.make,
@@ -110,7 +118,8 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
         exterior_color: formData.exterior_color,
         interior_color: formData.interior_color,
         vin: formData.vin,
-        vehicle_type: formData.vehicle_type,
+        vehicle_type: currentVehicleType,
+        advisor_id: currentAdvisorId,
         owner_name: formData.owner_name,
         owner_contact: formData.owner_contact,
         features: features || [],
@@ -119,7 +128,8 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
 
       if (isAdmin) {
         payload.featured = isCustomerVehicle ? false : formData.featured
-        payload.advisor_id = formData.advisor_id
+      } else {
+        payload.featured = false
       }
 
       const url = carId ? `${API_BASE}/cars/${carId}` : `${API_BASE}/cars`
@@ -170,8 +180,14 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
           <div className="grid md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle type</label>
-              <select name="vehicle_type" value={formData.vehicle_type} onChange={handleInputChange} className="border px-3 py-2 rounded w-full">
-                <option value="inventory">Inventory (for sale)</option>
+              <select
+                name="vehicle_type"
+                value={formData.vehicle_type}
+                onChange={handleInputChange}
+                disabled={isService}
+                className="border px-3 py-2 rounded w-full disabled:bg-gray-100 disabled:text-gray-500"
+              >
+                {!isService && <option value="inventory">Inventory (for sale)</option>}
                 <option value="customer">Customer vehicle</option>
               </select>
             </div>
@@ -283,7 +299,8 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
           <ImagesUploader initial={imagesPayload.paths} onChange={handleImagesChange} />
         </section>
 
-        {isAdmin && (
+        {/* Wyświetlane tylko dla admina, który nie jest w roli service */}
+        {isAdmin && !isService && (
           <section className="space-y-4">
             <h3 className="text-lg font-semibold">Admin options</h3>
             <div className={`grid ${isCustomerVehicle ? 'md:grid-cols-1' : 'md:grid-cols-2'} gap-4`}>

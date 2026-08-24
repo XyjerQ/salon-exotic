@@ -36,7 +36,10 @@ const upload = multer({
 });
 
 router.get('/', auth, async (req, res) => {
-  if (!isAdminOrManager(req)) return res.status(403).json({ error: 'Admin or Manager only' });
+  const allowedRoles = ['admin', 'manager', 'service', 'sales'];
+  if (!allowedRoles.includes(req.user?.role)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
 
   const db = req.app.get('db');
   const rows = await db.all(
@@ -129,7 +132,7 @@ router.put('/:id', auth, async (req, res) => {
     phone,
     photo_path,
     role,
-    password,     
+    password,    
     currentPassword,
     newPassword,
     confirmNewPassword

@@ -24,14 +24,19 @@ export default function AdminDashboard() {
 
   const token = localStorage.getItem('employeeToken')
   const user = JSON.parse(localStorage.getItem('employeeUser') || '{}')
-  const isAdminOrManager = user.role === 'admin' || user.role === 'manager'
+  
+  // Uprawnienia
+  const isAdminOrManager = ['admin', 'manager'].includes(user.role)
+  const isPrivileged = ['admin', 'manager', 'service'].includes(user.role)
+  // Serwis oraz admin/manager mogą pobierać listę pracowników (potrzebne do nazwisk doradców)
+  const canFetchEmployees = ['admin', 'manager', 'service'].includes(user.role)
 
   useEffect(() => {
     if (!token) {
       navigate('/employee/login')
       return
     }
-    if (user.role !== 'admin' && user.role !== 'sales' && user.role !== 'service' && user.role !== 'manager') {
+    if (!['admin', 'sales', 'service', 'manager'].includes(user.role)) {
       navigate('/employee/login')
       return
     }
@@ -46,13 +51,13 @@ export default function AdminDashboard() {
       const carsRes = await fetch(`${API_BASE}/cars${q}`)
       const carsData = await carsRes.json()
       
-      if (!isAdminOrManager) {
+      if (user.role === 'sales') {
         setCars(carsData.filter(car => car.advisor_id === user.id))
       } else {
         setCars(carsData)
       }
 
-      if (isAdminOrManager) {
+      if (canFetchEmployees) {
         const empRes = await fetch(`${API_BASE}/employees`, {
           headers: { Authorization: `Bearer ${token}` }
         })
@@ -107,7 +112,6 @@ export default function AdminDashboard() {
     fetchData()
   }
 
-  // Pomocnicza nazwa panelu w zależności od roli
   const getDashboardTitle = () => {
     if (user.role === 'admin') return 'Admin Dashboard'
     if (user.role === 'manager') return 'Management Dashboard'
@@ -200,7 +204,7 @@ export default function AdminDashboard() {
             <CarList
               cars={cars}
               employees={employees}
-              isAdmin={isAdminOrManager}
+              userRole={user.role}
               onViewDetails={(id) => navigate(`/car/${id}`)}
               onEdit={(id) => {
                 setEditingCarId(id)
@@ -224,7 +228,7 @@ export default function AdminDashboard() {
         {view === 'car-form' && (
           <CarForm
             carId={editingCarId}
-            isAdmin={isAdminOrManager}
+            isAdmin={isPrivileged}
             employees={employees}
             token={token}
             onSave={handleSaveCar}

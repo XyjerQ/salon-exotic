@@ -5,6 +5,7 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
 export default function ServiceHistory({ initialVin = '' }) {
   const [loading, setLoading] = useState(false)
+  const [allCars, setAllCars] = useState([])
   const [history, setHistory] = useState([])
   const [car, setCar] = useState(null)
   const [vinLookup, setVinLookup] = useState(initialVin)
@@ -12,11 +13,38 @@ export default function ServiceHistory({ initialVin = '' }) {
   const [editingId, setEditingId] = useState(null)
   const [editingEntry, setEditingEntry] = useState(null)
 
+  const token = localStorage.getItem('employeeToken')
+
+  // Pobierz listę wszystkich aut przy montowaniu komponentu
   useEffect(() => {
-    if (initialVin) lookupByVin(initialVin)
+    fetchAllCars()
+  }, [])
+
+  useEffect(() => {
+    if (initialVin) {
+      lookupByVin(initialVin)
+    }
   }, [initialVin])
 
-  const token = localStorage.getItem('employeeToken')
+  const fetchAllCars = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/cars`)
+      const arr = await res.json()
+      if (Array.isArray(arr)) {
+        setAllCars(arr)
+        // Jeśli mamy wstępny VIN, spróbujmy ustawić konkretne auto
+        if (initialVin) {
+          const found = arr.find(c => c.vin?.toLowerCase() === initialVin.toLowerCase())
+          if (found) {
+            setCar(found)
+            setHistory(found.service_history || [])
+          }
+        }
+      }
+    } catch (e) {
+      console.error('fetchAllCars error:', e)
+    }
+  }
 
   const lookupByVin = async (value) => {
     const vin = value ?? vinLookup
@@ -44,13 +72,39 @@ export default function ServiceHistory({ initialVin = '' }) {
     setLoading(false)
   }
 
+  const handleSelectCarFromDropdown = (carId) => {
+    if (!carId) {
+      setCar(null)
+      setHistory([])
+      setVinLookup('')
+      return
+    }
+    const selected = allCars.find(c => String(c.id) === String(carId))
+    if (selected) {
+      setCar(selected)
+      setVinLookup(selected.vin || '')
+      setHistory(selected.service_history || [])
+      setError('')
+    }
+  }
+
   const handleEntryAdded = async () => {
-    await lookupByVin()
+    if (car?.vin) {
+      await lookupByVin(car.vin)
+    }
+    await fetchAllCars()
   }
 
   const startEdit = (e) => {
     setEditingId(e.id)
-    setEditingEntry({ service_date: e.service_date, service_type: e.service_type, description: e.description || '', mileage_km: e.mileage_km || '', cost: e.cost || '', provider: e.provider || '' })
+    setEditingEntry({ 
+      service_date: e.service_date, 
+      service_type: e.service_type, 
+      description: e.description || '', 
+      mileage_km: e.mileage_km || '', 
+      cost: e.cost || '', 
+      provider: e.provider || '' 
+    })
   }
 
   const cancelEdit = () => {
@@ -70,7 +124,8 @@ export default function ServiceHistory({ initialVin = '' }) {
       if (res.ok) {
         await res.json()
         cancelEdit()
-        await lookupByVin()
+        if (car?.vin) await lookupByVin(car.vin)
+        await fetchAllCars()
       } else {
         const data = await res.json().catch(() => ({}))
         setError(data.error || 'Failed to update')
@@ -90,7 +145,8 @@ export default function ServiceHistory({ initialVin = '' }) {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (res.status === 204) {
-        await lookupByVin()
+        if (car?.vin) await lookupByVin(car.vin)
+        await fetchAllCars()
       } else {
         setError('Failed to delete')
       }
@@ -102,18 +158,42 @@ export default function ServiceHistory({ initialVin = '' }) {
 
   return (
     <div className="space-y-6">
-      {/* VIN Lookup */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">Lookup Vehicle by VIN</h3>
-        <div className="flex items-center gap-2">
-          <input 
-            value={vinLookup} 
-            onChange={(e) => setVinLookup(e.target.value)} 
-            placeholder="Enter VIN" 
-            className="border px-3 py-2 rounded flex-1" 
-          />
-          <button onClick={() => lookupByVin()} className="bg-blackline-accent text-black px-4 py-2 rounded font-medium">Find</button>
-          <button onClick={() => { setVinLookup(''); setCar(null); setHistory([]); setError('') }} className="bg-gray-200 px-4 py-2 rounded font-medium">Clear</button>
+      {/* Vehicle Selection & VIN Lookup */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+        <h3 className="text-lg font-semibold">Select or Lookup Vehicle</h3>
+        
+        <div className="grid md:grid-cols-2 gap-4">
+          {/* Dropdown ze wszystkimi autami */}
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">Choose from all cars in system</label>
+            <select
+              value={car?.id || ''}
+              onChange={(e) => handleSelectCarFromDropdown(e.target.value)}
+              className="border px-3 py-2 rounded w-full bg-white"
+            >
+              <option value="">-- Select a car --</option>
+              {allCars.map(c => (
+                <option key={c.id} value={c.id}>
+                  {c.make} {c.model} ({c.year}) - {c.vin || 'No VIN'}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Wyszukiwanie po VIN */}
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">Or lookup by VIN</label>
+            <div className="flex items-center gap-2">
+              <input 
+                value={vinLookup} 
+                onChange={(e) => setVinLookup(e.target.value)} 
+                placeholder="Enter VIN" 
+                className="border px-3 py-2 rounded flex-1" 
+              />
+              <button onClick={() => lookupByVin()} className="bg-black text-white px-4 py-2 rounded font-medium">Find</button>
+              <button onClick={() => { setVinLookup(''); setCar(null); setHistory([]); setError('') }} className="bg-gray-200 px-3 py-2 rounded font-medium">Clear</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -179,7 +259,7 @@ export default function ServiceHistory({ initialVin = '' }) {
           <h3 className="text-lg font-semibold mb-4">Service History ({history.length})</h3>
 
           {history.length === 0 ? (
-            <p className="text-gray-600">No service history recorded.</p>
+            <p className="text-gray-600">No service history recorded for this vehicle.</p>
           ) : (
             <div className="space-y-3 mb-4">
               {history.map(entry => (
@@ -242,7 +322,7 @@ export default function ServiceHistory({ initialVin = '' }) {
                         />
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={submitEdit} className="bg-blackline-accent text-black px-3 py-1 rounded">Save</button>
+                        <button onClick={submitEdit} className="bg-black text-white px-3 py-1 rounded">Save</button>
                         <button onClick={cancelEdit} className="bg-gray-200 px-3 py-1 rounded">Cancel</button>
                       </div>
                     </div>

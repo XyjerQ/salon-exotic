@@ -30,12 +30,6 @@ const formatMileage = (value) => {
   return String(value)
 }
 
-const formatHorsepower = (value) => {
-  if (value === undefined || value === null || value === '') return '—'
-  if (typeof value === 'number') return `${value} HP`
-  return String(value)
-}
-
 export default function CarDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -83,6 +77,8 @@ export default function CarDetails() {
       cancelled = true
     }
   }, [id])
+
+  const isCustomerVehicle = car && (car.vehicle_type || '').toLowerCase() === 'customer'
 
   const consultantSource = car
     ? employees.find((employee) => String(employee.id) === String(car.advisor_id)) || null
@@ -143,9 +139,11 @@ export default function CarDetails() {
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-[0.2em] text-gray-400">Vehicle Details</p>
           <h1 className="text-4xl md:text-6xl font-extrabold mt-2">{car.make} {car.model}</h1>
-          <div className="flex items-center gap-6 mt-6">
-            <p className="text-3xl md:text-4xl text-blackline-accent font-bold">{formatMoney(car.price)}</p>
-          </div>
+          {!isCustomerVehicle && (
+            <div className="flex items-center gap-6 mt-6">
+              <p className="text-3xl md:text-4xl text-blackline-accent font-bold">{formatMoney(car.price)}</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -239,10 +237,12 @@ export default function CarDetails() {
               )}
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-lg">
-              <h3 className="text-2xl font-extrabold mb-4">About this vehicle</h3>
-              <p className="text-gray-700 leading-relaxed">{car.description}</p>
-            </div>
+            {car.description && (
+              <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-lg">
+                <h3 className="text-2xl font-extrabold mb-4">About this vehicle</h3>
+                <p className="text-gray-700 leading-relaxed">{car.description}</p>
+              </div>
+            )}
           </div>
 
           <div ref={rightContentRef} className="space-y-6">
@@ -253,49 +253,75 @@ export default function CarDetails() {
                 <div className="grid grid-cols-2 gap-6 pb-6 border-b border-gray-200">
                   <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wider">Year</p>
-                    <p className="text-2xl font-bold text-black mt-1">{car.year}</p>
+                    <p className="text-2xl font-bold text-black mt-1">{car.year || '—'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wider">Mileage</p>
                     <p className="text-2xl font-bold text-black mt-1">{formatMileage(car.mileage_km)}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500 uppercase tracking-wider">Transmission</p>
-                    <p className="text-xl font-bold text-black mt-1">{car.transmission}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500 uppercase tracking-wider">Horsepower</p>
-                    <p className="text-2xl font-bold text-black mt-1">{formatHorsepower(car.horsepower_hp)}</p>
-                  </div>
+
+                  {!isCustomerVehicle && (
+                    <>
+                      <div>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider">Transmission</p>
+                        <p className="text-xl font-bold text-black mt-1">{car.transmission || '—'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider">Horsepower</p>
+                        <p className="text-2xl font-bold text-black mt-1">{car.horsepower_hp ? `${car.horsepower_hp} HP` : '—'}</p>
+                      </div>
+                    </>
+                  )}
+
                   <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wider">Engine</p>
-                    <p className="text-lg font-bold text-black mt-1">{car.engine}</p>
+                    <p className="text-lg font-bold text-black mt-1">{car.engine || '—'}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500 uppercase tracking-wider">Drivetrain</p>
-                    <p className="text-lg font-bold text-black mt-1">{car.drivetrain}</p>
-                  </div>
+
+                  {!isCustomerVehicle && (
+                    <div>
+                      <p className="text-sm text-gray-500 uppercase tracking-wider">Drivetrain</p>
+                      <p className="text-lg font-bold text-black mt-1">{car.drivetrain || '—'}</p>
+                    </div>
+                  )}
+
                   <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wider">Exterior Color</p>
-                    <p className="text-lg font-bold text-black mt-1">{car.exterior_color}</p>
+                    <p className="text-lg font-bold text-black mt-1">{car.exterior_color || '—'}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500 uppercase tracking-wider">Interior</p>
-                    <p className="text-lg font-bold text-black mt-1">{car.interior_color}</p>
-                  </div>
+
+                  {!isCustomerVehicle && (
+                    <div>
+                      <p className="text-sm text-gray-500 uppercase tracking-wider">Interior</p>
+                      <p className="text-lg font-bold text-black mt-1">{car.interior_color || '—'}</p>
+                    </div>
+                  )}
                 </div>
 
-                <div>
-                  <h3 className="text-xl font-semibold mb-3">Key Features</h3>
-                  <ul className="space-y-2 text-gray-700">
-                    {featuresList.map((feature, index) => (
-                      <li key={index} className="flex items-center">
-                        <span className="text-blackline-accent mr-3 text-lg">✓</span>
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {isCustomerVehicle && (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4">
+                    <div className="text-xs font-bold uppercase tracking-wider text-amber-900 mb-2">Owner Details & Contact</div>
+                    <div className="grid gap-1 text-sm text-gray-800">
+                      <div><span className="font-medium text-gray-500">Name:</span> {car.owner_name || '—'}</div>
+                      <div><span className="font-medium text-gray-500">Phone:</span> {car.owner_contact || '—'}</div>
+                      <div><span className="font-medium text-gray-500">Email:</span> {car.owner_email || '—'}</div>
+                    </div>
+                  </div>
+                )}
+
+                {featuresList.length > 0 && (
+                  <div>
+                    <h3 className="text-xl font-semibold mb-3">Key Features</h3>
+                    <ul className="space-y-2 text-gray-700">
+                      {featuresList.map((feature, index) => (
+                        <li key={index} className="flex items-center">
+                          <span className="text-blackline-accent mr-3 text-lg">✓</span>
+                          <span className="text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 {consultantSource && (
                   <div className="border-t border-gray-200 pt-6">
@@ -324,13 +350,14 @@ export default function CarDetails() {
                     </div>
                   </div>
                 )}
-
+                {!isCustomerVehicle && (
                 <button
                   onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
                   className="w-full bg-blackline-accent hover:opacity-90 text-black font-bold py-4 rounded-lg mt-4 transition-opacity"
                 >
                   Inquire about this vehicle
                 </button>
+                )}
               </div>
             </div>
           </div>

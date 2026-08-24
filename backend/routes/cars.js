@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const router = express.Router();
 const auth = require('../middleware/auth');
 
@@ -13,7 +14,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 const isAdmin = (req) => req.user?.role === 'admin';
-const canManageCars = (req) => req.user?.role === 'admin' || req.user?.role === 'sales';
+const isManagerOrAdmin = (req) => ['admin', 'manager'].includes(req.user?.role);
+const isService = (req) => req.user?.role === 'service';
+const canManageCars = (req) => ['admin', 'manager', 'sales', 'service'].includes(req.user?.role);
 
 function toBoolInt(value, fallback = 0) {
   if (value === undefined || value === null || value === '') return fallback;
@@ -102,6 +105,15 @@ async function upsertCarRelations(db, carId, payload) {
   } = payload;
 
   if (replaceImages) {
+    const oldImages = await db.all('SELECT image_path FROM car_images WHERE car_id = ?', [carId]);
+    for (const img of oldImages) {
+      if (img.image_path) {
+        const filePath = path.join(uploadDir, '..', img.image_path.replace(/^\/uploads/, ''));
+        if (fs.existsSync(filePath)) {
+          try { fs.unlinkSync(filePath); } catch (e) { console.error('Błąd usuwania pliku:', e); }
+        }
+      }
+    }
     await db.run('DELETE FROM car_images WHERE car_id = ?', [carId]);
   }
 
@@ -173,36 +185,6 @@ router.get('/', async (req, res) => {
   const db = req.app.get('db');
   const { q, advisor_id, minPrice, maxPrice, featured, vin } = req.query;
 
-  if (vin) {
-    let sql = 'SELECT c.id FROM cars c WHERE c.vin = ?';
-    const params = [vin];
-
-    if (q) {
-      sql += ' AND (c.make LIKE ? OR c.model LIKE ? OR c.description LIKE ?)';
-      params.push('%' + q + '%', '%' + q + '%', '%' + q + '%');
-    }
-    if (advisor_id) {
-      sql += ' AND c.advisor_id = ?';
-      params.push(advisor_id);
-    }
-    if (minPrice) {
-      sql += ' AND c.price >= ?';
-      params.push(minPrice);
-    }
-    if (maxPrice) {
-      sql += ' AND c.price <= ?';
-      params.push(maxPrice);
-    }
-    if (featured !== undefined) {
-      sql += ' AND c.featured = ?';
-      params.push(featured === 'true' || featured === '1' ? 1 : 0);
-    }
-
-    const rows = await db.all(sql, params);
-    const enriched = await Promise.all(rows.map((row) => getCarWithRelations(db, row.id)));
-    return res.json(enriched.filter(Boolean));
-  }
-
   let sql = 'SELECT c.* FROM cars c WHERE 1=1';
   const params = [];
 
@@ -264,13 +246,12 @@ router.get('/', async (req, res) => {
   res.json(enriched);
 });
 
-// add single service entry for car
+// add single service entry for car (Service ma pełny dostęp)
 router.post('/:id/service', auth, async (req, res) => {
+  if (!canManageCars(req)) return res.status(403).json({ error: 'Forbidden' });
+
   const db = req.app.get('db');
   const carId = req.params.id;
-
-  // any logged-in sales/admin can add service records
-  if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
 
   const { service_date, service_type, description, mileage_km, cost, provider } = req.body;
   if (!service_date || !service_type) {
@@ -284,15 +265,15 @@ router.post('/:id/service', auth, async (req, res) => {
       [carId, service_date, service_type, description ?? null, maybeNumber(mileage_km), maybeNumber(cost), provider ?? null]
     );
     
-    const car = await db.get('SELECT mileage_km FROM cars WHERE id = ?', [carId])
-    const currentMileage = maybeNumber(car?.mileage_km)
-    const nextMileage = maybeNumber(mileage_km)
+    const car = await db.get('SELECT mileage_km FROM cars WHERE id = ?', [carId]);
+    const currentMileage = maybeNumber(car?.mileage_km);
+    const nextMileage = maybeNumber(mileage_km);
 
     if (nextMileage !== null && (currentMileage === null || nextMileage > currentMileage)) {
       await db.run(
         'UPDATE cars SET mileage_km = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
         [nextMileage, carId]
-      )
+      );
     }
 
     await db.exec('COMMIT');
@@ -305,16 +286,18 @@ router.post('/:id/service', auth, async (req, res) => {
   }
 });
 
-// update a service entry
+// update a service entry (Service ma pełny dostęp)
 router.put('/service/:id', auth, async (req, res) => {
+  if (!canManageCars(req)) return res.status(403).json({ error: 'Forbidden' });
+
   const db = req.app.get('db');
   const id = req.params.id;
 
   const existing = await db.get('SELECT * FROM car_service_history WHERE id = ?', [id]);
   if (!existing) return res.status(404).json({ error: 'Not found' });
 
-  // permission: admin or sales assigned to car
-  if (!isAdmin(req)) {
+  // Uprawnienia: admin/manager, serwis ma pełny dostęp, a sales tylko do swoich aut
+  if (!isManagerOrAdmin(req) && !isService(req)) {
     const car = await db.get('SELECT advisor_id FROM cars WHERE id = ?', [existing.car_id]);
     if (!car || car.advisor_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
   }
@@ -350,15 +333,17 @@ router.put('/service/:id', auth, async (req, res) => {
   }
 });
 
-// delete a service entry
+// delete a service entry (Service ma pełny dostęp)
 router.delete('/service/:id', auth, async (req, res) => {
+  if (!canManageCars(req)) return res.status(403).json({ error: 'Forbidden' });
+
   const db = req.app.get('db');
   const id = req.params.id;
 
   const existing = await db.get('SELECT * FROM car_service_history WHERE id = ?', [id]);
   if (!existing) return res.status(404).json({ error: 'Not found' });
 
-  if (!isAdmin(req)) {
+  if (!isManagerOrAdmin(req) && !isService(req)) {
     const car = await db.get('SELECT advisor_id FROM cars WHERE id = ?', [existing.car_id]);
     if (!car || car.advisor_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
   }
@@ -387,7 +372,7 @@ router.post(
   ]),
   async (req, res) => {
     if (!canManageCars(req)) {
-      return res.status(403).json({ error: 'Only sales/admin can manage cars' });
+      return res.status(403).json({ error: 'Only authorized roles can manage cars' });
     }
 
     const db = req.app.get('db');
@@ -413,8 +398,14 @@ router.post(
       owner_contact
     } = req.body;
 
-    const advisor_id = isAdmin(req) ? (advisorBody ?? req.user.id) : req.user.id;
-    const isFeatured = isAdmin(req) ? toBoolInt(featured, 0) : 0;
+    // Rola service może tworzyć wyłącznie auta typu 'customer'
+    const targetVehicleType = vehicle_type ?? 'inventory';
+    if (isService(req) && targetVehicleType !== 'customer') {
+      return res.status(403).json({ error: 'Service role can only manage customer vehicles' });
+    }
+
+    const advisor_id = isManagerOrAdmin(req) ? (advisorBody ?? req.user.id) : req.user.id;
+    const isFeatured = isManagerOrAdmin(req) ? toBoolInt(featured, 0) : 0;
 
     const uploaded = []
       .concat(req.files?.image || [])
@@ -447,7 +438,7 @@ router.post(
           advisor_id,
           isFeatured,
           vin ?? null,
-          vehicle_type ?? 'inventory',
+          targetVehicleType,
           owner_name ?? null,
           owner_contact ?? null
         ]
@@ -483,14 +474,21 @@ router.put(
   ]),
   async (req, res) => {
     if (!canManageCars(req)) {
-      return res.status(403).json({ error: 'Only sales/admin can manage cars' });
+      return res.status(403).json({ error: 'Only authorized roles can manage cars' });
     }
 
     const db = req.app.get('db');
-    const existing = await db.get('SELECT * FROM cars WHERE id = ?', [req.params.id]);
+    const carId = req.params.id;
+    const existing = await db.get('SELECT * FROM cars WHERE id = ?', [carId]);
     if (!existing) return res.status(404).json({ error: 'Not found' });
 
-    if (!isAdmin(req) && existing.advisor_id !== req.user.id) {
+    // Sprawdzenie uprawnień do edycji auta
+    if (isService(req)) {
+      // Serwis może edytować tylko auta typu 'customer'
+      if (existing.vehicle_type !== 'customer') {
+        return res.status(403).json({ error: 'Service role can only manage customer vehicles' });
+      }
+    } else if (!isManagerOrAdmin(req) && existing.advisor_id !== req.user.id) {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
@@ -516,12 +514,17 @@ router.put(
       owner_contact
     } = req.body;
 
-    const advisor_id = isAdmin(req)
+    const targetVehicleType = vehicle_type ?? existing.vehicle_type;
+    if (isService(req) && targetVehicleType !== 'customer') {
+      return res.status(403).json({ error: 'Service role cannot change vehicle type to inventory' });
+    }
+
+    const advisor_id = isManagerOrAdmin(req)
       ? (advisorBody ?? existing.advisor_id)
       : existing.advisor_id;
 
     const isFeatured =
-      isAdmin(req) && featured !== undefined
+      isManagerOrAdmin(req) && featured !== undefined
         ? toBoolInt(featured, existing.featured)
         : existing.featured;
 
@@ -563,14 +566,14 @@ router.put(
           advisor_id,
           isFeatured,
           vin ?? existing.vin,
-          vehicle_type ?? existing.vehicle_type,
+          targetVehicleType,
           owner_name ?? existing.owner_name,
           owner_contact ?? existing.owner_contact,
-          req.params.id
+          carId
         ]
       );
 
-      await upsertCarRelations(db, req.params.id, {
+      await upsertCarRelations(db, carId, {
         uploadedImages: uploaded,
         imagePaths,
         features,
@@ -582,7 +585,7 @@ router.put(
       });
 
       await db.exec('COMMIT');
-      const updated = await getCarWithRelations(db, req.params.id);
+      const updated = await getCarWithRelations(db, carId);
       return res.json(updated);
     } catch (err) {
       await db.exec('ROLLBACK');
@@ -593,19 +596,46 @@ router.put(
 
 router.delete('/:id', auth, async (req, res) => {
   if (!canManageCars(req)) {
-    return res.status(403).json({ error: 'Only sales/admin can manage cars' });
+    return res.status(403).json({ error: 'Only authorized roles can manage cars' });
   }
 
   const db = req.app.get('db');
-  const existing = await db.get('SELECT * FROM cars WHERE id = ?', [req.params.id]);
+  const carId = req.params.id;
+  const existing = await db.get('SELECT * FROM cars WHERE id = ?', [carId]);
   if (!existing) return res.status(404).json({ error: 'Not found' });
 
-  if (!isAdmin(req) && existing.advisor_id !== req.user.id) {
+  if (isService(req)) {
+    if (existing.vehicle_type !== 'customer') {
+      return res.status(403).json({ error: 'Service role can only manage customer vehicles' });
+    }
+  } else if (!isManagerOrAdmin(req) && existing.advisor_id !== req.user.id) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
-  await db.run('DELETE FROM cars WHERE id = ?', [req.params.id]);
-  res.status(204).end();
+  try {
+    await db.exec('BEGIN');
+
+    const images = await db.all('SELECT image_path FROM car_images WHERE car_id = ?', [carId]);
+    for (const img of images) {
+      if (img.image_path) {
+        const filePath = path.join(uploadDir, '..', img.image_path.replace(/^\/uploads/, ''));
+        if (fs.existsSync(filePath)) {
+          try { fs.unlinkSync(filePath); } catch (e) { console.error('Błąd usuwania pliku:', e); }
+        }
+      }
+    }
+
+    await db.run('DELETE FROM car_images WHERE car_id = ?', [carId]);
+    await db.run('DELETE FROM car_features WHERE car_id = ?', [carId]);
+    await db.run('DELETE FROM car_service_history WHERE car_id = ?', [carId]);
+    await db.run('DELETE FROM cars WHERE id = ?', [carId]);
+
+    await db.exec('COMMIT');
+    res.status(204).end();
+  } catch (err) {
+    await db.exec('ROLLBACK');
+    res.status(500).json({ error: 'Delete failed', details: err.message });
+  }
 });
 
 module.exports = router;
