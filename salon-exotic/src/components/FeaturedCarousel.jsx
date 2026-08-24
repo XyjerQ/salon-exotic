@@ -113,11 +113,7 @@ export default function FeaturedCarousel() {
               className="flex-shrink-0 w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)] snap-start"
             >
               <FeatureCard
-                title={`${car.brand || ''} ${car.model || ''}`.trim()}
-                desc={car.description}
-                image={car.image_path}
-                year={car.year}
-                horsepower={car.horsepower_hp}
+                car={car}
                 mileage={formatMileage(car.mileage_km)}
                 onViewDetails={() => navigate(`/car/${car.id}`)}
               />
