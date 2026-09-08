@@ -275,6 +275,24 @@ async function seedTestDrives(db) {
   }
 }
 
+async function seedNewsletterSubscribers(db) {
+  const subscribers = [
+    'alex.morgan@example.com',
+    'olivia.carter@example.com',
+    'noah.bennett@example.com',
+    'emma.rivers@example.com',
+    'liam.hudson@example.com',
+    'sophia.wells@example.com'
+  ];
+
+  for (const email of subscribers) {
+    await db.run(
+      'INSERT OR IGNORE INTO newsletter_subscribers (email, active) VALUES (?, 1)',
+      [email]
+    );
+  }
+}
+
 async function ensureSeedData(db) {
   const tables = [
     'employees',
@@ -298,6 +316,7 @@ async function ensureSeedData(db) {
   if (databaseHasData) {
     await seedMissingCarFeatures(db);
     await seedTestDrives(db);
+    await seedNewsletterSubscribers(db);
     return;
   }
 
@@ -337,6 +356,7 @@ async function ensureSeedData(db) {
 
   await seedCars(db, employeeMap);
   await seedTestDrives(db);
+  await seedNewsletterSubscribers(db);
 }
 
 module.exports = {
