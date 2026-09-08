@@ -26,8 +26,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif/;
+    const allowedTypes = /jpeg|jpg|png|webp/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
     if (mimetype && extname) return cb(null, true);
@@ -240,7 +241,6 @@ router.post('/:id/upload-photo', auth, upload.single('photo'), async (req, res) 
   const photo_path = `/uploads/${req.file.filename}`;
 
   try {
-    name = undefined; // safety
     await db.run(
       'UPDATE employees SET photo_path = ? WHERE id = ?',
       [photo_path, id]

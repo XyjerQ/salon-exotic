@@ -8,10 +8,23 @@ const auth = require('../middleware/auth');
 const uploadDir = path.resolve(process.env.UPLOAD_DIR || './public/uploads');
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+  filename: (req, file, cb) => {
+    const extension = path.extname(file.originalname).toLowerCase();
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${extension}`);
+  }
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 8 * 1024 * 1024, files: 30 },
+  fileFilter: (req, file, cb) => {
+    const allowed = new Set(['image/jpeg', 'image/png', 'image/webp']);
+    if (!allowed.has(file.mimetype)) {
+      return cb(new Error('Only JPEG, PNG and WebP images are allowed'));
+    }
+    cb(null, true);
+  }
+});
 
 const isAdmin = (req) => req.user?.role === 'admin';
 const isManagerOrAdmin = (req) => ['admin', 'manager'].includes(req.user?.role);

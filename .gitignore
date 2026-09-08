@@ -15,3 +15,4 @@ salon-exotic/.env
 .idea/
 *.swp
 node_modules/
+changes.txt

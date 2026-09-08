@@ -3,9 +3,32 @@ const express = require('express');
 const router = express.Router();
 
 router.post('/', async (req, res) => {
-  const { name, email, message } = req.body;
-  console.log('Contact form:', name, email, message);
-  res.json({ ok: true });
+  const db = req.app.get('db');
+  const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+  const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+  const message = typeof req.body.message === 'string' ? req.body.message.trim() : '';
+  const phone = typeof req.body.phone === 'string' ? req.body.phone.trim() : null;
+
+  if (name.length < 2 || name.length > 120) {
+    return res.status(400).json({ error: 'Name must be between 2 and 120 characters' });
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Invalid email address' });
+  }
+  if (message.length < 10 || message.length > 5000) {
+    return res.status(400).json({ error: 'Message must be between 10 and 5000 characters' });
+  }
+
+  try {
+    const result = await db.run(
+      'INSERT INTO contacts (name, email, phone, message) VALUES (?, ?, ?, ?)',
+      [name, email, phone, message]
+    );
+    res.status(201).json({ ok: true, id: result.lastID });
+  } catch (err) {
+    console.error('Contact form save failed:', err);
+    res.status(500).json({ error: 'Unable to save contact request' });
+  }
 });
 
 module.exports = router;

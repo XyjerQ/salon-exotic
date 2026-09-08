@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS car_service_history (
 CREATE TABLE IF NOT EXISTS transactions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   car_id INTEGER NOT NULL,
-  employee_id INTEGER NOT NULL,
+  employee_id INTEGER,
   customer_name TEXT NOT NULL,
   customer_email TEXT,
   customer_phone TEXT,

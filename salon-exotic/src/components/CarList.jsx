@@ -2,6 +2,13 @@ import React from 'react'
 
 export default function CarList({ cars = [], employees = [], userRole, onEdit, onDelete, onAdd, loading, onViewHistory, onViewDetails }) {
   const mediaBase = (import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/?api\/?$/, '')
+  const frontendBase = import.meta.env.BASE_URL || '/'
+  const resolveImageUrl = (imagePath) => {
+    if (!imagePath) return ''
+    if (/^https?:\/\//i.test(imagePath)) return imagePath
+    if (imagePath.startsWith('/uploads/')) return `${mediaBase}${imagePath}`
+    return `${frontendBase}${imagePath.replace(/^\//, '')}`
+  }
 
   const safeCars = Array.isArray(cars) ? cars : []
 
@@ -80,17 +87,17 @@ export default function CarList({ cars = [], employees = [], userRole, onEdit, o
                   }
                 }}
               >
-                <div className="grid gap-0 md:grid-cols-[400px_minmax(0,1fr)]">
-                  <div className="relative min-h-64 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 md:min-h-full">
+                <div className="grid items-stretch gap-0 md:grid-cols-[400px_minmax(0,1fr)]">
+                  <div className="relative min-h-[280px] self-stretch overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 md:min-h-0">
                     {car.primary_image ? (
                       <img
-                        src={`${mediaBase}${car.primary_image}`}
+                        src={resolveImageUrl(car.primary_image)}
                         alt={`${car.make} ${car.model}`}
-                        className="h-full w-full object-cover"
+                        className="absolute inset-0 h-full w-full object-cover"
                         onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/600x400?text=Car' }}
                       />
                     ) : (
-                      <div className="flex h-full min-h-64 flex-col justify-between p-6 text-white">
+                      <div className="flex h-full min-h-[280px] flex-col justify-between p-6 text-white">
                         <div className="flex gap-2">
                           {Boolean(car.featured) && <span className="rounded-full bg-yellow-300 px-3 py-1 text-xs font-semibold text-black">Featured</span>}
                           <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/90">

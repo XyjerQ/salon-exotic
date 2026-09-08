@@ -2,6 +2,13 @@ import React from 'react'
 
 export default function EmployeesList({ employees, onEdit, onAdd, loading }) {
   const mediaBase = (import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/?api\/?$/, '')
+  const frontendBase = import.meta.env.BASE_URL || '/'
+  const resolveImageUrl = (imagePath) => {
+    if (!imagePath) return ''
+    if (/^https?:\/\//i.test(imagePath)) return imagePath
+    if (imagePath.startsWith('/uploads/')) return `${mediaBase}${imagePath}`
+    return `${frontendBase}${imagePath.replace(/^\//, '')}`
+  }
 
   const getInitials = (name = '') => {
     const parts = String(name).trim().split(/\s+/).filter(Boolean)
@@ -36,7 +43,7 @@ export default function EmployeesList({ employees, onEdit, onAdd, loading }) {
                 <div className="relative min-h-[200px] md:min-h-full w-full bg-gradient-to-br from-black via-gray-800 to-gray-700 flex items-center justify-center overflow-hidden">
                   {emp.photo_path ? (
                     <img
-                      src={`${mediaBase}${emp.photo_path}`}
+                      src={resolveImageUrl(emp.photo_path)}
                       alt={emp.name}
                       className="absolute inset-0 h-full w-full object-cover"
                       onError={(e) => {

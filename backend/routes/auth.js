@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const SECRET = process.env.JWT_SECRET || 'changeme';
+const SECRET = process.env.JWT_SECRET;
 
 const isAdmin = (req) => req.user?.role === 'admin';
 
@@ -13,16 +13,18 @@ router.post('/register', auth, async (req, res) => {
 
   const db = req.app.get('db');
   const { name, email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'Missing fields' });
+  if (typeof email !== 'string' || typeof password !== 'string' || !email.trim() || password.length < 8) {
+    return res.status(400).json({ error: 'Email and a password of at least 8 characters are required' });
+  }
   const hash = await bcrypt.hash(password, 10);
 
   try {
     const result = await db.run(
       'INSERT INTO employees (name, email, password_hash, role) VALUES (?, ?, ?, ?)',
-      [name || '', email, hash, 'sales']
+      [typeof name === 'string' ? name.trim() : '', email.trim().toLowerCase(), hash, 'sales']
     );
-    const user = { id: result.lastID, name, email, role: 'sales' };
-    const token = jwt.sign(user, SECRET);
+    const user = { id: result.lastID, name: typeof name === 'string' ? name.trim() : '', email: email.trim().toLowerCase(), role: 'sales' };
+    const token = jwt.sign(user, SECRET, { expiresIn: '8h' });
     res.json({ user, token });
   } catch (e) {
     res.status(400).json({ error: 'Email already used' });
@@ -32,12 +34,15 @@ router.post('/register', auth, async (req, res) => {
 router.post('/login', async (req, res) => {
   const db = req.app.get('db');
   const { email, password } = req.body;
-  const row = await db.get('SELECT * FROM employees WHERE email = ?', [email]);
+  if (typeof email !== 'string' || typeof password !== 'string' || !email.trim() || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+  const row = await db.get('SELECT * FROM employees WHERE email = ?', [email.trim().toLowerCase()]);
   if (!row) return res.status(401).json({ error: 'Invalid credentials' });
   const ok = await bcrypt.compare(password, row.password_hash);
   if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
   const user = { id: row.id, name: row.name, email: row.email, role: row.role };
-  const token = jwt.sign(user, SECRET);
+  const token = jwt.sign(user, SECRET, { expiresIn: '8h' });
   res.json({ user, token });
 });
 
