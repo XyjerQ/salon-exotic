@@ -250,6 +250,44 @@
     "assignedEmployee": "emp01"
   },
   {
+    "id": "vwcorr01",
+    "vin": "WVWZZZ50ZLK000000",
+    "make": "Volkswagen",
+    "model": "Corrado",
+    "year": 1989,
+    "price": "€12,500",
+    "mileage": "236,200 km",
+    "transmission": "5-Speed Diesel Manual",
+    "horsepower": 400,
+    "engine": "1.8L Turbo 20V (1.8T)",
+    "drivetrain": "Front-Wheel Drive",
+    "fuelType": "Petrol",
+    "color": "Classic Green OEM Paint",
+    "interiorColor": "Original Factory Interior",
+    "images": [
+      "img/cars/corrado (0).webp",
+      "img/cars/corrado (1).webp",
+      "img/cars/corrado (2).webp",
+      "img/cars/corrado (3).webp"
+    ],
+    "description": "This classic 1989 Volkswagen Corrado is a legendary 90s sports coupe elevated to extreme performance levels while keeping its iconic, factory-original aesthetic alive on the outside. Under the hood lies a thoroughly rebuilt and freshly overhauled 1.8T engine packed with brand-new components, professionally engineered and built to handle around 400 horsepower. Power is put to the ground through a custom 5-speed manual transmission sourced from a diesel variant, featuring optimized, longer gear ratios perfectly tailored for high-power delivery. The car's stance is locked in using MTS Technik height-adjustable coilovers, perfectly accentuating the rare 3-piece RH ZW1 wheels originating from a Porsche 924, measuring 8.5J up front and a deep 9.5J in the rear. Inside, the cabin remains remarkably original and well-preserved, offering a true time-capsule feel paired with modern turbocharged thrills.",
+    "features": [
+      "1.8L Turbo (1.8T) Engine Swap",
+      "Thoroughly Overhauled Motor with New Components",
+      "Prepared for ~400 Horsepower",
+      "5-Speed Manual Transmission from Diesel (Optimized Gear Ratios)",
+      "MTS Technik Height-Adjustable Coilover Suspension",
+      "3-Piece RH ZW1 Wheels (Porsche 924 Spec)",
+      "Original Factory Exterior Look",
+      "Original Preserved Interior",
+      "Classic Wedge Coupe Styling with Active Rear Spoiler",
+      "Upgraded Turbo Performance Setup",
+      "Front-Wheel Drive Layout"
+    ],
+    "assignedEmployee": "emp01",
+    "featured": true
+  },
+  {
     "id": "peug40601",
     "vin": "VF38CXFXF81294821",
     "make": "Peugeot",

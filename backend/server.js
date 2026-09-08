@@ -11,6 +11,7 @@ const authRoutes = require('./routes/auth');
 const carsRoutes = require('./routes/cars');
 const employeesRoutes = require('./routes/employees');
 const contactRoutes = require('./routes/contact');
+const testDrivesRouter = require('./routes/testDrives');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -20,6 +21,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(uploadDir));
+app.use('/api/test-drives', testDrivesRouter);
 
 // ensure upload dir exists
 fs.mkdirSync(uploadDir, { recursive: true });

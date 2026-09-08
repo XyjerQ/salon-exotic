@@ -5,6 +5,7 @@ import ServiceHistory from '../components/ServiceHistory'
 import CarForm from '../components/CarForm'
 import EmployeesList from '../components/EmployeesList'
 import EmployeeForm from '../components/EmployeeForm'
+import TestDrivesManager from '../components/TestDrivesManager'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
@@ -181,6 +182,16 @@ export default function AdminDashboard() {
             >
               Service History
             </button>
+            <button
+              onClick={() => setView('test-drives')}
+              className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
+                view === 'test-drives'
+                  ? 'border-blackline-accent text-black'
+                  : 'border-transparent text-gray-600 hover:text-black'
+              }`}
+            >
+              Test Drives
+            </button>
         </div>
 
         {error && (
@@ -271,6 +282,11 @@ export default function AdminDashboard() {
       {view === 'service-history' && (
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
           <ServiceHistory initialVin={serviceVin} />
+        </div>
+      )}
+      {view === 'test-drives' && isAdminOrManager && (
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+          <TestDrivesManager token={token} />
         </div>
       )}
     </main>
