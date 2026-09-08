@@ -13,6 +13,7 @@ const authRoutes = require('./routes/auth');
 const carsRoutes = require('./routes/cars');
 const employeesRoutes = require('./routes/employees');
 const contactRoutes = require('./routes/contact');
+const newsletterRoutes = require('./routes/newsletter');
 const testDrivesRouter = require('./routes/testDrives');
 
 const app = express();
@@ -52,6 +53,7 @@ app.use('/uploads', express.static(uploadDir));
 app.use('/api/auth/login', loginLimiter);
 app.use('/api/test-drives', publicFormLimiter, testDrivesRouter);
 app.use('/api/contact', publicFormLimiter, contactRoutes);
+app.use('/api/newsletter', publicFormLimiter, newsletterRoutes);
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 // ensure upload dir exists
