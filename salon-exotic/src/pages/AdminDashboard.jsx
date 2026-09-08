@@ -154,7 +154,7 @@ export default function AdminDashboard() {
               onClick={() => setView('cars-list')}
               className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
                 view === 'cars-list'
-                  ? 'border-blackline-accent text-black'
+                  ? 'border-black text-black'
                   : 'border-transparent text-gray-600 hover:text-black'
               }`}
             >
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
                 onClick={() => setView('employees-list')}
                 className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
                   view === 'employees-list'
-                    ? 'border-blackline-accent text-black'
+                    ? 'border-black text-black'
                     : 'border-transparent text-gray-600 hover:text-black'
                 }`}
               >
@@ -176,7 +176,7 @@ export default function AdminDashboard() {
               onClick={() => setView('service-history')}
               className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
                 view === 'service-history'
-                  ? 'border-blackline-accent text-black'
+                  ? 'border-black text-black'
                   : 'border-transparent text-gray-600 hover:text-black'
               }`}
             >
@@ -186,7 +186,7 @@ export default function AdminDashboard() {
               onClick={() => setView('test-drives')}
               className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
                 view === 'test-drives'
-                  ? 'border-blackline-accent text-black'
+                  ? 'border-black text-black'
                   : 'border-transparent text-gray-600 hover:text-black'
               }`}
             >
@@ -210,7 +210,7 @@ export default function AdminDashboard() {
         {view === 'cars-list' && (
           <div>
             <div className="mb-4 flex items-center gap-2">
-              <input placeholder="Search VIN" className="border px-3 py-2 rounded flex-1" onChange={(e) => fetchData(e.target.value)} />
+              <input placeholder="Search VIN" className="border px-3 py-2 rounded flex-1 bg-white" onChange={(e) => fetchData(e.target.value)} />
             </div>
             <CarList
               cars={cars}
@@ -278,17 +278,15 @@ export default function AdminDashboard() {
             loading={loading}
           />
         )}
-      </div>
-      {view === 'service-history' && (
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+
+        {view === 'service-history' && (
           <ServiceHistory initialVin={serviceVin} />
-        </div>
-      )}
-      {view === 'test-drives' && isAdminOrManager && (
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+        )}
+
+        {view === 'test-drives' && isAdminOrManager && (
           <TestDrivesManager token={token} />
-        </div>
-      )}
+        )}
+      </div>
     </main>
   )
 }

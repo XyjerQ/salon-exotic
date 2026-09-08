@@ -212,6 +212,69 @@ async function seedMissingCarFeatures(db) {
   }
 }
 
+async function seedTestDrives(db) {
+  const countRow = await db.get('SELECT COUNT(*) AS count FROM test_drives');
+  if ((countRow?.count || 0) > 0) return;
+
+  const cars = await db.all('SELECT id FROM cars LIMIT 5');
+  const carIds = cars.map(c => c.id);
+
+  const sampleTestDrives = [
+    {
+      customer_name: 'Adam Małysz',
+      customer_email: 'adam.malysz@example.com',
+      customer_phone: '+48 500 600 700',
+      car_id: carIds.length > 0 ? carIds[0] : null,
+      requested_date: '2026-09-15',
+      status: 'confirmed',
+      notes: 'Klient prosił o przygotowanie auta w czarnym kolorze i pełny bak.'
+    },
+    {
+      customer_name: 'Katarzyna Figura',
+      customer_email: 'k.figura@interia.pl',
+      customer_phone: '+48 601 702 803',
+      car_id: null,
+      requested_date: '2026-09-18',
+      status: 'pending',
+      notes: 'Zgłoszenie z formularza głównego, wymaga kontaktu telefonicznego.'
+    },
+    {
+      customer_name: 'Robert Kubica',
+      customer_email: 'f1.robert@kubica.pl',
+      customer_phone: '+48 999 888 777',
+      car_id: carIds.length > 1 ? carIds[1] : (carIds.length > 0 ? carIds[0] : null),
+      requested_date: '2026-09-10',
+      status: 'completed',
+      notes: 'Jazda odbyła się pomyślnie, klient wstępnie zainteresowany zakupem.'
+    },
+    {
+      customer_name: 'Janusz Tracz',
+      customer_email: 'tracz@interes.pl',
+      customer_phone: '+48 700 800 900',
+      car_id: null,
+      requested_date: '2026-09-22',
+      status: 'cancelled',
+      notes: 'Klient odwołał wizytę z powodu wyjazdu.'
+    }
+  ];
+
+  for (const td of sampleTestDrives) {
+    await db.run(
+      `INSERT INTO test_drives (customer_name, customer_email, customer_phone, car_id, requested_date, status, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        td.customer_name,
+        td.customer_email,
+        td.customer_phone,
+        td.car_id,
+        td.requested_date,
+        td.status,
+        td.notes
+      ]
+    );
+  }
+}
+
 async function ensureSeedData(db) {
   const tables = [
     'employees',
@@ -234,6 +297,7 @@ async function ensureSeedData(db) {
   const databaseHasData = counts.some((count) => count > 0);
   if (databaseHasData) {
     await seedMissingCarFeatures(db);
+    await seedTestDrives(db);
     return;
   }
 
@@ -272,6 +336,7 @@ async function ensureSeedData(db) {
   }
 
   await seedCars(db, employeeMap);
+  await seedTestDrives(db);
 }
 
 module.exports = {

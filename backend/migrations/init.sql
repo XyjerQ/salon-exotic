@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS test_drives (
   customer_name TEXT NOT NULL,
   customer_email TEXT NOT NULL,
   customer_phone TEXT,
-  car_id INTEGER NOT NULL,
+  car_id INTEGER,
   requested_date DATETIME NOT NULL,
   status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'confirmed', 'completed', 'cancelled')),
   notes TEXT,

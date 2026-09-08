@@ -28,6 +28,10 @@ export default function TestDrivesManager({ token }) {
       })
       if (!res.ok) throw new Error('Failed to fetch test drives')
       const data = await res.json()
+
+      // Sortowanie domyślne po dacie (rosnąco)
+      data.sort((a, b) => new Date(b.requested_date) - new Date(a.requested_date))
+      
       setTestDrives(data)
 
       const carsRes = await fetch(`${API_BASE}/cars`)
@@ -217,7 +221,7 @@ export default function TestDrivesManager({ token }) {
                           onChange={(e) => setSelectedCarId(e.target.value)}
                           className={tableInputClass}
                         >
-                          <option value="">-- Select stock car --</option>
+                          <option value="">-- Select car --</option>
                           {cars.map((car) => (
                             <option key={car.id} value={car.id}>
                               {car.make} {car.model} ({car.year}) - {car.vin?.slice(-6)}

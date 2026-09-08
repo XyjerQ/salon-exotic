@@ -21,7 +21,7 @@ const isValidEmail = (email) => {
   return emailRegex.test(email);
 };
 
-// 1. TWORZENIE ZGŁOSZENIA JAZDY PRÓBNEJ
+// 1. TWORZENIE ZGŁOSZENIA JAZDY PRÓBNEJ (Klient rezerwuje bez wybranego auta -> car_id = null)
 router.post('/', async (req, res) => {
   const db = req.app.get('db');
   const { name, phone, email, date } = req.body;
@@ -49,9 +49,6 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    let defaultCar = await db.get('SELECT id FROM cars LIMIT 1');
-    const fallbackCarId = defaultCar ? defaultCar.id : 1;
-
     const result = await db.run(
       `INSERT INTO test_drives (customer_name, customer_phone, customer_email, requested_date, car_id, status)
        VALUES (?, ?, ?, ?, ?, ?)`,
@@ -60,15 +57,18 @@ router.post('/', async (req, res) => {
         phone.trim(),
         email ? email.trim() : '',
         date,
-        fallbackCarId,
+        null, 
         'pending'
       ]
     );
 
-    const newTestDrive = await db.get(
-      'SELECT * FROM test_drives WHERE id = ?',
-      [result.lastID]
-    );
+    // Pobieramy utworzone zgłoszenie wraz z danymi auta (które będą nullami, co obsłuży frontend)
+    const newTestDrive = await db.get(`
+      SELECT td.*, c.make, c.model, c.year 
+      FROM test_drives td
+      LEFT JOIN cars c ON td.car_id = c.id
+      WHERE td.id = ?
+    `, [result.lastID]);
 
     res.status(201).json(newTestDrive);
   } catch (err) {
