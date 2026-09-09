@@ -309,6 +309,43 @@ async function seedNewsletterSubscribers(db) {
   }
 }
 
+async function seedContacts(db) {
+  const countRow = await db.get('SELECT COUNT(*) AS count FROM contacts');
+  if (Number(countRow?.count || 0) > 0) return;
+
+  const sampleContacts = [
+    {
+      name: 'Mateusz Zielinski',
+      email: 'mateusz.zielinski@example.com',
+      phone: '+48 501 234 567',
+      subject: 'Vehicle Availability',
+      message: 'Dzien dobry, czy Porsche 911 GT3 RS jest nadal dostepne? Chetnie umowie jazde probna.'
+    },
+    {
+      name: 'Julia Nowak',
+      email: 'julia.nowak@example.com',
+      phone: '+48 602 345 678',
+      subject: 'Financing Question',
+      message: 'Prosze o informacje dotyczace finansowania oraz wymaganej wplaty poczatkowej dla wybranego auta.'
+    },
+    {
+      name: 'Tomasz Wisniewski',
+      email: 'tomasz.wisniewski@example.com',
+      phone: null,
+      subject: 'Trade-In',
+      message: 'Czy przyjmujecie samochody sportowe w rozliczeniu? Moglbym przeslac zdjecia i dane auta.'
+    }
+  ];
+
+  for (const contact of sampleContacts) {
+    await db.run(
+      `INSERT INTO contacts (name, email, phone, subject, message, status)
+       VALUES (?, ?, ?, ?, ?, 'new')`,
+      [contact.name, contact.email, contact.phone, contact.subject, contact.message]
+    );
+  }
+}
+
 async function seedSiteSettings(db) {
   for (const [key, value] of Object.entries(DEFAULT_SITE_SETTINGS)) {
     await db.run(
@@ -392,6 +429,7 @@ async function ensureSeedData(db) {
   await seedRoles(db);
   await seedSiteSettings(db);
   await seedFaq(db);
+  await seedContacts(db);
   if (databaseHasData) {
     await seedMissingCarFeatures(db);
     await seedTestDrives(db);

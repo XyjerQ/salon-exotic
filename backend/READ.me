@@ -58,7 +58,7 @@ Naglowki dla requestow JSON:
 Tylko `admin` ma dostep do zakladki `Roles & Permissions` oraz API `/api/roles`.
 Administrator moze tworzyc custom role, nadawac im uprawnienia, przypisywac role pracownikom
 i usuwac role, które nie sa przypisane. Role systemowe (`admin`, `manager`, `sales`, `service`)
-nie moga zostac usuniete.
+mozna usunac z wyjatkiem `admin`, ale najpierw trzeba przeniesc przypisanych pracownikow do innej roli.
 
 Dostepne uprawnienia obejmuja m.in.:
 
@@ -70,6 +70,9 @@ Dostepne uprawnienia obejmuja m.in.:
 
 Uprawnienia sa ladowane przy autoryzacji z bazy, wiec custom role dziala na backendzie,
 a nie tylko w interfejsie.
+
+Przy pustej tabeli `contacts` seed dodaje trzy przykladowe wiadomosci klientów.
+Istniejace wiadomosci nie sa nadpisywane.
 
 ### Ustawienia witryny
 

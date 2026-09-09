@@ -136,7 +136,21 @@ export default function RolesManager({ token }) {
             {roles.map((role) => (
               <div key={role.id} className={`flex items-center rounded-md ${role.id === selectedRoleId ? 'bg-black text-white' : 'hover:bg-gray-100'}`}>
                 <button onClick={() => selectRole(role)} className="flex-1 text-left px-3 py-2 text-sm truncate">{role.display_name}</button>
-                {!role.is_system && <button onClick={() => deleteRole(role)} title="Delete role" aria-label={`Delete ${role.display_name}`} className="text-red-600 p-2 hover:bg-red-100 rounded">&#128465;</button>}
+                {role.name !== 'admin' && (
+                  <button
+                    onClick={() => deleteRole(role)}
+                    title="Delete role"
+                    aria-label={`Delete ${role.display_name}`}
+                    className="text-red-600 p-2 hover:bg-red-100 rounded transition-colors"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M3 6h18" />
+                      <path d="M8 6V4h8v2" />
+                      <path d="M19 6l-1 14H6L5 6" />
+                      <path d="M10 11v5M14 11v5" />
+                    </svg>
+                  </button>
+                )}
               </div>
             ))}
           </div>

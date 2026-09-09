@@ -79,21 +79,6 @@ router.put('/:id', auth, requireAdmin, async (req, res) => {
   }
 });
 
-router.delete('/:id', auth, requireAdmin, async (req, res) => {
-  try {
-    const db = req.app.get('db');
-    const role = await db.get('SELECT * FROM roles WHERE id = ?', [Number(req.params.id)]);
-    if (!role) return res.status(404).json({ error: 'Role not found' });
-    if (role.is_system) return res.status(400).json({ error: 'System roles cannot be deleted' });
-    const assigned = await db.get('SELECT COUNT(*) AS count FROM employees WHERE role_id = ?', [role.id]);
-    if (assigned.count > 0) return res.status(400).json({ error: 'Reassign employees before deleting this role' });
-    await db.run('DELETE FROM roles WHERE id = ?', [role.id]);
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(500).json({ error: 'Unable to delete role' });
-  }
-});
-
 router.put('/employees/:id/role', auth, requireAdmin, async (req, res) => {
   const roleId = Number(req.body.role_id);
   const employeeId = Number(req.params.id);
@@ -108,6 +93,21 @@ router.put('/employees/:id/role', auth, requireAdmin, async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: 'Unable to assign role' });
+  }
+});
+
+router.delete('/:id', auth, requireAdmin, async (req, res) => {
+  try {
+    const db = req.app.get('db');
+    const role = await db.get('SELECT * FROM roles WHERE id = ?', [Number(req.params.id)]);
+    if (!role) return res.status(404).json({ error: 'Role not found' });
+    if (role.name === 'admin') return res.status(400).json({ error: 'The admin role cannot be deleted' });
+    const assigned = await db.get('SELECT COUNT(*) AS count FROM employees WHERE role_id = ?', [role.id]);
+    if (assigned.count > 0) return res.status(400).json({ error: 'Reassign employees before deleting this role' });
+    await db.run('DELETE FROM roles WHERE id = ?', [role.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Unable to delete role' });
   }
 });
 
