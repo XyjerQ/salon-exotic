@@ -1,9 +1,37 @@
-import React from 'react'
+import React, { useState } from 'react'
 import employees from '../data/employees.json'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
+
 export default function Contact() {
   const gridRef = useScrollAnimation({ staggerChildren: true })
+  const [form, setForm] = useState({ name: '', email: '', phone: '', subject: 'General Inquiry', message: '' })
+  const [formState, setFormState] = useState({ loading: false, error: '', success: '' })
+
+  const handleChange = (event) => {
+    setForm((current) => ({ ...current, [event.target.name]: event.target.value }))
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setFormState({ loading: true, error: '', success: '' })
+
+    try {
+      const response = await fetch(`${API_BASE}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Unable to send your message')
+
+      setForm({ name: '', email: '', phone: '', subject: 'General Inquiry', message: '' })
+      setFormState({ loading: false, error: '', success: 'Thank you. Your message has been sent.' })
+    } catch (error) {
+      setFormState({ loading: false, error: error.message, success: '' })
+    }
+  }
 
   return (
     <main className="bg-gray-50 text-black min-h-screen">
@@ -143,11 +171,15 @@ export default function Contact() {
             Have a question? Fill out the form below and we'll get back to you as soon as possible.
           </p>
           
-          <form className="grid md:grid-cols-2 gap-4">
+          <form className="grid md:grid-cols-2 gap-4" onSubmit={handleSubmit}>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
               <input 
                 type="text" 
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                required
                 className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blackline-accent"
                 placeholder="John Doe"
               />
@@ -157,6 +189,10 @@ export default function Contact() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
               <input 
                 type="email" 
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                required
                 className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blackline-accent"
                 placeholder="john@example.com"
               />
@@ -166,6 +202,9 @@ export default function Contact() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
               <input 
                 type="tel" 
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
                 className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blackline-accent"
                 placeholder="+48 600 000 000"
               />
@@ -173,7 +212,7 @@ export default function Contact() {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-              <select className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blackline-accent">
+              <select name="subject" value={form.subject} onChange={handleChange} className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blackline-accent">
                 <option>General Inquiry</option>
                 <option>Test Drive Request</option>
                 <option>Financing Question</option>
@@ -186,17 +225,25 @@ export default function Contact() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
               <textarea 
                 rows="4"
+                name="message"
+                value={form.message}
+                onChange={handleChange}
+                required
+                minLength="10"
                 className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blackline-accent resize-none"
                 placeholder="Tell us more about your needs..."
               ></textarea>
             </div>
             
             <div className="md:col-span-2">
+              {formState.error && <p className="mb-4 text-red-600">{formState.error}</p>}
+              {formState.success && <p className="mb-4 text-green-700">{formState.success}</p>}
               <button 
                 type="submit"
+                disabled={formState.loading}
                 className="w-full md:w-auto bg-black text-white px-8 py-3 rounded-md hover:bg-gray-800 transition-colors font-semibold"
               >
-                Send Message
+                {formState.loading ? 'Sending...' : 'Send Message'}
               </button>
             </div>
           </form>

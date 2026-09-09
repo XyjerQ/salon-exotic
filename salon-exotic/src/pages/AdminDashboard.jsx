@@ -6,6 +6,7 @@ import CarForm from '../components/CarForm'
 import EmployeesList from '../components/EmployeesList'
 import EmployeeForm from '../components/EmployeeForm'
 import TestDrivesManager from '../components/TestDrivesManager'
+import MessagesManager from '../components/MessagesManager'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
@@ -192,6 +193,18 @@ export default function AdminDashboard() {
             >
               Test Drives
             </button>
+            {isAdminOrManager && (
+              <button
+                onClick={() => setView('messages')}
+                className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
+                  view === 'messages'
+                    ? 'border-black text-black'
+                    : 'border-transparent text-gray-600 hover:text-black'
+                }`}
+              >
+                Messages
+              </button>
+            )}
         </div>
 
         {error && (
@@ -285,6 +298,10 @@ export default function AdminDashboard() {
 
         {view === 'test-drives' && isAdminOrManager && (
           <TestDrivesManager token={token} />
+        )}
+
+        {view === 'messages' && isAdminOrManager && (
+          <MessagesManager token={token} />
         )}
       </div>
     </main>

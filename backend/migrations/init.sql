@@ -107,8 +107,12 @@ CREATE TABLE IF NOT EXISTS contacts (
   name TEXT NOT NULL,
   email TEXT NOT NULL,
   phone TEXT,
+  subject TEXT NOT NULL DEFAULT 'General Inquiry',
   message TEXT NOT NULL,
   status TEXT DEFAULT 'new' CHECK(status IN ('new', 'in_progress', 'resolved')),
+  reply TEXT,
+  replied_at DATETIME,
+  replied_by INTEGER,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

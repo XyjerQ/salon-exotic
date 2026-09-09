@@ -13,6 +13,21 @@ Domyslny serwer:
 
 - `http://localhost:4000`
 
+### Konfiguracja odpowiedzi mailowych
+
+Odpowiedzi z panelu `Messages` wymagaja ustawienia w `backend/.env`:
+
+```env
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=mailer@example.com
+SMTP_PASS=haslo-aplikacji
+MAIL_FROM=Salon Exotic <mailer@example.com>
+```
+
+Bez tych zmiennych wiadomosc i odpowiedz nadal zapisza sie w bazie, ale API nie wysle maila.
+
 ## 2. Zmienne w Postman
 
 Utworz Collection Variables:
@@ -34,6 +49,26 @@ Naglowki dla requestow JSON:
 - Tworzone konto pracownika ma zawsze role `sales`
 - `sales` moze tworzyc/edytowac/usuwac tylko swoje auta
 - `admin` moze zarzadzac wszystkimi autami i przypisywac `advisor_id`
+- `admin` i `manager` maja dostep do `GET /api/messages` oraz `PUT /api/messages/:id`
+
+### Wiadomosci
+
+Publiczny formularz zapisuje dane przez `POST /api/contact`:
+
+```json
+{
+  "name": "Jan Kowalski",
+  "email": "jan@example.com",
+  "phone": "+48 600 000 000",
+  "subject": "General Inquiry",
+  "message": "Prosze o kontakt w sprawie auta."
+}
+```
+
+Odpowiedz pracownika wysyla mail do klienta i oznacza wiadomosc jako rozwiazana:
+
+- `GET /api/messages` z naglowkiem `Authorization: Bearer {{adminToken}}`
+- `PUT /api/messages/:id` z body `{ "reply": "Dziekujemy za kontakt..." }`
 
 ## 4. Przygotowanie pierwszego admina
 

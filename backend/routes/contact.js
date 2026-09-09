@@ -8,6 +8,7 @@ router.post('/', async (req, res) => {
   const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
   const message = typeof req.body.message === 'string' ? req.body.message.trim() : '';
   const phone = typeof req.body.phone === 'string' ? req.body.phone.trim() : null;
+  const subject = typeof req.body.subject === 'string' ? req.body.subject.trim() : 'General Inquiry';
 
   if (name.length < 2 || name.length > 120) {
     return res.status(400).json({ error: 'Name must be between 2 and 120 characters' });
@@ -18,11 +19,14 @@ router.post('/', async (req, res) => {
   if (message.length < 10 || message.length > 5000) {
     return res.status(400).json({ error: 'Message must be between 10 and 5000 characters' });
   }
+  if (subject.length < 2 || subject.length > 120) {
+    return res.status(400).json({ error: 'Subject must be between 2 and 120 characters' });
+  }
 
   try {
     const result = await db.run(
-      'INSERT INTO contacts (name, email, phone, message) VALUES (?, ?, ?, ?)',
-      [name, email, phone, message]
+      'INSERT INTO contacts (name, email, phone, subject, message) VALUES (?, ?, ?, ?, ?)',
+      [name, email, phone, subject, message]
     );
     res.status(201).json({ ok: true, id: result.lastID });
   } catch (err) {

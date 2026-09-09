@@ -15,6 +15,17 @@ async function init() {
   await db.exec('PRAGMA foreign_keys = ON;');
   const sql = await fs.readFile(sqlFile, 'utf8');
   await db.exec(sql);
+  const contactColumns = await db.all('PRAGMA table_info(contacts)');
+  const existingContactColumns = new Set(contactColumns.map(column => column.name));
+  const contactColumnMigrations = [
+    ['subject', "ALTER TABLE contacts ADD COLUMN subject TEXT NOT NULL DEFAULT 'General Inquiry'"],
+    ['reply', 'ALTER TABLE contacts ADD COLUMN reply TEXT'],
+    ['replied_at', 'ALTER TABLE contacts ADD COLUMN replied_at DATETIME'],
+    ['replied_by', 'ALTER TABLE contacts ADD COLUMN replied_by INTEGER']
+  ];
+  for (const [column, migration] of contactColumnMigrations) {
+    if (!existingContactColumns.has(column)) await db.exec(migration);
+  }
   await ensureCarSchemaExtras(db);
   await ensureSeedData(db);
   return db;

@@ -15,6 +15,7 @@ const employeesRoutes = require('./routes/employees');
 const contactRoutes = require('./routes/contact');
 const newsletterRoutes = require('./routes/newsletter');
 const testDrivesRouter = require('./routes/testDrives');
+const messagesRoutes = require('./routes/messages');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -70,6 +71,7 @@ init().then(db => {
   app.use('/api/auth', authRoutes);
   app.use('/api/cars', carsRoutes);
   app.use('/api/employees', employeesRoutes);
+  app.use('/api/messages', messagesRoutes);
 
   app.use((err, req, res, next) => {
     if (res.headersSent) return next(err);
