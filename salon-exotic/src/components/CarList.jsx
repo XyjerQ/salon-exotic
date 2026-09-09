@@ -118,6 +118,7 @@ export default function CarList({ cars = [], employees = [], userRole, onEdit, o
                         <div className="mb-2 flex flex-wrap gap-2">
                           {Boolean(car.featured) && <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800">Featured</span>}
                           <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">{car.vehicle_type || 'inventory'}</span>
+                          {car.status === 'sold' && <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">sold</span>}
                         </div>
                       </div>
 

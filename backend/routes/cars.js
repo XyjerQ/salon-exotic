@@ -31,6 +31,7 @@ const isAdmin = (req) => req.user?.role === 'admin';
 const isManagerOrAdmin = (req) => hasPermission(req, 'cars.manage_all');
 const isService = (req) => req.user?.role === 'service';
 const canManageCars = (req) => hasPermission(req, 'cars.view') || hasPermission(req, 'cars.create') || hasPermission(req, 'cars.edit');
+const validCarStatuses = new Set(['available', 'reserved', 'sold']);
 
 function toBoolInt(value, fallback = 0) {
   if (value === undefined || value === null || value === '') return fallback;
@@ -44,6 +45,41 @@ function maybeNumber(value) {
   if (value === undefined || value === null || value === '') return null;
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
+}
+
+async function syncServiceTransaction(db, serviceEntry, employeeId) {
+  const car = await db.get('SELECT owner_name, owner_email, owner_contact FROM cars WHERE id = ?', [serviceEntry.car_id]);
+  const existing = await db.get('SELECT id FROM transaction_history WHERE service_history_id = ?', [serviceEntry.id]);
+  const values = [
+    serviceEntry.car_id,
+    employeeId || null,
+    car?.owner_name || 'Salon Exotic',
+    car?.owner_email || null,
+    car?.owner_contact || null,
+    serviceEntry.service_type,
+    serviceEntry.description || null,
+    maybeNumber(serviceEntry.cost) || 0,
+    serviceEntry.service_date,
+    serviceEntry.provider || null
+  ];
+
+  if (existing) {
+    await db.run(
+      `UPDATE transaction_history
+       SET car_id=?, employee_id=?, customer_name=?, customer_email=?, customer_phone=?, title=?, description=?, amount=?, transaction_date=?, notes=?, updated_at=CURRENT_TIMESTAMP
+       WHERE id=?`,
+      [...values, existing.id]
+    );
+    return existing.id;
+  }
+
+  const result = await db.run(
+    `INSERT INTO transaction_history
+     (transaction_type, service_history_id, car_id, employee_id, customer_name, customer_email, customer_phone, title, description, amount, status, transaction_date, notes)
+     VALUES ('service', ?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?, ?)`,
+    [serviceEntry.id, ...values]
+  );
+  return result.lastID;
 }
 
 function parseArrayField(value, defaultValue = []) {
@@ -197,10 +233,14 @@ async function upsertCarRelations(db, carId, payload) {
 
 router.get('/', async (req, res) => {
   const db = req.app.get('db');
-  const { q, advisor_id, minPrice, maxPrice, featured, vin } = req.query;
+  const { q, advisor_id, minPrice, maxPrice, featured, vin, public: publicView } = req.query;
 
   let sql = 'SELECT c.* FROM cars c WHERE 1=1';
   const params = [];
+
+  if (publicView === 'true' || publicView === '1') {
+    sql += " AND c.vehicle_type = 'inventory' AND c.inventory_visible = 1";
+  }
 
   if (q) {
     sql += ' AND (c.make LIKE ? OR c.model LIKE ? OR c.description LIKE ?)';
@@ -290,9 +330,9 @@ router.post('/:id/service', auth, async (req, res) => {
       );
     }
 
-    await db.exec('COMMIT');
-
     const inserted = await db.get('SELECT * FROM car_service_history WHERE id = ?', [result.lastID]);
+    await syncServiceTransaction(db, inserted, req.user.id);
+    await db.exec('COMMIT');
     res.status(201).json(inserted);
   } catch (err) {
     await db.exec('ROLLBACK');
@@ -337,10 +377,12 @@ router.put('/service/:id', auth, async (req, res) => {
       );
     }
 
+    const updatedService = await db.get('SELECT * FROM car_service_history WHERE id = ?', [id]);
+    await syncServiceTransaction(db, updatedService, req.user.id);
+
     await db.exec('COMMIT');
 
-    const updated = await db.get('SELECT * FROM car_service_history WHERE id = ?', [id]);
-    res.json(updated);
+    res.json(updatedService);
   } catch (err) {
     await db.exec('ROLLBACK');
     res.status(500).json({ error: 'Update failed', details: err.message });
@@ -363,6 +405,7 @@ router.delete('/service/:id', auth, async (req, res) => {
   }
 
   try {
+    await db.run('DELETE FROM transaction_history WHERE service_history_id = ?', [id]);
     await db.run('DELETE FROM car_service_history WHERE id = ?', [id]);
     res.status(204).end();
   } catch (err) {
@@ -409,11 +452,17 @@ router.post(
       vin,
       vehicle_type,
       owner_name,
-      owner_contact
+      owner_contact,
+      status,
+      inventory_visible
     } = req.body;
 
     // Rola service może tworzyć wyłącznie auta typu 'customer'
     const targetVehicleType = vehicle_type ?? 'inventory';
+    if (status && !validCarStatuses.has(status)) return res.status(400).json({ error: 'Invalid vehicle status' });
+    const isInventoryVisible = isManagerOrAdmin(req) || hasPermission(req, 'cars.edit')
+      ? toBoolInt(inventory_visible, 1)
+      : 1;
     if (isService(req) && targetVehicleType !== 'customer') {
       return res.status(403).json({ error: 'Service role can only manage customer vehicles' });
     }
@@ -433,7 +482,7 @@ router.post(
     await db.exec('BEGIN');
     try {
       const result = await db.run(
-        'INSERT INTO cars (make, model, year, price, description, transmission, drivetrain, fuel_type, engine, mileage_km, horsepower_hp, exterior_color, interior_color, image_path, advisor_id, featured, vin, vehicle_type, owner_name, owner_contact) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO cars (make, model, year, price, description, transmission, drivetrain, fuel_type, engine, mileage_km, horsepower_hp, exterior_color, interior_color, image_path, advisor_id, featured, vin, vehicle_type, owner_name, owner_contact, status, inventory_visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
           make ?? null,
           model ?? null,
@@ -454,7 +503,9 @@ router.post(
           vin ?? null,
           targetVehicleType,
           owner_name ?? null,
-          owner_contact ?? null
+          owner_contact ?? null,
+          status && validCarStatuses.has(status) ? status : 'available',
+          isInventoryVisible
         ]
       );
 
@@ -525,10 +576,16 @@ router.put(
       vin,
       vehicle_type,
       owner_name,
-      owner_contact
+      owner_contact,
+      status,
+      inventory_visible
     } = req.body;
 
     const targetVehicleType = vehicle_type ?? existing.vehicle_type;
+    if (status && !validCarStatuses.has(status)) return res.status(400).json({ error: 'Invalid vehicle status' });
+    const nextInventoryVisible = isManagerOrAdmin(req) || hasPermission(req, 'cars.edit')
+      ? toBoolInt(inventory_visible, existing.inventory_visible ?? 1)
+      : existing.inventory_visible ?? 1;
     if (isService(req) && targetVehicleType !== 'customer') {
       return res.status(403).json({ error: 'Service role cannot change vehicle type to inventory' });
     }
@@ -562,7 +619,7 @@ router.put(
     await db.exec('BEGIN');
     try {
       await db.run(
-        'UPDATE cars SET make=?, model=?, year=?, price=?, description=?, transmission=?, drivetrain=?, fuel_type=?, engine=?, mileage_km=?, horsepower_hp=?, exterior_color=?, interior_color=?, advisor_id=?, featured=?, vin=?, vehicle_type=?, owner_name=?, owner_contact=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
+        'UPDATE cars SET make=?, model=?, year=?, price=?, description=?, transmission=?, drivetrain=?, fuel_type=?, engine=?, mileage_km=?, horsepower_hp=?, exterior_color=?, interior_color=?, advisor_id=?, featured=?, vin=?, vehicle_type=?, owner_name=?, owner_contact=?, status=?, inventory_visible=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
         [
           make ?? existing.make,
           model ?? existing.model,
@@ -583,6 +640,8 @@ router.put(
           targetVehicleType,
           owner_name ?? existing.owner_name,
           owner_contact ?? existing.owner_contact,
+          status ?? existing.status,
+          nextInventoryVisible,
           carId
         ]
       );

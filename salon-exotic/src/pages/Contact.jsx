@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import employees from '../data/employees.json'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { useSiteSettings } from '../context/SiteSettingsContext'
@@ -7,8 +8,16 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
 export default function Contact() {
   const { settings } = useSiteSettings()
+  const [searchParams] = useSearchParams()
+  const vehicle = searchParams.get('vehicle')
   const gridRef = useScrollAnimation({ staggerChildren: true })
-  const [form, setForm] = useState({ name: '', email: '', phone: '', subject: 'General Inquiry', message: '' })
+  const [form, setForm] = useState(() => ({
+    name: '',
+    email: '',
+    phone: '',
+    subject: vehicle ? 'Vehicle Inquiry' : 'General Inquiry',
+    message: vehicle ? `I would like to inquire about ${vehicle}.` : ''
+  }))
   const [formState, setFormState] = useState({ loading: false, error: '', success: '' })
 
   const handleChange = (event) => {
@@ -214,6 +223,7 @@ export default function Contact() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
               <select name="subject" value={form.subject} onChange={handleChange} className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blackline-accent">
                 <option>General Inquiry</option>
+                <option>Vehicle Inquiry</option>
                 <option>Test Drive Request</option>
                 <option>Financing Question</option>
                 <option>Vehicle Availability</option>

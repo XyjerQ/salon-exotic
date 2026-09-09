@@ -19,6 +19,7 @@ const messagesRoutes = require('./routes/messages');
 const settingsRoutes = require('./routes/settings');
 const faqRoutes = require('./routes/faq');
 const rolesRoutes = require('./routes/roles');
+const transactionHistoryRoutes = require('./routes/transactionHistory');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -78,6 +79,7 @@ init().then(db => {
   app.use('/api/employees', employeesRoutes);
   app.use('/api/messages', messagesRoutes);
   app.use('/api/roles', rolesRoutes);
+  app.use('/api/transaction-history', transactionHistoryRoutes);
 
   app.use((err, req, res, next) => {
     if (res.headersSent) return next(err);

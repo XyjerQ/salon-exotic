@@ -34,6 +34,23 @@ router.get('/', auth, requireManager, async (req, res) => {
   }
 });
 
+router.patch('/:id/status', auth, async (req, res) => {
+  if (!hasPermission(req, 'messages.view')) return res.status(403).json({ error: 'Insufficient permissions' });
+  const allowedStatuses = new Set(['new', 'in_progress', 'resolved']);
+  const status = typeof req.body.status === 'string' ? req.body.status : '';
+  if (!allowedStatuses.has(status)) return res.status(400).json({ error: 'Invalid message status' });
+
+  try {
+    const db = req.app.get('db');
+    const result = await db.run('UPDATE contacts SET status = ? WHERE id = ?', [status, Number(req.params.id)]);
+    if (!result.changes) return res.status(404).json({ error: 'Message not found' });
+    res.json({ ok: true, status });
+  } catch (err) {
+    console.error('Message status update failed:', err);
+    res.status(500).json({ error: 'Unable to update message status' });
+  }
+});
+
 router.put('/:id', auth, requireReplyPermission, async (req, res) => {
   const reply = typeof req.body.reply === 'string' ? req.body.reply.trim() : '';
   if (reply.length < 2 || reply.length > 5000) {

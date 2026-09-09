@@ -36,8 +36,7 @@ export default function ServiceHistory({ initialVin = '' }) {
         if (initialVin) {
           const found = arr.find(c => c.vin?.toLowerCase() === initialVin.toLowerCase())
           if (found) {
-            setCar(found)
-            setHistory(found.service_history || [])
+            handleSelectCarFromDropdown(found.id)
           }
         }
       }
@@ -55,9 +54,13 @@ export default function ServiceHistory({ initialVin = '' }) {
       const res = await fetch(`${API_BASE}/cars?vin=${encodeURIComponent(vin)}`)
       const arr = await res.json()
       if (arr && arr.length > 0) {
-        const c = arr[0]
-        setCar(c)
-        setHistory(c.service_history || [])
+        const basicCar = arr[0]
+        // Pobieramy pełne dane z relacjami (w tym service_history)
+        const detailRes = await fetch(`${API_BASE}/cars/${basicCar.id}`)
+        const fullCar = await detailRes.json()
+        
+        setCar(fullCar)
+        setHistory(fullCar.service_history || [])
       } else {
         setCar(null)
         setHistory([])
@@ -72,25 +75,36 @@ export default function ServiceHistory({ initialVin = '' }) {
     setLoading(false)
   }
 
-  const handleSelectCarFromDropdown = (carId) => {
+  const handleSelectCarFromDropdown = async (carId) => {
     if (!carId) {
       setCar(null)
       setHistory([])
       setVinLookup('')
       return
     }
-    const selected = allCars.find(c => String(c.id) === String(carId))
-    if (selected) {
-      setCar(selected)
-      setVinLookup(selected.vin || '')
-      setHistory(selected.service_history || [])
-      setError('')
+    setError('')
+    setLoading(true)
+    try {
+      // Pobieramy pełne dane bezpośrednio po ID auta
+      const res = await fetch(`${API_BASE}/cars/${carId}`)
+      const fullCar = await res.json()
+      if (res.ok) {
+        setCar(fullCar)
+        setVinLookup(fullCar.vin || '')
+        setHistory(fullCar.service_history || [])
+      } else {
+        setError(fullCar.error || 'Failed to load car details')
+      }
+    } catch (e) {
+      console.error('handleSelectCarFromDropdown error:', e)
+      setError(e.message)
     }
+    setLoading(false)
   }
 
   const handleEntryAdded = async () => {
-    if (car?.vin) {
-      await lookupByVin(car.vin)
+    if (car?.id) {
+      await handleSelectCarFromDropdown(car.id)
     }
     await fetchAllCars()
   }
@@ -124,7 +138,7 @@ export default function ServiceHistory({ initialVin = '' }) {
       if (res.ok) {
         await res.json()
         cancelEdit()
-        if (car?.vin) await lookupByVin(car.vin)
+        if (car?.id) await handleSelectCarFromDropdown(car.id)
         await fetchAllCars()
       } else {
         const data = await res.json().catch(() => ({}))
@@ -145,7 +159,7 @@ export default function ServiceHistory({ initialVin = '' }) {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (res.status === 204) {
-        if (car?.vin) await lookupByVin(car.vin)
+        if (car?.id) await handleSelectCarFromDropdown(car.id)
         await fetchAllCars()
       } else {
         setError('Failed to delete')

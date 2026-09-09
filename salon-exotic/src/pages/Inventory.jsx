@@ -32,7 +32,7 @@ export default function Inventory() {
       setError('')
 
       try {
-        const res = await fetch(`${API_BASE}/cars`)
+        const res = await fetch(`${API_BASE}/cars?public=true`)
         if (!res.ok) {
           throw new Error('Failed to load inventory')
         }

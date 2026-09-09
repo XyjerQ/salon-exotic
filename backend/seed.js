@@ -54,6 +54,7 @@ async function ensureCarSchemaExtras(db) {
   await ensureColumn(db, 'cars', 'transmission', 'transmission TEXT');
   await ensureColumn(db, 'cars', 'drivetrain', 'drivetrain TEXT');
   await ensureColumn(db, 'cars', 'fuel_type', 'fuel_type TEXT');
+  await ensureColumn(db, 'cars', 'inventory_visible', 'inventory_visible INTEGER DEFAULT 1');
 }
 
 async function upsertEmployee(db, employee, overrides = {}) {
@@ -346,6 +347,104 @@ async function seedContacts(db) {
   }
 }
 
+async function seedTransactionHistory(db) {
+  const countRow = await db.get('SELECT COUNT(*) AS count FROM transaction_history');
+  if (Number(countRow?.count || 0) > 0) return;
+
+  const cars = await db.all('SELECT id, make, model FROM cars ORDER BY id LIMIT 4');
+  const salesEmployee = await db.get("SELECT id FROM employees WHERE role = 'sales' ORDER BY id LIMIT 1");
+  const serviceEmployee = await db.get("SELECT id FROM employees WHERE role = 'service' ORDER BY id LIMIT 1");
+  const manager = await db.get("SELECT id FROM employees WHERE role = 'manager' ORDER BY id LIMIT 1");
+  const salesId = salesEmployee?.id || manager?.id || null;
+  const serviceId = serviceEmployee?.id || manager?.id || salesId;
+
+  const records = [
+    {
+      type: 'vehicle_sale', carId: cars[0]?.id || null, employeeId: salesId,
+      customer: 'Piotr Kowalczyk', email: 'piotr.kowalczyk@example.com', phone: '+48 500 111 222',
+      title: `${cars[0]?.make || 'Porsche'} ${cars[0]?.model || '911'} sale`, description: 'Finalized vehicle sale after inspection and test drive.',
+      amount: 589000, payment: 'leasing', status: 'completed', date: '2026-08-28', notes: 'Delivery arranged to Warsaw.'
+    },
+    {
+      type: 'vehicle_sale', carId: cars[1]?.id || null, employeeId: salesId,
+      customer: 'Anna Zielinska', email: 'anna.zielinska@example.com', phone: '+48 601 222 333',
+      title: `${cars[1]?.make || 'BMW'} ${cars[1]?.model || 'M4'} sale`, description: 'Vehicle sold with ceramic coating package.',
+      amount: 329000, payment: 'transfer', status: 'completed', date: '2026-08-21', notes: null
+    },
+    {
+      type: 'service', carId: cars[2]?.id || null, employeeId: serviceId,
+      customer: 'Marek Wroblewski', email: 'marek.wroblewski@example.com', phone: '+48 602 333 444',
+      title: 'Full vehicle inspection', description: 'Pre-purchase inspection, diagnostics and fluid check.',
+      amount: 1450, payment: 'card', status: 'completed', date: '2026-09-02', notes: 'Customer requested a written report.'
+    },
+    {
+      type: 'detailing', carId: cars[3]?.id || cars[0]?.id || null, employeeId: serviceId,
+      customer: 'Karol Jablonski', email: 'karol.jablonski@example.com', phone: '+48 603 444 555',
+      title: 'Paint correction and ceramic coating', description: 'Two-stage correction, ceramic coating and interior detailing.',
+      amount: 6200, payment: 'cash', status: 'completed', date: '2026-08-30', notes: 'Maintenance wash recommended every two weeks.'
+    },
+    {
+      type: 'service', carId: cars[0]?.id || null, employeeId: serviceId,
+      customer: 'Salon Exotic', email: null, phone: null,
+      title: 'Seasonal fleet service', description: 'Oil, filters and brake inspection for showroom vehicle.',
+      amount: 2800, payment: 'transfer', status: 'in_progress', date: '2026-09-08', notes: 'Waiting for brake parts.'
+    }
+  ];
+
+  for (const record of records) {
+    await db.run(
+      `INSERT INTO transaction_history
+       (transaction_type, car_id, employee_id, customer_name, customer_email, customer_phone, title, description, amount, payment_method, status, transaction_date, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [record.type, record.carId, record.employeeId, record.customer, record.email, record.phone, record.title, record.description, record.amount, record.payment, record.status, record.date, record.notes]
+    );
+  }
+}
+
+async function syncSoldCarsFromTransactions(db) {
+  await db.run(`
+    UPDATE cars
+    SET status = 'sold', inventory_visible = 0, updated_at = CURRENT_TIMESTAMP
+    WHERE id IN (
+      SELECT car_id FROM transaction_history
+      WHERE transaction_type = 'vehicle_sale' AND status = 'completed' AND car_id IS NOT NULL
+    )
+  `);
+}
+
+async function seedServiceTransactions(db) {
+  const serviceEntries = await db.all(`
+    SELECT csh.*, c.owner_name, c.owner_email, c.owner_contact
+    FROM car_service_history csh
+    LEFT JOIN cars c ON c.id = csh.car_id
+    LEFT JOIN transaction_history th ON th.service_history_id = csh.id
+    WHERE th.id IS NULL
+  `);
+  if (serviceEntries.length === 0) return;
+
+  const employee = await db.get("SELECT id FROM employees WHERE role IN ('service', 'manager', 'admin') ORDER BY CASE role WHEN 'service' THEN 1 WHEN 'manager' THEN 2 ELSE 3 END LIMIT 1");
+  for (const entry of serviceEntries) {
+    await db.run(
+      `INSERT INTO transaction_history
+       (transaction_type, service_history_id, car_id, employee_id, customer_name, customer_email, customer_phone, title, description, amount, status, transaction_date, notes)
+       VALUES ('service', ?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?, ?)`,
+      [
+        entry.id,
+        entry.car_id,
+        employee?.id || null,
+        entry.owner_name || 'Salon Exotic',
+        entry.owner_email || null,
+        entry.owner_contact || null,
+        entry.service_type,
+        entry.description || null,
+        Number(entry.cost) || 0,
+        entry.service_date,
+        entry.provider || null
+      ]
+    );
+  }
+}
+
 async function seedSiteSettings(db) {
   for (const [key, value] of Object.entries(DEFAULT_SITE_SETTINGS)) {
     await db.run(
@@ -430,6 +529,9 @@ async function ensureSeedData(db) {
   await seedSiteSettings(db);
   await seedFaq(db);
   await seedContacts(db);
+  await seedTransactionHistory(db);
+  await seedServiceTransactions(db);
+  await syncSoldCarsFromTransactions(db);
   if (databaseHasData) {
     await seedMissingCarFeatures(db);
     await seedTestDrives(db);

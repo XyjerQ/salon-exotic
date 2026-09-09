@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
+const messageStatusLabels = { new: 'New', in_progress: 'In progress', resolved: 'Resolved' }
 
 export default function MessagesManager({ token }) {
   const [messages, setMessages] = useState([])
@@ -58,6 +59,26 @@ export default function MessagesManager({ token }) {
     }
   }
 
+  const updateStatus = async (messageId, status) => {
+    setError('')
+    try {
+      const response = await fetch(`${API_BASE}/messages/${messageId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Unable to update message status')
+      setMessages((current) => current.map((message) => message.id === messageId ? { ...message, status } : message))
+      setSelectedMessage((current) => current ? { ...current, status } : current)
+    } catch (statusError) {
+      setError(statusError.message)
+    }
+  }
+
   if (loading) return <p className="text-gray-600">Loading messages...</p>
 
   return (
@@ -80,9 +101,9 @@ export default function MessagesManager({ token }) {
               </p>
             </div>
             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-              selectedMessage.reply ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+              selectedMessage.status === 'resolved' ? 'bg-green-100 text-green-800' : selectedMessage.status === 'in_progress' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
             }`}>
-              {selectedMessage.reply ? 'Replied' : 'New'}
+              {messageStatusLabels[selectedMessage.status] || 'New'}
             </span>
           </div>
 
@@ -93,6 +114,14 @@ export default function MessagesManager({ token }) {
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 min-h-[220px]">
                 <p className="whitespace-pre-wrap text-gray-800 leading-relaxed">{selectedMessage.message}</p>
               </div>
+
+              {(selectedMessage.vehicle_name || selectedMessage.vehicle_vin) && (
+                <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-blue-800 mb-2">Vehicle</p>
+                  <p className="font-semibold text-gray-900">{selectedMessage.vehicle_name || 'Vehicle inquiry'}</p>
+                  {selectedMessage.vehicle_vin && <p className="mt-1 font-mono text-sm text-gray-700">VIN: {selectedMessage.vehicle_vin}</p>}
+                </div>
+              )}
 
               {selectedMessage.reply && (
                 <div className="border-l-4 border-green-500 bg-green-50 p-5 mt-6">
@@ -127,6 +156,16 @@ export default function MessagesManager({ token }) {
                 {selectedMessage.email}
               </a>
               {selectedMessage.phone && <p className="text-sm text-gray-600 mt-2">{selectedMessage.phone}</p>}
+              <label className="mt-5 block">
+                <span className="mb-2 block text-sm font-semibold text-gray-700">Message status</span>
+                <select
+                  value={selectedMessage.status || 'new'}
+                  onChange={(event) => updateStatus(selectedMessage.id, event.target.value)}
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                >
+                  {Object.entries(messageStatusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
+              </label>
             </aside>
           </div>
         </div>
@@ -175,10 +214,10 @@ export default function MessagesManager({ token }) {
                       <td className="py-4 px-3 text-gray-600 truncate">{message.message}</td>
                       <td className="py-4 px-3 text-gray-600 whitespace-nowrap">{new Date(message.created_at).toLocaleDateString()}</td>
                       <td className="py-4 px-3">
-                        <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          message.reply ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                          <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          message.status === 'resolved' ? 'bg-green-100 text-green-800' : message.status === 'in_progress' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
                         }`}>
-                          {message.reply ? 'Replied' : 'New'}
+                          {messageStatusLabels[message.status] || 'New'}
                         </span>
                       </td>
                     </tr>

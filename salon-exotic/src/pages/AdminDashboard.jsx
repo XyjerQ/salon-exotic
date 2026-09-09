@@ -10,13 +10,14 @@ import MessagesManager from '../components/MessagesManager'
 import SiteSettingsManager from '../components/SiteSettingsManager'
 import FAQManager from '../components/FAQManager'
 import RolesManager from '../components/RolesManager'
+import TransactionHistoryManager from '../components/TransactionHistoryManager'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
 const legacyPermissions = {
-  manager: ['dashboard.view', 'employees.view', 'employees.create', 'employees.edit', 'cars.edit', 'test_drives.view', 'test_drives.manage', 'messages.view', 'messages.reply', 'site_settings.manage', 'faq.manage'],
-  sales: ['dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'test_drives.view', 'messages.view', 'messages.reply'],
-  service: ['dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'employees.view', 'messages.view', 'messages.reply']
+  manager: ['dashboard.view', 'employees.view', 'employees.create', 'employees.edit', 'cars.edit', 'transactions.view', 'transactions.create', 'transactions.edit', 'transactions.delete', 'transactions.manage_all', 'test_drives.view', 'test_drives.manage', 'messages.view', 'messages.reply', 'site_settings.manage', 'faq.manage'],
+  sales: ['dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'transactions.view', 'transactions.create', 'transactions.edit', 'transactions.delete', 'test_drives.view', 'messages.view', 'messages.reply'],
+  service: ['dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'transactions.view', 'transactions.create', 'transactions.edit', 'transactions.delete', 'employees.view', 'messages.view', 'messages.reply']
 }
 
 // ============= Main Dashboard =============
@@ -32,6 +33,7 @@ export default function AdminDashboard() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [serviceVin, setServiceVin] = useState('')
+  const [carFilter, setCarFilter] = useState('inventory')
 
   const token = localStorage.getItem('employeeToken')
   const user = JSON.parse(localStorage.getItem('employeeUser') || '{}')
@@ -43,9 +45,15 @@ export default function AdminDashboard() {
   const isAdminOrManager = hasPermission('employees.view')
   const canViewTestDrives = hasPermission('test_drives.view')
   const canViewMessages = hasPermission('messages.view')
+  const canViewTransactions = hasPermission('transactions.view')
   const isPrivileged = hasPermission('cars.edit')
   // Serwis oraz admin/manager mogą pobierać listę pracowników (potrzebne do nazwisk doradców)
   const canFetchEmployees = hasPermission('employees.view')
+  const carsForList = cars.filter((car) => {
+    if (carFilter === 'sold') return car.status === 'sold'
+    if (carFilter === 'customer') return car.vehicle_type === 'customer'
+    return car.vehicle_type !== 'customer' && car.status !== 'sold'
+  })
 
   useEffect(() => {
     if (!token) {
@@ -128,6 +136,16 @@ export default function AdminDashboard() {
     fetchData()
   }
 
+  const handleDashboardBack = () => {
+    if (view === 'employee-form') {
+      setView('employees-list')
+      setEditingEmployeeId(null)
+      return
+    }
+    setView('cars-list')
+    setEditingCarId(null)
+  }
+
   const getDashboardTitle = () => {
     if (user.role === 'admin') return 'Admin Dashboard'
     if (user.role === 'manager') return 'Management Dashboard'
@@ -145,6 +163,12 @@ export default function AdminDashboard() {
             <p className="text-gray-400 text-sm">Welcome, {user.name}</p>
           </div>
           <div className="flex gap-3">
+            <button
+              onClick={() => navigate('/')}
+              className="bg-white text-black hover:bg-gray-200 px-4 py-2 rounded-lg font-medium"
+            >
+              View website
+            </button>
             <button
               onClick={() => navigate(`/employee/profile/${user.id}`)}
               className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium"
@@ -220,6 +244,16 @@ export default function AdminDashboard() {
                 Messages
               </button>
             )}
+            {canViewTransactions && (
+              <button
+                onClick={() => setView('transactions')}
+                className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
+                  view === 'transactions' ? 'border-black text-black' : 'border-transparent text-gray-600 hover:text-black'
+                }`}
+              >
+                Transactions
+              </button>
+            )}
             {hasPermission('site_settings.manage') && (
               <button
                 onClick={() => setView('site-settings')}
@@ -266,14 +300,46 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {view !== 'cars-list' && (
+          <button
+            type="button"
+            onClick={handleDashboardBack}
+            title="Back"
+            aria-label="Back"
+            className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-gray-600 transition-colors hover:text-black"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M19 12H5" />
+              <path d="M12 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+        )}
+
         {/* Views */}
         {view === 'cars-list' && (
           <div>
-            <div className="mb-4 flex items-center gap-2">
+            <div className="mb-4 flex flex-wrap items-center gap-2">
               <input placeholder="Search VIN" className="border px-3 py-2 rounded flex-1 bg-white" onChange={(e) => fetchData(e.target.value)} />
+              {[
+                ['inventory', 'Inventory'],
+                ['customer', 'Customer vehicles'],
+                ['sold', 'Sold']
+              ].map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setCarFilter(value)}
+                  className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
+                    carFilter === value ? 'bg-black text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
             <CarList
-              cars={cars}
+              cars={carsForList}
               employees={employees}
               userRole={user.role}
               onViewDetails={(id) => navigate(`/car/${id}`)}
@@ -349,6 +415,10 @@ export default function AdminDashboard() {
 
         {view === 'messages' && canViewMessages && (
           <MessagesManager token={token} />
+        )}
+
+        {view === 'transactions' && canViewTransactions && (
+          <TransactionHistoryManager token={token} userRole={user.role} userPermissions={activePermissions} />
         )}
 
         {view === 'site-settings' && hasPermission('site_settings.manage') && (

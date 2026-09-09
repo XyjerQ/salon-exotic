@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS cars (
   image_path TEXT,
   advisor_id INTEGER,
   featured INTEGER DEFAULT 0 CHECK(featured IN (0, 1)),
+  inventory_visible INTEGER DEFAULT 1 CHECK(inventory_visible IN (0, 1)),
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY(advisor_id) REFERENCES employees(id) ON DELETE SET NULL
@@ -114,6 +115,28 @@ CREATE TABLE IF NOT EXISTS transactions (
   FOREIGN KEY(employee_id) REFERENCES employees(id) ON DELETE SET NULL
 );
 
+CREATE TABLE IF NOT EXISTS transaction_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  transaction_type TEXT NOT NULL CHECK(transaction_type IN ('vehicle_sale', 'service', 'detailing')),
+  service_history_id INTEGER,
+  car_id INTEGER,
+  employee_id INTEGER,
+  customer_name TEXT NOT NULL,
+  customer_email TEXT,
+  customer_phone TEXT,
+  title TEXT NOT NULL,
+  description TEXT,
+  amount REAL NOT NULL DEFAULT 0,
+  payment_method TEXT CHECK(payment_method IN ('cash', 'card', 'transfer', 'leasing', 'credit')),
+  status TEXT NOT NULL DEFAULT 'completed' CHECK(status IN ('planned', 'in_progress', 'completed', 'cancelled')),
+  transaction_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(car_id) REFERENCES cars(id) ON DELETE SET NULL,
+  FOREIGN KEY(employee_id) REFERENCES employees(id) ON DELETE SET NULL
+);
+
 CREATE TABLE IF NOT EXISTS test_drives (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   customer_name TEXT NOT NULL,
@@ -133,6 +156,8 @@ CREATE TABLE IF NOT EXISTS contacts (
   email TEXT NOT NULL,
   phone TEXT,
   subject TEXT NOT NULL DEFAULT 'General Inquiry',
+  vehicle_name TEXT,
+  vehicle_vin TEXT,
   message TEXT NOT NULL,
   status TEXT DEFAULT 'new' CHECK(status IN ('new', 'in_progress', 'resolved')),
   reply TEXT,
@@ -181,6 +206,8 @@ CREATE INDEX IF NOT EXISTS idx_car_features_car_id ON car_features(car_id);
 CREATE INDEX IF NOT EXISTS idx_car_service_history_car_id ON car_service_history(car_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_car_id ON transactions(car_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_employee_id ON transactions(employee_id);
+CREATE INDEX IF NOT EXISTS idx_transaction_history_type ON transaction_history(transaction_type);
+CREATE INDEX IF NOT EXISTS idx_transaction_history_employee_id ON transaction_history(employee_id);
 CREATE INDEX IF NOT EXISTS idx_cars_vin ON cars(vin);
 CREATE INDEX IF NOT EXISTS idx_cars_status ON cars(status);
 CREATE INDEX IF NOT EXISTS idx_site_settings_key ON site_settings(key);

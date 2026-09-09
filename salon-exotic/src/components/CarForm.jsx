@@ -16,6 +16,7 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
     price: '',
     description: '',
     featured: false,
+    inventory_visible: true,
     advisor_id: isService ? user.id : '',
     transmission: '',
     drivetrain: '',
@@ -61,7 +62,8 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
         year: data.year || new Date().getFullYear(),
         price: data.price || '',
         description: data.description || '',
-        featured: data.featured === 1,
+        featured: data.featured === 1 || data.featured === '1' || data.featured === true,
+        inventory_visible: data.inventory_visible !== 0,
         advisor_id: data.advisor_id || '',
         transmission: data.transmission || '',
         drivetrain: data.drivetrain || '',
@@ -122,6 +124,7 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
         advisor_id: currentAdvisorId,
         owner_name: formData.owner_name,
         owner_contact: formData.owner_contact,
+        inventory_visible: formData.inventory_visible ? 1 : 0,
         features: features || [],
         image_paths: imagesPayload.paths || []
       }
@@ -299,22 +302,27 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
           <ImagesUploader initial={imagesPayload.paths} onChange={handleImagesChange} />
         </section>
 
-        {/* Wyświetlane tylko dla admina, który nie jest w roli service */}
-        {isAdmin && !isService && (
+        {/* Visibility is editable by admin and sales; advisor/featured stay admin-only. */}
+        {(isAdmin || userRole === 'sales') && !isService && (
           <section className="space-y-4">
-            <h3 className="text-lg font-semibold">Admin options</h3>
-            <div className={`grid ${isCustomerVehicle ? 'md:grid-cols-1' : 'md:grid-cols-2'} gap-4`}>
-              <div>
+            <h3 className="text-lg font-semibold">Inventory options</h3>
+            <div className={`grid ${isAdmin && !isCustomerVehicle ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-4`}>
+              {isAdmin && <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Advisor</label>
                 <select name="advisor_id" value={formData.advisor_id} onChange={handleInputChange} className="border px-3 py-2 rounded w-full">
                   <option value="">Assign advisor</option>
                   {employees.map((employee) => <option key={employee.id} value={employee.id}>{employee.name}</option>)}
                 </select>
-              </div>
+              </div>}
               {!isCustomerVehicle && (
-                <label className="flex items-center gap-2 pt-8">
-                  <input type="checkbox" name="featured" checked={formData.featured} onChange={handleInputChange} /> Featured
-                </label>
+                <div className="space-y-3 pt-8">
+                  {isAdmin && <label className="flex items-center gap-2">
+                    <input type="checkbox" name="featured" checked={formData.featured} onChange={handleInputChange} /> Featured
+                  </label>}
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" name="inventory_visible" checked={formData.inventory_visible} onChange={handleInputChange} /> Visible in public inventory
+                  </label>
+                </div>
               )}
             </div>
           </section>

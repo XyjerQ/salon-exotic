@@ -55,8 +55,9 @@ export default function CarCard({ car, onViewDetails }) {
           onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = withBase('img/ui/fallback.svg'); setImageLoaded(true) }}
           onLoad={() => setImageLoaded(true)}
         />
-        <div className="absolute top-3 right-3 bg-black text-blackline-accent px-3 py-1 rounded-full text-sm font-semibold">
-          {car.year}
+        <div className="absolute top-3 right-3 flex gap-2">
+          {car.status === 'sold' && <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">Sold</span>}
+          <span className="bg-black text-blackline-accent px-3 py-1 rounded-full text-sm font-semibold">{car.year}</span>
         </div>
       </div>
       <div className="p-6 flex-1 flex flex-col">

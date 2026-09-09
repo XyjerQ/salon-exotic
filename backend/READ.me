@@ -50,6 +50,8 @@ Naglowki dla requestow JSON:
 - `sales` moze tworzyc/edytowac/usuwac tylko swoje auta
 - `admin` moze zarzadzac wszystkimi autami i przypisywac `advisor_id`
 - `admin` i `manager` maja dostep do `GET /api/messages` oraz `PUT /api/messages/:id`
+- Wiadomosci wyslane z `CarDetails` zapisuja nazwe auta i VIN w polach `vehicle_name` oraz `vehicle_vin`
+- Status wiadomosci mozna zmienic przez `PATCH /api/messages/:id/status` (`new`, `in_progress`, `resolved`)
 - `admin` i `manager` maja dostep do `PUT /api/settings`; publiczna strona pobiera ustawienia przez `GET /api/settings`
 - `admin` i `manager` maja dostep do zarzadzania FAQ; publiczna strona pobiera pytania przez `GET /api/faq`
 
@@ -73,6 +75,21 @@ a nie tylko w interfejsie.
 
 Przy pustej tabeli `contacts` seed dodaje trzy przykladowe wiadomosci klientów.
 Istniejace wiadomosci nie sa nadpisywane.
+
+### Historia transakcji
+
+Modul `Transactions History` zapisuje trzy typy operacji: `vehicle_sale`, `service` i `detailing`.
+Sales pracuje na sprzedazach aut, service na serwisie i detailingu, a admin/manager maja dostep do
+calosci historii. Rekordy sa filtrowane po pracowniku dla ról bez uprawnienia `transactions.manage_all`.
+Dodanie, edycja lub usuniecie wpisu w `Service History` automatycznie tworzy, aktualizuje lub usuwa
+powiazany rekord `service` w `Transactions History`.
+
+- `GET /api/transaction-history` - lista historii zgodna z uprawnieniami
+- `POST /api/transaction-history` - dodanie wpisu
+- `PUT /api/transaction-history/:id` - edycja wpisu
+- `DELETE /api/transaction-history/:id` - usuniecie wpisu
+
+Przy pustej tabeli `transaction_history` seed dodaje przykladowe sprzedaze aut, uslugi i detailing.
 
 ### Ustawienia witryny
 

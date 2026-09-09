@@ -9,6 +9,11 @@ const PERMISSIONS = [
   { key: 'employees.create', label: 'Add employees' },
   { key: 'employees.edit', label: 'Edit employees' },
   { key: 'employees.delete', label: 'Delete employees' },
+  { key: 'transactions.view', label: 'View transaction history' },
+  { key: 'transactions.create', label: 'Add transactions' },
+  { key: 'transactions.edit', label: 'Edit transactions' },
+  { key: 'transactions.delete', label: 'Delete transactions' },
+  { key: 'transactions.manage_all', label: 'Manage all transaction history' },
   { key: 'test_drives.view', label: 'View test drives' },
   { key: 'test_drives.manage', label: 'Manage test drives' },
   { key: 'messages.view', label: 'View messages' },
@@ -24,11 +29,12 @@ const BUILTIN_ROLE_PERMISSIONS = {
   manager: [
     'dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'cars.delete', 'cars.manage_all',
     'employees.view', 'employees.create', 'employees.edit',
+    'transactions.view', 'transactions.create', 'transactions.edit', 'transactions.delete', 'transactions.manage_all',
     'test_drives.view', 'test_drives.manage', 'messages.view', 'messages.reply',
     'site_settings.manage', 'faq.manage'
   ],
-  sales: ['dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'test_drives.view', 'messages.view', 'messages.reply'],
-  service: ['dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'employees.view', 'messages.view', 'messages.reply']
+  sales: ['dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'transactions.view', 'transactions.create', 'transactions.edit', 'transactions.delete', 'test_drives.view', 'messages.view', 'messages.reply'],
+  service: ['dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'transactions.view', 'transactions.create', 'transactions.edit', 'transactions.delete', 'employees.view', 'messages.view', 'messages.reply']
 };
 
 module.exports = { PERMISSIONS, BUILTIN_ROLE_PERMISSIONS };

@@ -48,6 +48,9 @@ export default function CarDetails() {
   const [employees, setEmployees] = useState([])
   const [selectedImage, setSelectedImage] = useState(0)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
+  const [isInquiryOpen, setIsInquiryOpen] = useState(false)
+  const [inquiryForm, setInquiryForm] = useState({ name: '', email: '', phone: '', message: '' })
+  const [inquiryState, setInquiryState] = useState({ loading: false, error: '', success: '' })
   const [loading, setLoading] = useState(true)
 
   const leftContentRef = useScrollAnimation()
@@ -153,15 +156,53 @@ export default function CarDetails() {
 
   const selectedImagePath = imageList[selectedImage] || imageList[0]
 
+  const handleInquiryChange = (event) => {
+    setInquiryForm((current) => ({ ...current, [event.target.name]: event.target.value }))
+  }
+
+  const handleInquirySubmit = async (event) => {
+    event.preventDefault()
+    setInquiryState({ loading: true, error: '', success: '' })
+
+    try {
+      const response = await fetch(`${API_BASE}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...inquiryForm,
+          subject: `Vehicle Inquiry: ${car.make} ${car.model}`,
+          vehicle_name: `${car.make} ${car.model}`,
+          vehicle_vin: car.vin || ''
+        })
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Unable to send your inquiry')
+
+      setInquiryForm({ name: '', email: '', phone: '', message: '' })
+      setInquiryState({ loading: false, error: '', success: 'Your inquiry has been sent successfully.' })
+    } catch (error) {
+      setInquiryState({ loading: false, error: error.message, success: '' })
+    }
+  }
+
   return (
     <main className="bg-gray-50 text-black min-h-screen">
       <div className="bg-black text-white pt-20 pb-8">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <p className="text-sm uppercase tracking-[0.2em] text-gray-400">Vehicle Details</p>
-          <h1 className="text-4xl md:text-6xl font-extrabold mt-2">{car.make} {car.model}</h1>
+          <div className="mt-2 flex flex-wrap items-center gap-4">
+            <h1 className="text-4xl md:text-6xl font-extrabold">{car.make} {car.model}</h1>
+          </div>
           {!isCustomerVehicle && (
-            <div className="flex items-center gap-6 mt-6">
-              <p className="text-3xl md:text-4xl text-blackline-accent font-bold">{formatMoney(car.price)}</p>
+            <div className="flex flex-wrap items-center gap-4 mt-6">
+              <p className={`text-3xl md:text-4xl text-blackline-accent font-bold ${car.status === 'sold' ? 'line-through opacity-70' : ''}`}>
+                {formatMoney(car.price)}
+              </p>
+              {car.status === 'sold' && (
+                <span className="rounded-full bg-red-600 px-4 py-2 text-sm font-bold uppercase tracking-wider text-white">
+                  Sold
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -378,7 +419,10 @@ export default function CarDetails() {
 
                 {!isCustomerVehicle && (
                   <button
-                    onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
+                    onClick={() => {
+                      setInquiryState({ loading: false, error: '', success: '' })
+                      setIsInquiryOpen(true)
+                    }}
                     className="w-full bg-gray-300 hover:bg-blackline-accent text-black font-bold py-4 rounded-lg mt-4 transition-colors"
                   >
                     Inquire about this vehicle
@@ -447,6 +491,63 @@ export default function CarDetails() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
+        </div>
+      )}
+
+      {isInquiryOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setIsInquiryOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="vehicle-inquiry-title"
+            className="relative max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-xl bg-white p-6 shadow-2xl md:p-8"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setIsInquiryOpen(false)}
+              className="absolute right-4 top-4 rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-black"
+              aria-label="Close inquiry form"
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <p className="text-sm uppercase tracking-wider text-gray-500">Vehicle inquiry</p>
+            <h2 id="vehicle-inquiry-title" className="mt-1 pr-8 text-2xl font-bold">Ask about {car.make} {car.model}</h2>
+            <p className="mt-2 text-sm text-gray-600">Send us your details and our team will get back to you.</p>
+
+            {inquiryState.error && <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{inquiryState.error}</div>}
+            {inquiryState.success && <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">{inquiryState.success}</div>}
+
+            <form onSubmit={handleInquirySubmit} className="mt-6 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label>
+                  <span className="mb-1 block text-sm font-medium text-gray-700">Full name</span>
+                  <input required name="name" value={inquiryForm.name} onChange={handleInquiryChange} className="w-full rounded-md border border-gray-300 px-3 py-2" />
+                </label>
+                <label>
+                  <span className="mb-1 block text-sm font-medium text-gray-700">Email</span>
+                  <input required type="email" name="email" value={inquiryForm.email} onChange={handleInquiryChange} className="w-full rounded-md border border-gray-300 px-3 py-2" />
+                </label>
+              </div>
+              <label>
+                <span className="mb-1 block text-sm font-medium text-gray-700">Phone</span>
+                <input name="phone" value={inquiryForm.phone} onChange={handleInquiryChange} className="w-full rounded-md border border-gray-300 px-3 py-2" />
+              </label>
+              <label>
+                <span className="mb-1 block text-sm font-medium text-gray-700">Message</span>
+                <textarea required minLength="10" rows="5" name="message" value={inquiryForm.message} onChange={handleInquiryChange} placeholder={`I would like to know more about the ${car.make} ${car.model}.`} className="w-full resize-y rounded-md border border-gray-300 px-3 py-2" />
+              </label>
+              <button disabled={inquiryState.loading} className="w-full rounded-md bg-black px-5 py-3 font-semibold text-white hover:bg-gray-800 disabled:opacity-50">
+                {inquiryState.loading ? 'Sending...' : 'Send inquiry'}
+              </button>
+            </form>
+          </div>
         </div>
       )}
     </main>
