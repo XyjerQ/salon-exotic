@@ -53,6 +53,24 @@ Naglowki dla requestow JSON:
 - `admin` i `manager` maja dostep do `PUT /api/settings`; publiczna strona pobiera ustawienia przez `GET /api/settings`
 - `admin` i `manager` maja dostep do zarzadzania FAQ; publiczna strona pobiera pytania przez `GET /api/faq`
 
+### Role i uprawnienia
+
+Tylko `admin` ma dostep do zakladki `Roles & Permissions` oraz API `/api/roles`.
+Administrator moze tworzyc custom role, nadawac im uprawnienia, przypisywac role pracownikom
+i usuwac role, które nie sa przypisane. Role systemowe (`admin`, `manager`, `sales`, `service`)
+nie moga zostac usuniete.
+
+Dostepne uprawnienia obejmuja m.in.:
+
+- dashboard, cars, employees,
+- test drives (`view`, `manage`),
+- messages (`view`, `reply`),
+- site settings, FAQ,
+- roles and permissions.
+
+Uprawnienia sa ladowane przy autoryzacji z bazy, wiec custom role dziala na backendzie,
+a nie tylko w interfejsie.
+
 ### Ustawienia witryny
 
 Panel `Site Settings` zapisuje m.in. `site_name`, `site_tagline`, `address`, `phone`, `email`,

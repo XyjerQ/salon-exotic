@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const { hasPermission } = require('../middleware/auth');
 
 const isAdminOrManager = (req) => req.user?.role === 'admin' || req.user?.role === 'manager';
 const isAdmin = (req) => req.user?.role === 'admin';
@@ -41,7 +42,7 @@ router.get('/public', async (req, res) => {
   const db = req.app.get('db');
   try {
     const rows = await db.all(
-      'SELECT id, name, email, phone, role, description, specialization, photo_path FROM employees'
+      'SELECT id, name, email, phone, role, role_id, description, specialization, photo_path FROM employees'
     );
     res.json(rows);
   } catch (err) {
@@ -50,14 +51,13 @@ router.get('/public', async (req, res) => {
 });
 
 router.get('/', auth, async (req, res) => {
-  const allowedRoles = ['admin', 'manager', 'service', 'sales'];
-  if (!allowedRoles.includes(req.user?.role)) {
+  if (!hasPermission(req, 'employees.view')) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
   const db = req.app.get('db');
   const rows = await db.all(
-    'SELECT id, name, email, phone, role, description, specialization, photo_path FROM employees'
+    'SELECT id, name, email, phone, role, role_id, description, specialization, photo_path FROM employees'
   );
   res.json(rows);
 });
@@ -67,12 +67,12 @@ router.get('/:id', auth, async (req, res) => {
   const id = Number(req.params.id);
 
   // admin/manager widzi każdego, pracownik tylko siebie
-  if (!isAdminOrManager(req) && req.user.id !== id) {
+  if (!hasPermission(req, 'employees.edit') && req.user.id !== id) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
   const row = await db.get(
-    'SELECT id, name, email, phone, role, description, specialization, photo_path FROM employees WHERE id = ?',
+    'SELECT id, name, email, phone, role, role_id, description, specialization, photo_path FROM employees WHERE id = ?',
     [id]
   );
   if (!row) return res.status(404).json({ error: 'Not found' });
@@ -82,7 +82,7 @@ router.get('/:id', auth, async (req, res) => {
 
 // admin lub manager dodaje pracownika
 router.post('/', auth, async (req, res) => {
-  if (!isAdminOrManager(req)) return res.status(403).json({ error: 'Admin or Manager only' });
+  if (!hasPermission(req, 'employees.create')) return res.status(403).json({ error: 'Insufficient permissions' });
 
   const db = req.app.get('db');
   const { name, email, password, phone, description, specialization, photo_path, role } = req.body;
@@ -131,7 +131,7 @@ router.put('/:id', auth, async (req, res) => {
   const db = req.app.get('db');
   const id = Number(req.params.id);
   
-  if (!isAdminOrManager(req) && req.user.id !== id) {
+  if (!hasPermission(req, 'employees.edit') && req.user.id !== id) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
@@ -155,7 +155,7 @@ router.put('/:id', auth, async (req, res) => {
   let password_hash = existing.password_hash;
 
   // SCENARIUSZ A: Administrator/Manager wpisuje bezpośrednio nowe hasło
-  if (isAdminOrManager(req) && password) {
+  if (hasPermission(req, 'employees.edit') && password) {
     password_hash = await bcrypt.hash(password, 10);
   }
   // SCENARIUSZ B: Użytkownik zmienia swoje własne hasło (stare + nowe)
@@ -180,7 +180,7 @@ router.put('/:id', auth, async (req, res) => {
 
   // Ustalamy nową rolę
   let updatedRole = existing.role;
-  if (isAdminOrManager(req) && role) {
+  if (hasPermission(req, 'employees.edit') && role) {
     // Blokada: manager nie może zmienić roli samemu sobie
     if (req.user.role === 'manager' && req.user.id === id) {
       if (role !== existing.role) {
@@ -230,7 +230,7 @@ router.post('/:id/upload-photo', auth, upload.single('photo'), async (req, res) 
   const id = Number(req.params.id);
   
   // pracownik może wgrać tylko swoje zdjęcie, admin/manager może wgrać każdemu
-  if (!isAdminOrManager(req) && req.user.id !== id) {
+  if (!hasPermission(req, 'employees.edit') && req.user.id !== id) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 

@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const { hasPermission } = require('../middleware/auth');
 
 const isAdminOrManager = (req) => req.user?.role === 'admin' || req.user?.role === 'manager';
 
@@ -79,8 +80,7 @@ router.post('/', async (req, res) => {
 
 // 2. POBRANIE LISTY ZGŁOSZEŃ (Dla personelu)
 router.get('/', auth, async (req, res) => {
-  const allowedRoles = ['admin', 'manager', 'service', 'sales'];
-  if (!allowedRoles.includes(req.user?.role)) {
+  if (!hasPermission(req, 'test_drives.view')) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
@@ -100,7 +100,7 @@ router.get('/', auth, async (req, res) => {
 
 // 3. EDYCJA / POTWIERDZENIE ZGŁOSZENIA (Admin / Manager)
 router.put('/:id', auth, async (req, res) => {
-  if (!isAdminOrManager(req)) {
+  if (!hasPermission(req, 'test_drives.manage')) {
     return res.status(403).json({ error: 'Admin or Manager only' });
   }
 
@@ -183,7 +183,7 @@ router.put('/:id', auth, async (req, res) => {
 
 // 4. USUNIĘCIE ZGŁOSZENIA
 router.delete('/:id', auth, async (req, res) => {
-  if (!isAdminOrManager(req)) {
+  if (!hasPermission(req, 'test_drives.manage')) {
     return res.status(403).json({ error: 'Admin or Manager only' });
   }
 

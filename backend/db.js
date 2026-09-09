@@ -26,6 +26,11 @@ async function init() {
   for (const [column, migration] of contactColumnMigrations) {
     if (!existingContactColumns.has(column)) await db.exec(migration);
   }
+  const employeeColumns = await db.all('PRAGMA table_info(employees)');
+  if (!employeeColumns.some(column => column.name === 'role_id')) {
+    await db.exec('ALTER TABLE employees ADD COLUMN role_id INTEGER');
+  }
+  await db.exec('CREATE INDEX IF NOT EXISTS idx_employees_role_id ON employees(role_id)');
   await ensureCarSchemaExtras(db);
   await ensureSeedData(db);
   return db;

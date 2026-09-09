@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const { hasPermission } = require('../middleware/auth');
 
 const uploadDir = path.resolve(process.env.UPLOAD_DIR || './public/uploads');
 const storage = multer.diskStorage({
@@ -27,9 +28,9 @@ const upload = multer({
 });
 
 const isAdmin = (req) => req.user?.role === 'admin';
-const isManagerOrAdmin = (req) => ['admin', 'manager'].includes(req.user?.role);
+const isManagerOrAdmin = (req) => hasPermission(req, 'cars.manage_all');
 const isService = (req) => req.user?.role === 'service';
-const canManageCars = (req) => ['admin', 'manager', 'sales', 'service'].includes(req.user?.role);
+const canManageCars = (req) => hasPermission(req, 'cars.view') || hasPermission(req, 'cars.create') || hasPermission(req, 'cars.edit');
 
 function toBoolInt(value, fallback = 0) {
   if (value === undefined || value === null || value === '') return fallback;

@@ -1,5 +1,6 @@
 const express = require('express');
 const auth = require('../middleware/auth');
+const { hasPermission } = require('../middleware/auth');
 const { DEFAULT_SITE_SETTINGS } = require('../seed');
 
 const router = express.Router();
@@ -22,7 +23,7 @@ router.get('/', async (req, res) => {
 });
 
 router.put('/', auth, async (req, res) => {
-  if (!isAdminOrManager(req)) return res.status(403).json({ error: 'Admin or Manager only' });
+  if (!hasPermission(req, 'site_settings.manage')) return res.status(403).json({ error: 'Insufficient permissions' });
 
   const updates = {};
   for (const key of editableKeys) {

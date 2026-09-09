@@ -1,5 +1,28 @@
 PRAGMA foreign_keys = ON;
 
+CREATE TABLE IF NOT EXISTS roles (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT UNIQUE NOT NULL,
+  display_name TEXT NOT NULL,
+  is_system INTEGER DEFAULT 0 CHECK(is_system IN (0, 1)),
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS permissions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  key TEXT UNIQUE NOT NULL,
+  label TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS role_permissions (
+  role_id INTEGER NOT NULL,
+  permission_id INTEGER NOT NULL,
+  PRIMARY KEY(role_id, permission_id),
+  FOREIGN KEY(role_id) REFERENCES roles(id) ON DELETE CASCADE,
+  FOREIGN KEY(permission_id) REFERENCES permissions(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS employees (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
@@ -7,11 +30,13 @@ CREATE TABLE IF NOT EXISTS employees (
   password_hash TEXT NOT NULL,
   phone TEXT,
   role TEXT DEFAULT 'sales' CHECK(role IN ('admin', 'sales', 'service', 'manager')),
+  role_id INTEGER,
   description TEXT,
   specialization TEXT,
   photo_path TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  ,FOREIGN KEY(role_id) REFERENCES roles(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS cars (

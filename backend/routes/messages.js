@@ -1,12 +1,16 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const auth = require('../middleware/auth');
+const { hasPermission } = require('../middleware/auth');
 
 const router = express.Router();
-const allowedRoles = ['admin', 'manager'];
-
 const requireManager = (req, res, next) => {
-  if (!allowedRoles.includes(req.user?.role)) return res.status(403).json({ error: 'Admin or Manager only' });
+  if (!hasPermission(req, 'messages.view') && !hasPermission(req, 'messages.reply')) return res.status(403).json({ error: 'Insufficient permissions' });
+  next();
+};
+
+const requireReplyPermission = (req, res, next) => {
+  if (!hasPermission(req, 'messages.reply')) return res.status(403).json({ error: 'Insufficient permissions' });
   next();
 };
 
@@ -30,7 +34,7 @@ router.get('/', auth, requireManager, async (req, res) => {
   }
 });
 
-router.put('/:id', auth, requireManager, async (req, res) => {
+router.put('/:id', auth, requireReplyPermission, async (req, res) => {
   const reply = typeof req.body.reply === 'string' ? req.body.reply.trim() : '';
   if (reply.length < 2 || reply.length > 5000) {
     return res.status(400).json({ error: 'Reply must be between 2 and 5000 characters' });

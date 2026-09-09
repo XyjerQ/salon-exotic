@@ -1,5 +1,6 @@
 const express = require('express');
 const auth = require('../middleware/auth');
+const { hasPermission } = require('../middleware/auth');
 
 const router = express.Router();
 const isAdminOrManager = (req) => ['admin', 'manager'].includes(req.user?.role);
@@ -37,7 +38,7 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/categories', auth, async (req, res) => {
-  if (!isAdminOrManager(req)) return res.status(403).json({ error: 'Admin or Manager only' });
+  if (!hasPermission(req, 'faq.manage')) return res.status(403).json({ error: 'Insufficient permissions' });
   const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
   const icon = typeof req.body.icon === 'string' ? req.body.icon.trim() : '';
   if (name.length < 2 || name.length > 120) return res.status(400).json({ error: 'Category name must be between 2 and 120 characters' });
@@ -54,7 +55,7 @@ router.post('/categories', auth, async (req, res) => {
 });
 
 router.delete('/categories/:id', auth, async (req, res) => {
-  if (!isAdminOrManager(req)) return res.status(403).json({ error: 'Admin or Manager only' });
+  if (!hasPermission(req, 'faq.manage')) return res.status(403).json({ error: 'Insufficient permissions' });
   try {
     const result = await req.app.get('db').run('DELETE FROM faq_categories WHERE id = ?', [Number(req.params.id)]);
     if (!result.changes) return res.status(404).json({ error: 'FAQ category not found' });
@@ -66,7 +67,7 @@ router.delete('/categories/:id', auth, async (req, res) => {
 });
 
 router.post('/', auth, async (req, res) => {
-  if (!isAdminOrManager(req)) return res.status(403).json({ error: 'Admin or Manager only' });
+  if (!hasPermission(req, 'faq.manage')) return res.status(403).json({ error: 'Insufficient permissions' });
   const categoryId = Number(req.body.category_id);
   const validationError = validateQuestion(req.body.question, req.body.answer);
   if (!Number.isInteger(categoryId) || categoryId < 1) return res.status(400).json({ error: 'A valid category is required' });
@@ -87,7 +88,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 router.put('/:id', auth, async (req, res) => {
-  if (!isAdminOrManager(req)) return res.status(403).json({ error: 'Admin or Manager only' });
+  if (!hasPermission(req, 'faq.manage')) return res.status(403).json({ error: 'Insufficient permissions' });
   const validationError = validateQuestion(req.body.question, req.body.answer);
   if (validationError) return res.status(400).json({ error: validationError });
   try {
@@ -103,7 +104,7 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 router.delete('/:id', auth, async (req, res) => {
-  if (!isAdminOrManager(req)) return res.status(403).json({ error: 'Admin or Manager only' });
+  if (!hasPermission(req, 'faq.manage')) return res.status(403).json({ error: 'Insufficient permissions' });
   try {
     const result = await req.app.get('db').run('DELETE FROM faq_questions WHERE id = ?', [Number(req.params.id)]);
     if (!result.changes) return res.status(404).json({ error: 'FAQ question not found' });

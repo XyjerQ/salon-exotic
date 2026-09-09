@@ -1,6 +1,7 @@
 const fs = require('fs/promises');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const { PERMISSIONS, BUILTIN_ROLE_PERMISSIONS } = require('./permissions');
 
 const employeesSeedPath = path.resolve(__dirname, '../salon-exotic/src/data/employees.json');
 const carsSeedPath = path.resolve(__dirname, '../salon-exotic/src/data/cars.json');
@@ -321,6 +322,31 @@ async function seedSiteSettings(db) {
   }
 }
 
+async function seedRoles(db) {
+  for (const permission of PERMISSIONS) {
+    await db.run('INSERT OR IGNORE INTO permissions (key, label) VALUES (?, ?)', [permission.key, permission.label]);
+  }
+
+  for (const [roleName, permissionKeys] of Object.entries(BUILTIN_ROLE_PERMISSIONS)) {
+    await db.run(
+      `INSERT INTO roles (name, display_name, is_system) VALUES (?, ?, 1)
+       ON CONFLICT(name) DO UPDATE SET display_name = excluded.display_name`,
+      [roleName, roleName.charAt(0).toUpperCase() + roleName.slice(1)]
+    );
+    const role = await db.get('SELECT id FROM roles WHERE name = ?', [roleName]);
+    for (const permissionKey of permissionKeys) {
+      const permission = await db.get('SELECT id FROM permissions WHERE key = ?', [permissionKey]);
+      await db.run('INSERT OR IGNORE INTO role_permissions (role_id, permission_id) VALUES (?, ?)', [role.id, permission.id]);
+    }
+  }
+
+  await db.run(`
+    UPDATE employees
+    SET role_id = (SELECT id FROM roles WHERE roles.name = employees.role)
+    WHERE role_id IS NULL
+  `);
+}
+
 async function seedFaq(db) {
   const existing = await db.get('SELECT COUNT(*) AS count FROM faq_categories');
   if (Number(existing?.count || 0) > 0) return;
@@ -363,6 +389,7 @@ async function ensureSeedData(db) {
   );
 
   const databaseHasData = counts.some((count) => count > 0);
+  await seedRoles(db);
   await seedSiteSettings(db);
   await seedFaq(db);
   if (databaseHasData) {

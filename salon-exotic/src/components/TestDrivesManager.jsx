@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
-export default function TestDrivesManager({ token }) {
+export default function TestDrivesManager({ token, userRole }) {
+  const canManage = ['admin', 'manager'].includes(userRole)
   const [testDrives, setTestDrives] = useState([])
   const [cars, setCars] = useState([])
   const [loading, setLoading] = useState(false)
@@ -35,7 +36,7 @@ export default function TestDrivesManager({ token }) {
       setTestDrives(data)
 
       const carsRes = await fetch(`${API_BASE}/cars`)
-      if (carsRes.ok) {
+      if (canManage && carsRes.ok) {
         const carsData = await carsRes.json()
         const dealerCars = carsData.filter(car => !car.is_customer_vehicle && car.type !== 'customer' && car.owner_type !== 'customer')
         setCars(dealerCars)
@@ -118,7 +119,7 @@ export default function TestDrivesManager({ token }) {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold">Test Drive Requests</h2>
-          <p className="text-gray-500 text-sm">Manage customer bookings, assign stock cars, and confirm dates.</p>
+            <p className="text-gray-500 text-sm">{canManage ? 'Manage customer bookings, assign stock cars, and confirm dates.' : 'View customer test drive requests.'}</p>
         </div>
         <button
           onClick={fetchTestData}
@@ -146,7 +147,7 @@ export default function TestDrivesManager({ token }) {
                 <th className="py-3 px-3 w-[13%]">Date</th>
                 <th className="py-3 px-3 w-[20%]">Assigned Car</th>
                 <th className="py-3 px-3 w-[11%]">Status</th>
-                <th className="py-3 px-3 w-[15%] text-right">Actions</th>
+                {canManage && <th className="py-3 px-3 w-[15%] text-right">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-sm">
@@ -261,7 +262,7 @@ export default function TestDrivesManager({ token }) {
                     </td>
 
                     {/* Actions */}
-                    <td className="py-3 px-3 text-right">
+                    {canManage && <td className="py-3 px-3 text-right">
                       {isEditing ? (
                         <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
                           <button
@@ -293,7 +294,7 @@ export default function TestDrivesManager({ token }) {
                           </button>
                         </div>
                       )}
-                    </td>
+                    </td>}
                   </tr>
                 )
               })}

@@ -9,8 +9,15 @@ import TestDrivesManager from '../components/TestDrivesManager'
 import MessagesManager from '../components/MessagesManager'
 import SiteSettingsManager from '../components/SiteSettingsManager'
 import FAQManager from '../components/FAQManager'
+import RolesManager from '../components/RolesManager'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
+
+const legacyPermissions = {
+  manager: ['dashboard.view', 'employees.view', 'employees.create', 'employees.edit', 'cars.edit', 'test_drives.view', 'test_drives.manage', 'messages.view', 'messages.reply', 'site_settings.manage', 'faq.manage'],
+  sales: ['dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'test_drives.view', 'messages.view', 'messages.reply'],
+  service: ['dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'employees.view', 'messages.view', 'messages.reply']
+}
 
 // ============= Main Dashboard =============
 export default function AdminDashboard() {
@@ -30,17 +37,22 @@ export default function AdminDashboard() {
   const user = JSON.parse(localStorage.getItem('employeeUser') || '{}')
   
   // Uprawnienia
-  const isAdminOrManager = ['admin', 'manager'].includes(user.role)
-  const isPrivileged = ['admin', 'manager', 'service'].includes(user.role)
+  const activePermissions = user.permissions || legacyPermissions[user.role] || []
+  const hasPermission = (permission) => user.role === 'admin' || activePermissions.includes(permission)
+  const isAdmin = user.role === 'admin'
+  const isAdminOrManager = hasPermission('employees.view')
+  const canViewTestDrives = hasPermission('test_drives.view')
+  const canViewMessages = hasPermission('messages.view')
+  const isPrivileged = hasPermission('cars.edit')
   // Serwis oraz admin/manager mogą pobierać listę pracowników (potrzebne do nazwisk doradców)
-  const canFetchEmployees = ['admin', 'manager', 'service'].includes(user.role)
+  const canFetchEmployees = hasPermission('employees.view')
 
   useEffect(() => {
     if (!token) {
       navigate('/employee/login')
       return
     }
-    if (!['admin', 'sales', 'service', 'manager'].includes(user.role)) {
+    if (!hasPermission('dashboard.view')) {
       navigate('/employee/login')
       return
     }
@@ -163,7 +175,7 @@ export default function AdminDashboard() {
             >
               Cars ({cars.length})
             </button>
-            {isAdminOrManager && (
+            {hasPermission('employees.view') && (
               <button
                 onClick={() => setView('employees-list')}
                 className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
@@ -185,7 +197,7 @@ export default function AdminDashboard() {
             >
               Service History
             </button>
-            <button
+            {canViewTestDrives && <button
               onClick={() => setView('test-drives')}
               className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
                 view === 'test-drives'
@@ -195,7 +207,8 @@ export default function AdminDashboard() {
             >
               Test Drives
             </button>
-            {isAdminOrManager && (
+            }
+            {canViewMessages && (
               <button
                 onClick={() => setView('messages')}
                 className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
@@ -207,7 +220,7 @@ export default function AdminDashboard() {
                 Messages
               </button>
             )}
-            {isAdminOrManager && (
+            {hasPermission('site_settings.manage') && (
               <button
                 onClick={() => setView('site-settings')}
                 className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
@@ -219,7 +232,7 @@ export default function AdminDashboard() {
                 Site Settings
               </button>
             )}
-            {isAdminOrManager && (
+            {hasPermission('faq.manage') && (
               <button
                 onClick={() => setView('faq')}
                 className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
@@ -227,6 +240,16 @@ export default function AdminDashboard() {
                 }`}
               >
                 FAQ
+              </button>
+            )}
+            {isAdmin && (
+              <button
+                onClick={() => setView('roles')}
+                className={`px-4 py-3 font-semibold border-b-2 transition-colors ${
+                  view === 'roles' ? 'border-black text-black' : 'border-transparent text-gray-600 hover:text-black'
+                }`}
+              >
+                Roles & Permissions
               </button>
             )}
         </div>
@@ -320,20 +343,24 @@ export default function AdminDashboard() {
           <ServiceHistory initialVin={serviceVin} />
         )}
 
-        {view === 'test-drives' && isAdminOrManager && (
-          <TestDrivesManager token={token} />
+        {view === 'test-drives' && canViewTestDrives && (
+          <TestDrivesManager token={token} userRole={user.role} />
         )}
 
-        {view === 'messages' && isAdminOrManager && (
+        {view === 'messages' && canViewMessages && (
           <MessagesManager token={token} />
         )}
 
-        {view === 'site-settings' && isAdminOrManager && (
+        {view === 'site-settings' && hasPermission('site_settings.manage') && (
           <SiteSettingsManager token={token} />
         )}
 
-        {view === 'faq' && isAdminOrManager && (
+        {view === 'faq' && hasPermission('faq.manage') && (
           <FAQManager token={token} />
+        )}
+
+        {view === 'roles' && isAdmin && (
+          <RolesManager token={token} />
         )}
       </div>
     </main>
