@@ -16,6 +16,8 @@ const contactRoutes = require('./routes/contact');
 const newsletterRoutes = require('./routes/newsletter');
 const testDrivesRouter = require('./routes/testDrives');
 const messagesRoutes = require('./routes/messages');
+const settingsRoutes = require('./routes/settings');
+const faqRoutes = require('./routes/faq');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -55,6 +57,8 @@ app.use('/api/auth/login', loginLimiter);
 app.use('/api/test-drives', publicFormLimiter, testDrivesRouter);
 app.use('/api/contact', publicFormLimiter, contactRoutes);
 app.use('/api/newsletter', publicFormLimiter, newsletterRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/faq', faqRoutes);
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 // ensure upload dir exists

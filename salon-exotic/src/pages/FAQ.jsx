@@ -1,11 +1,23 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
-import faqCategories from '../data/faq.json'
+import { useSiteSettings } from '../context/SiteSettingsContext'
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
 export default function FAQ() {
+  const { settings } = useSiteSettings()
+  const [faqCategories, setFaqCategories] = useState([])
   const [activeCategory, setActiveCategory] = useState(0)
   const [openQuestions, setOpenQuestions] = useState(new Set([0]))
   const sectionRef = useScrollAnimation()
+
+  useEffect(() => {
+    fetch(`${API_BASE}/faq`)
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error('Unable to load FAQ')))
+      .then((data) => setFaqCategories(data))
+      .catch(() => setFaqCategories([]))
+  }, [])
 
   const toggleQuestion = (questionIndex) => {
     const newSet = new Set(openQuestions)
@@ -59,6 +71,9 @@ export default function FAQ() {
 
           {/* Questions Section */}
           <div className="lg:col-span-3">
+            {!currentCategory ? (
+              <div className="bg-white border border-gray-200 rounded-lg p-8 text-gray-500">Loading FAQ...</div>
+            ) : (
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
               <div className="bg-black text-white p-6">
                 <div className="flex items-center gap-3">
@@ -84,11 +99,11 @@ export default function FAQ() {
                             </span>
                             <div className="flex-1">
                               <p className="text-base md:text-lg font-semibold text-gray-900 pr-4">
-                                {item.q}
+                                {item.q.replace(/Blackline/gi, settings.site_name)}
                               </p>
                               {isOpen && (
                                 <p className="text-gray-700 mt-3 leading-relaxed">
-                                  {item.a}
+                                  {item.a.replace(/Blackline/gi, settings.site_name)}
                                 </p>
                               )}
                             </div>
@@ -107,6 +122,7 @@ export default function FAQ() {
                 })}
               </div>
             </div>
+            )}
 
             {/* Still have questions CTA */}
             <div className="mt-8 bg-black text-white rounded-lg p-8 text-center">
@@ -115,17 +131,17 @@ export default function FAQ() {
                 Our team is here to help. Contact us directly for personalized assistance.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a
-                  href="/contact"
+                <Link
+                  to="/contact"
                   className="inline-block bg-white text-black px-6 py-3 rounded-md hover:bg-gray-100 transition font-semibold"
                 >
                   Contact Us
-                </a>
+                </Link>
                 <a
-                  href="tel:+48600000000"
+                  href={`tel:${settings.phone}`}
                   className="inline-block bg-transparent border-2 border-white text-white px-6 py-3 rounded-md hover:bg-white/10 transition font-semibold"
                 >
-                  Call: +48 600 000 000
+                  Call: {settings.phone}
                 </a>
               </div>
             </div>

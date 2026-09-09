@@ -4,9 +4,24 @@ const bcrypt = require('bcrypt');
 
 const employeesSeedPath = path.resolve(__dirname, '../salon-exotic/src/data/employees.json');
 const carsSeedPath = path.resolve(__dirname, '../salon-exotic/src/data/cars.json');
+const faqSeedPath = path.resolve(__dirname, '../salon-exotic/src/data/faq.json');
 
 const ADMIN_EMAIL = 'a@a.pl';
 const ADMIN_PASSWORD = 'admin';
+
+const DEFAULT_SITE_SETTINGS = {
+  site_name: 'Blackline Salon',
+  headline: 'Blackline',
+  site_tagline: 'Premium & exotic cars showroom.',
+  address: '123 Luxury Ave, Warsaw, PL',
+  phone: '+48 600 000 000',
+  email: 'info@blackline.com',
+  instagram_url: 'https://instagram.com',
+  facebook_url: 'https://facebook.com',
+  linkedin_url: 'https://linkedin.com',
+  tiktok_url: '',
+  copyright_text: '© 2026 Blackline Salon. All rights reserved.'
+};
 
 function parseMoney(value) {
   if (value === undefined || value === null || value === '') return null;
@@ -293,6 +308,41 @@ async function seedNewsletterSubscribers(db) {
   }
 }
 
+async function seedSiteSettings(db) {
+  for (const [key, value] of Object.entries(DEFAULT_SITE_SETTINGS)) {
+    await db.run(
+      `INSERT INTO site_settings (key, value) VALUES (?, ?)
+       ON CONFLICT(key) DO UPDATE SET value = CASE
+         WHEN site_settings.value IS NULL OR site_settings.value = '' THEN excluded.value
+         ELSE site_settings.value
+       END, updated_at = CURRENT_TIMESTAMP`,
+      [key, value]
+    );
+  }
+}
+
+async function seedFaq(db) {
+  const existing = await db.get('SELECT COUNT(*) AS count FROM faq_categories');
+  if (Number(existing?.count || 0) > 0) return;
+
+  const categories = await readJson(faqSeedPath);
+  for (let categoryIndex = 0; categoryIndex < categories.length; categoryIndex += 1) {
+    const category = categories[categoryIndex];
+    const categoryResult = await db.run(
+      'INSERT INTO faq_categories (name, icon, sort_order) VALUES (?, ?, ?)',
+      [category.category, category.icon || '', categoryIndex]
+    );
+
+    for (let questionIndex = 0; questionIndex < (category.questions || []).length; questionIndex += 1) {
+      const question = category.questions[questionIndex];
+      await db.run(
+        'INSERT INTO faq_questions (category_id, question, answer, sort_order) VALUES (?, ?, ?, ?)',
+        [categoryResult.lastID, question.q, question.a, questionIndex]
+      );
+    }
+  }
+}
+
 async function ensureSeedData(db) {
   const tables = [
     'employees',
@@ -313,6 +363,8 @@ async function ensureSeedData(db) {
   );
 
   const databaseHasData = counts.some((count) => count > 0);
+  await seedSiteSettings(db);
+  await seedFaq(db);
   if (databaseHasData) {
     await seedMissingCarFeatures(db);
     await seedTestDrives(db);
@@ -361,5 +413,6 @@ async function ensureSeedData(db) {
 
 module.exports = {
   ensureSeedData,
-  ensureCarSchemaExtras
+  ensureCarSchemaExtras,
+  DEFAULT_SITE_SETTINGS
 };

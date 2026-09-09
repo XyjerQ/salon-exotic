@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from 'react'
+import { useSiteSettings } from '../context/SiteSettingsContext'
 
 const withBase = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
 
 export default function Hero() {
+  const { settings } = useSiteSettings()
   
-  const title = 'Blackline Salon'
+  const title = settings.site_name
   const ctaText = 'See our inventory'
   const ctaHref = `${import.meta.env.BASE_URL}inventory`
   const image = withBase('img/hero/gt3rs.png')

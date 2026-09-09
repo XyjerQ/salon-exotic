@@ -50,6 +50,27 @@ Naglowki dla requestow JSON:
 - `sales` moze tworzyc/edytowac/usuwac tylko swoje auta
 - `admin` moze zarzadzac wszystkimi autami i przypisywac `advisor_id`
 - `admin` i `manager` maja dostep do `GET /api/messages` oraz `PUT /api/messages/:id`
+- `admin` i `manager` maja dostep do `PUT /api/settings`; publiczna strona pobiera ustawienia przez `GET /api/settings`
+- `admin` i `manager` maja dostep do zarzadzania FAQ; publiczna strona pobiera pytania przez `GET /api/faq`
+
+### Ustawienia witryny
+
+Panel `Site Settings` zapisuje m.in. `site_name`, `site_tagline`, `address`, `phone`, `email`,
+`instagram_url`, `facebook_url`, `linkedin_url`, `tiktok_url` oraz `copyright_text`.
+Zmiany sa przechowywane w tabeli `site_settings` i sa automatycznie wykorzystywane przez header,
+hero, footer, kontakt oraz sekcje strony glownej.
+
+### FAQ
+
+FAQ jest seedowane z `salon-exotic/src/data/faq.json` tylko wtedy, gdy tabela jest pusta.
+Późniejsze zmiany w panelu nie sa nadpisywane przy ponownym uruchomieniu backendu.
+
+- `GET /api/faq` - publiczna lista kategorii, pytan i odpowiedzi
+- `POST /api/faq/categories` - dodanie kategorii, admin/manager
+- `DELETE /api/faq/categories/:id` - usuniecie kategorii razem z pytaniami, admin/manager
+- `POST /api/faq` - dodanie pytania i odpowiedzi, admin/manager
+- `PUT /api/faq/:id` - edycja pytania lub odpowiedzi, admin/manager
+- `DELETE /api/faq/:id` - usuniecie pytania, admin/manager
 
 ### Wiadomosci
 

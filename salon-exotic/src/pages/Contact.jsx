@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
 import employees from '../data/employees.json'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
+import { useSiteSettings } from '../context/SiteSettingsContext'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
 export default function Contact() {
+  const { settings } = useSiteSettings()
   const gridRef = useScrollAnimation({ staggerChildren: true })
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: 'General Inquiry', message: '' })
   const [formState, setFormState] = useState({ loading: false, error: '', success: '' })
@@ -56,8 +58,7 @@ export default function Contact() {
             </div>
             <h3 className="font-bold text-lg mb-2">Visit Us</h3>
             <p className="text-gray-600 text-sm">
-              ul. Ekskluzywna 123<br />
-              00-001 Warsaw, Poland
+              {settings.address}
             </p>
           </div>
 
@@ -70,7 +71,7 @@ export default function Contact() {
             </div>
             <h3 className="font-bold text-lg mb-2">Call Us</h3>
             <p className="text-gray-600 text-sm">
-              +48 600 000 000<br />
+              {settings.phone}<br />
               Mon-Fri: 9:00 - 18:00
             </p>
           </div>
@@ -84,8 +85,7 @@ export default function Contact() {
             </div>
             <h3 className="font-bold text-lg mb-2">Email Us</h3>
             <p className="text-gray-600 text-sm">
-              info@blackline.com<br />
-              sales@blackline.com
+              {settings.email}
             </p>
           </div>
         </div>

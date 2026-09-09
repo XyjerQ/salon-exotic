@@ -130,6 +130,26 @@ CREATE TABLE IF NOT EXISTS site_settings (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS faq_categories (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  icon TEXT DEFAULT '',
+  sort_order INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS faq_questions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  category_id INTEGER NOT NULL,
+  question TEXT NOT NULL,
+  answer TEXT NOT NULL,
+  sort_order INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(category_id) REFERENCES faq_categories(id) ON DELETE CASCADE
+);
+
 -- Indeksy dla optymalizacji zapytań
 CREATE INDEX IF NOT EXISTS idx_car_images_car_id ON car_images(car_id);
 CREATE INDEX IF NOT EXISTS idx_car_features_car_id ON car_features(car_id);
@@ -139,3 +159,4 @@ CREATE INDEX IF NOT EXISTS idx_transactions_employee_id ON transactions(employee
 CREATE INDEX IF NOT EXISTS idx_cars_vin ON cars(vin);
 CREATE INDEX IF NOT EXISTS idx_cars_status ON cars(status);
 CREATE INDEX IF NOT EXISTS idx_site_settings_key ON site_settings(key);
+CREATE INDEX IF NOT EXISTS idx_faq_questions_category_id ON faq_questions(category_id);

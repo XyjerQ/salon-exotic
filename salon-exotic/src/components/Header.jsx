@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
+import { useSiteSettings } from '../context/SiteSettingsContext'
 
 export default function Header(){
+  const { settings } = useSiteSettings()
   const [open, setOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
@@ -48,9 +50,9 @@ export default function Header(){
 
         {/* center: brand title */}
         <div className="flex justify-center">
-          <Link to="/" aria-label="Blackline Salon home">
+          <Link to="/" aria-label={`${settings.site_name} home`}>
             <h1 className="text-3xl md:text-5xl font-extrabold tracking-widest uppercase" style={{ fontFamily: '\"Playfair Display\", serif' }}>
-              Blackline
+              {settings.headline}
             </h1>
           </Link>
         </div>

@@ -1,4 +1,5 @@
 import React from 'react'
+import { useSiteSettings } from '../context/SiteSettingsContext'
 
 const bands = [
   {
@@ -18,6 +19,8 @@ const bands = [
 ]
 
 export default function ShowcaseBands() {
+  const { settings } = useSiteSettings()
+
   return (
     <section className="py-10 md:py-14">
       <div className="max-w-6xl mx-auto px-4 md:px-8 space-y-10">
@@ -29,7 +32,7 @@ export default function ShowcaseBands() {
               className="grid md:grid-cols-2 items-stretch rounded-xl overflow-hidden shadow-2xl bg-black"
             >
               <div className={`bg-black text-white p-8 md:p-10 flex flex-col justify-center gap-4 ${reverse ? 'md:order-2' : 'md:order-1'}`}>
-                <h3 className="text-3xl md:text-4xl font-extrabold leading-tight">{band.title}</h3>
+                <h3 className="text-3xl md:text-4xl font-extrabold leading-tight">{band.title.replace('Blackline', settings.site_name)}</h3>
                 <p className="text-gray-300 text-base md:text-lg max-w-xl">{band.body}</p>
                 <div>
                   <a

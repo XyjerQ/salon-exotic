@@ -10,6 +10,7 @@ import EmployeeProfile from './pages/EmployeeProfile'
 import AdminDashboard from './pages/AdminDashboard'
 import Header from './components/Header'
 import Footer from './components/Footer'
+import { SiteSettingsProvider } from './context/SiteSettingsContext'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -49,9 +50,11 @@ function AppContent() {
 
 export default function App() {
   return (
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <ScrollToTop />
-      <AppContent />
-    </BrowserRouter>
+    <SiteSettingsProvider>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
+        <ScrollToTop />
+        <AppContent />
+      </BrowserRouter>
+    </SiteSettingsProvider>
   )
 }
