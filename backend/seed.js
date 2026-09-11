@@ -363,31 +363,31 @@ async function seedTransactionHistory(db) {
       type: 'vehicle_sale', carId: cars[0]?.id || null, employeeId: salesId,
       customer: 'Piotr Kowalczyk', email: 'piotr.kowalczyk@example.com', phone: '+48 500 111 222',
       title: `${cars[0]?.make || 'Porsche'} ${cars[0]?.model || '911'} sale`, description: 'Finalized vehicle sale after inspection and test drive.',
-      amount: 589000, payment: 'leasing', status: 'completed', date: '2026-08-28', notes: 'Delivery arranged to Warsaw.'
+      amount: 147000, payment: 'leasing', status: 'completed', date: '2026-08-28', notes: 'Delivery arranged to Warsaw.'
     },
     {
       type: 'vehicle_sale', carId: cars[1]?.id || null, employeeId: salesId,
       customer: 'Anna Zielinska', email: 'anna.zielinska@example.com', phone: '+48 601 222 333',
       title: `${cars[1]?.make || 'BMW'} ${cars[1]?.model || 'M4'} sale`, description: 'Vehicle sold with ceramic coating package.',
-      amount: 329000, payment: 'transfer', status: 'completed', date: '2026-08-21', notes: null
+      amount: 82250, payment: 'transfer', status: 'completed', date: '2026-08-21', notes: null
     },
     {
       type: 'service', carId: cars[2]?.id || null, employeeId: serviceId,
       customer: 'Marek Wroblewski', email: 'marek.wroblewski@example.com', phone: '+48 602 333 444',
       title: 'Full vehicle inspection', description: 'Pre-purchase inspection, diagnostics and fluid check.',
-      amount: 1450, payment: 'card', status: 'completed', date: '2026-09-02', notes: 'Customer requested a written report.'
+      amount: 250, payment: 'card', status: 'completed', date: '2026-09-02', notes: 'Customer requested a written report.'
     },
     {
       type: 'detailing', carId: cars[3]?.id || cars[0]?.id || null, employeeId: serviceId,
       customer: 'Karol Jablonski', email: 'karol.jablonski@example.com', phone: '+48 603 444 555',
       title: 'Paint correction and ceramic coating', description: 'Two-stage correction, ceramic coating and interior detailing.',
-      amount: 6200, payment: 'cash', status: 'completed', date: '2026-08-30', notes: 'Maintenance wash recommended every two weeks.'
+      amount: 1550, payment: 'cash', status: 'completed', date: '2026-08-30', notes: 'Maintenance wash recommended every two weeks.'
     },
     {
       type: 'service', carId: cars[0]?.id || null, employeeId: serviceId,
       customer: 'Salon Exotic', email: null, phone: null,
       title: 'Seasonal fleet service', description: 'Oil, filters and brake inspection for showroom vehicle.',
-      amount: 2800, payment: 'transfer', status: 'in_progress', date: '2026-09-08', notes: 'Waiting for brake parts.'
+      amount: 700, payment: 'transfer', status: 'in_progress', date: '2026-09-08', notes: 'Waiting for brake parts.'
     }
   ];
 
