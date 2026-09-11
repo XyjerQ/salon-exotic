@@ -33,8 +33,8 @@ const BUILTIN_ROLE_PERMISSIONS = {
     'test_drives.view', 'test_drives.manage', 'messages.view', 'messages.reply',
     'site_settings.manage', 'faq.manage'
   ],
-  sales: ['dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'transactions.view', 'transactions.create', 'transactions.edit', 'transactions.delete', 'test_drives.view', 'messages.view', 'messages.reply'],
-  service: ['dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'transactions.view', 'transactions.create', 'transactions.edit', 'transactions.delete', 'employees.view', 'messages.view', 'messages.reply']
+  sales: ['dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'transactions.view', 'transactions.create', 'transactions.edit', 'transactions.delete', 'test_drives.manage', 'test_drives.view', 'messages.view', 'messages.reply'],
+  service: ['dashboard.view', 'cars.view', 'cars.create', 'cars.edit', 'transactions.view', 'transactions.create', 'transactions.edit', 'transactions.delete', 'test_drives.view', 'messages.view', 'messages.reply']
 };
 
 module.exports = { PERMISSIONS, BUILTIN_ROLE_PERMISSIONS };
