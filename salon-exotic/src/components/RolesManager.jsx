@@ -14,7 +14,6 @@ export default function RolesManager({ token }) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
-  // Bezpieczne pobieranie tokena (z propsa lub localStorage jako fallback)
   const activeToken = token || localStorage.getItem('employeeToken')
 
   const request = async (url, options = {}) => {

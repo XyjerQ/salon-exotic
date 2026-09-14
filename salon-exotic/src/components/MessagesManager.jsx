@@ -11,7 +11,6 @@ export default function MessagesManager({ token }) {
   const [sendingId, setSendingId] = useState(null)
   const [selectedMessage, setSelectedMessage] = useState(null)
 
-  // Bezpieczne pobieranie tokena (z propsa lub localStorage jako fallback)
   const activeToken = token || localStorage.getItem('employeeToken')
 
   const loadMessages = async () => {

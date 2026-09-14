@@ -15,7 +15,6 @@ export default function ServiceHistory({ initialVin = '' }) {
 
   const token = localStorage.getItem('employeeToken')
 
-  // Pobierz listę aut i obsłuż initialVin w jednym miejscu
   useEffect(() => {
     fetchAllCarsAndInit()
   }, [initialVin])
@@ -103,7 +102,7 @@ export default function ServiceHistory({ initialVin = '' }) {
   const startEdit = (e) => {
     setEditingId(e.id)
     setEditingEntry({ 
-      service_date: e.service_date?.split('T')[0] || '', // Format YYYY-MM-DD dla input type="date"
+      service_date: e.service_date?.split('T')[0] || '', 
       service_type: e.service_type || '', 
       description: e.description || '', 
       mileage_km: e.mileage_km || '', 

@@ -445,6 +445,70 @@ async function seedServiceTransactions(db) {
   }
 }
 
+async function seedServiceHistory(db) {
+  const countRow = await db.get('SELECT COUNT(*) AS count FROM car_service_history');
+  if (Number(countRow?.count || 0) > 0) return;
+
+  const cars = await db.all('SELECT id, make, model FROM cars LIMIT 4');
+  if (cars.length === 0) return;
+
+  const sampleServiceEntries = [
+    {
+      carId: cars[0].id,
+      serviceDate: '2026-05-12',
+      serviceType: 'Wymiana oleju i filtrów',
+      provider: 'ASO BMW Warszawa',
+      mileage: 122400,
+      cost: 2500,
+      description: 'Standardowy przegląd okresowy, wymiana oleju silnikowego oraz filtrów kabinowych.'
+    },
+    {
+      carId: cars[0].id,
+      serviceDate: '2026-07-20',
+      serviceType: 'Wymiana klocków hamulcowych',
+      provider: 'Serwis Sportowy Blackline',
+      mileage: 124200,
+      cost: 4200,
+      description: 'Montaż nowych klocków hamulcowych przód/tył oraz kontrola płynu hamulcowego.'
+    },
+    {
+      carId: cars[1]?.id || cars[0].id,
+      serviceDate: '2026-06-10',
+      serviceType: 'Detailing i zabezpieczenie lakieru',
+      provider: 'Car Spa Studio',
+      mileage: 5100,
+      cost: 3500,
+      description: 'Jednostopniowa korekta lakieru oraz aplikacja powłoki ceramicznej.'
+    },
+    {
+      carId: cars[2]?.id || cars[0].id,
+      serviceDate: '2026-08-01',
+      serviceType: 'Diagnostyka elektroniki',
+      provider: 'Autoryzowany Serwis',
+      mileage: 24000,
+      cost: 650,
+      description: 'Aktualizacja oprogramowania sterującego oraz pełna diagnostyka komputerowa.'
+    }
+  ];
+
+  for (const entry of sampleServiceEntries) {
+    await db.run(
+      `INSERT INTO car_service_history 
+       (car_id, service_date, service_type, provider, mileage_km, cost, description)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        entry.carId,
+        entry.serviceDate,
+        entry.serviceType,
+        entry.provider,
+        entry.mileage,
+        entry.cost,
+        entry.description
+      ]
+    );
+  }
+}
+
 async function seedSiteSettings(db) {
   for (const [key, value] of Object.entries(DEFAULT_SITE_SETTINGS)) {
     await db.run(
@@ -529,10 +593,12 @@ async function ensureSeedData(db) {
   await seedSiteSettings(db);
   await seedFaq(db);
   await seedContacts(db);
-  await seedTransactionHistory(db);
-  await seedServiceTransactions(db);
-  await syncSoldCarsFromTransactions(db);
+  
   if (databaseHasData) {
+    // Nawet jeśli baza ma już dane, upewnijmy się, że historia serwisowa jest zasilona
+    await seedServiceHistory(db);
+    await seedTransactionHistory(db);
+    await seedServiceTransactions(db);
     await seedMissingCarFeatures(db);
     await seedTestDrives(db);
     await seedNewsletterSubscribers(db);
@@ -574,6 +640,10 @@ async function ensureSeedData(db) {
   }
 
   await seedCars(db, employeeMap);
+  await seedServiceHistory(db);       
+  await seedTransactionHistory(db);
+  await seedServiceTransactions(db);
+  await syncSoldCarsFromTransactions(db);
   await seedTestDrives(db);
   await seedNewsletterSubscribers(db);
 }
