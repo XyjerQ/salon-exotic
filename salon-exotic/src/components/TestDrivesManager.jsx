@@ -20,6 +20,9 @@ export default function TestDrivesManager({ authFetch, userRole }) {
   const [selectedStatus, setSelectedStatus] = useState('pending')
   const [notes, setNotes] = useState('')
 
+  // Stan dla modala usuwania
+  const [deletingId, setDeletingId] = useState(null)
+
   const fetchTestData = async () => {
     setLoading(true)
     setError('')
@@ -93,25 +96,35 @@ export default function TestDrivesManager({ authFetch, userRole }) {
     }
   }
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this test drive request?')) return
+  const confirmDelete = async () => {
+    if (!deletingId) return
+    setError('')
+    setSuccess('')
     try {
-      const res = await authFetch(`${API_BASE}/test-drives/${id}`, {
+      const res = await authFetch(`${API_BASE}/test-drives/${deletingId}`, {
         method: 'DELETE'
       })
       if (!res.ok) throw new Error('Failed to delete')
-      setTestDrives(testDrives.filter(td => td.id !== id))
+      setTestDrives(testDrives.filter(td => td.id !== deletingId))
+      setDeletingId(null)
       setSuccess('Deleted successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError(err.message)
+      setDeletingId(null)
     }
   }
+
+  // Znajdź rezerwację, którą chcemy usunąć (dla wyświetlenia danych w modalu)
+  const testDriveToDelete = testDrives.find(td => td.id === deletingId)
+  const deleteDisplayInfo = testDriveToDelete 
+    ? `${testDriveToDelete.customer_name} (${testDriveToDelete.requested_date || ''})` 
+    : 'this request'
 
   const tableInputClass = "w-full bg-transparent border border-transparent hover:border-gray-300 focus:border-black focus:bg-white rounded px-1.5 py-1 text-sm outline-none transition"
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6">
+    <div className="bg-white rounded-xl shadow-md p-6 relative">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold">Test Drive Requests</h2>
@@ -283,7 +296,7 @@ export default function TestDrivesManager({ authFetch, userRole }) {
                             Edit
                           </button>
                           <button
-                            onClick={() => handleDelete(td.id)}
+                            onClick={() => setDeletingId(td.id)}
                             className="hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-md text-xs font-medium transition"
                           >
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -301,6 +314,40 @@ export default function TestDrivesManager({ authFetch, userRole }) {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Modal potwierdzenia usunięcia */}
+      {deletingId && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 flex-shrink-0">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900">Delete: "{deleteDisplayInfo}"</h4>
+                <p className="text-sm text-gray-500">Are you sure you want to remove this test drive request? This action cannot be undone.</p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button 
+                onClick={() => setDeletingId(null)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-sm"
+              >
+                Delete Request
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

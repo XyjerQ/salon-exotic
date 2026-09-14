@@ -14,6 +14,9 @@ export default function RolesManager({ token }) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  // Stan dla modala usuwania roli
+  const [deletingRoleObj, setDeletingRoleObj] = useState(null)
+
   const activeToken = token || localStorage.getItem('employeeToken')
 
   const request = async (url, options = {}) => {
@@ -109,17 +112,19 @@ export default function RolesManager({ token }) {
     }
   }
 
-  const deleteRole = async (role) => {
-    if (!window.confirm(`Delete role "${role.display_name}"?`)) return
+  const confirmDeleteRole = async () => {
+    if (!deletingRoleObj) return
     setError('')
     setSuccess('')
     try {
-      await request(`${API_BASE}/roles/${role.id}`, { method: 'DELETE' })
+      await request(`${API_BASE}/roles/${deletingRoleObj.id}`, { method: 'DELETE' })
       setSelectedRoleId(null)
       setSuccess('Role deleted.')
+      setDeletingRoleObj(null)
       await loadData()
     } catch (deleteError) {
       setError(deleteError.message)
+      setDeletingRoleObj(null)
     }
   }
 
@@ -164,7 +169,7 @@ export default function RolesManager({ token }) {
                 <button onClick={() => selectRole(role)} className="flex-1 text-left px-3 py-2 text-sm truncate">{role.display_name}</button>
                 {role.name !== 'admin' && (
                   <button
-                    onClick={() => deleteRole(role)}
+                    onClick={() => setDeletingRoleObj(role)}
                     title="Delete role"
                     aria-label={`Delete ${role.display_name}`}
                     className="text-red-600 p-2 hover:bg-red-100 rounded transition-colors"
@@ -256,6 +261,42 @@ export default function RolesManager({ token }) {
           </div>
         </div>
       </div>
+
+      {/* Modal potwierdzenia usunięcia roli */}
+      {deletingRoleObj && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 flex-shrink-0">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900">Delete "{deletingRoleObj.display_name}"</h4>
+                <p className="text-sm text-gray-500">
+                  Are you sure you want to delete that role? This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button 
+                onClick={() => setDeletingRoleObj(null)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDeleteRole}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-sm"
+              >
+                Delete Role
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

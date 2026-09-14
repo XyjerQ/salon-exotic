@@ -14,6 +14,10 @@ export default function FAQManager({ token }) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  // Stany dla modala usuwania (pytania lub kategorii)
+  const [deletingQuestionId, setDeletingQuestionId] = useState(null)
+  const [deletingCategoryObj, setDeletingCategoryObj] = useState(null)
+
   // Bezpieczne pobieranie tokena (z propsa lub localStorage jako fallback)
   const activeToken = token || localStorage.getItem('employeeToken')
 
@@ -81,14 +85,16 @@ export default function FAQManager({ token }) {
     }
   }
 
-  const handleDeleteQuestion = async (id) => {
-    if (!window.confirm('Delete this FAQ question?')) return
+  const confirmDeleteQuestion = async () => {
+    if (!deletingQuestionId) return
     try {
-      await request(`${API_BASE}/faq/${id}`, { method: 'DELETE' })
+      await request(`${API_BASE}/faq/${deletingQuestionId}`, { method: 'DELETE' })
       setSuccess('Question deleted successfully.')
+      setDeletingQuestionId(null)
       await loadFaq()
     } catch (deleteError) {
       setError(deleteError.message)
+      setDeletingQuestionId(null)
     }
   }
 
@@ -108,19 +114,24 @@ export default function FAQManager({ token }) {
     }
   }
 
-  const handleDeleteCategory = async (category) => {
-    if (!window.confirm(`Delete category "${category.category}" and all its questions?`)) return
+  const confirmDeleteCategory = async () => {
+    if (!deletingCategoryObj) return
     try {
-      await request(`${API_BASE}/faq/categories/${category.id}`, { method: 'DELETE' })
+      await request(`${API_BASE}/faq/categories/${deletingCategoryObj.id}`, { method: 'DELETE' })
       setSuccess('Category and its questions deleted successfully.')
       setSelectedCategoryId('')
+      setDeletingCategoryObj(null)
       await loadFaq()
     } catch (deleteError) {
       setError(deleteError.message)
+      setDeletingCategoryObj(null)
     }
   }
 
   const selectedCategory = categories.find((category) => String(category.id) === String(selectedCategoryId))
+
+  // Wyszukanie pytania do wyświetlenia w modalu
+  const questionToDelete = selectedCategory?.questions?.find(q => q.id === deletingQuestionId)
 
   if (loading) return <p className="text-gray-600">Loading FAQ...</p>
 
@@ -150,7 +161,7 @@ export default function FAQManager({ token }) {
                   {category.icon} {category.category}
                 </button>
                 <button
-                  onClick={() => handleDeleteCategory(category)}
+                  onClick={() => setDeletingCategoryObj(category)}
                   aria-label={`Delete ${category.category}`}
                   title="Delete category"
                   className="p-2 mr-1 rounded text-red-600 hover:bg-red-100 transition-colors"
@@ -200,7 +211,7 @@ export default function FAQManager({ token }) {
                       <p className="text-gray-600 mt-2 whitespace-pre-wrap">{item.a}</p>
                       <div className="flex gap-2 mt-4">
                         <button onClick={() => { setEditingId(item.id); setEditing({ question: item.q, answer: item.a }) }} className="bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded text-sm">Edit</button>
-                        <button onClick={() => handleDeleteQuestion(item.id)} className="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded text-sm">Delete</button>
+                        <button onClick={() => setDeletingQuestionId(item.id)} className="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded text-sm">Delete</button>
                       </div>
                     </div>
                   </div>
@@ -210,6 +221,78 @@ export default function FAQManager({ token }) {
           </div>
         </div>
       </div>
+
+      {/* Modal potwierdzenia usunięcia pytania */}
+      {deletingQuestionId && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 flex-shrink-0">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900">Delete "{questionToDelete?.q}"</h4>
+                <p className="text-sm text-gray-500">
+                  Are you sure you want to remove this question? This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button 
+                onClick={() => setDeletingQuestionId(null)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDeleteQuestion}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-sm"
+              >
+                Delete Question
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal potwierdzenia usunięcia kategorii */}
+      {deletingCategoryObj && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 flex-shrink-0">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900">Delete: "{deletingCategoryObj.category}"</h4>
+                <p className="text-sm text-gray-500">
+                  Are you sure you want to delete that category and all its associated questions? This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button 
+                onClick={() => setDeletingCategoryObj(null)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDeleteCategory}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-sm"
+              >
+                Delete Category
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
