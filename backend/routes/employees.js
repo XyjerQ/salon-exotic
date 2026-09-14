@@ -224,6 +224,51 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
+// USUNIĘCIE PRACOWNIKA Z PRZEPISANIEM AUT
+router.delete('/:id', auth, async (req, res) => {
+  if (!hasPermission(req, 'employees.edit')) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  const db = req.app.get('db');
+  const id = Number(req.params.id);
+  
+  // Pobieramy ID pracownika, na którego mają zostać przepisane auta (domyślnie 0, jeśli nie podano)
+  const reassignTo = req.body.reassignTo !== undefined ? Number(req.body.reassignTo) : 0;
+
+  // Zabezpieczenie przed usunięciem samego siebie
+  if (req.user.id === id) {
+    return res.status(400).json({ error: 'You cannot delete your own account' });
+  }
+
+  try {
+    const employee = await db.get('SELECT * FROM employees WHERE id = ?', [id]);
+    if (!employee) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    // 1. Przepisanie przypisanych aut na nowego pracownika (lub do puli bez przypisania / id 0)
+    // Zmień nazwę kolumny 'advisor_id' na taką, jakiej używasz w tabeli cars (np. employee_id, advisor_id itp.)
+    await db.run('UPDATE cars SET advisor_id = ? WHERE advisor_id = ?', [reassignTo, id]);
+
+    // Opcjonalne: usunięcie pliku zdjęcia z dysku
+    if (employee.photo_path && employee.photo_path.startsWith('/uploads/')) {
+      const filePath = path.join(__dirname, '../public', employee.photo_path);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    // 2. Usunięcie pracownika
+    await db.run('DELETE FROM employees WHERE id = ?', [id]);
+    
+    res.json({ message: 'Employee deleted successfully and cars reassigned', id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error while deleting employee' });
+  }
+});
+
 // Upload zdjęcia pracownika
 router.post('/:id/upload-photo', auth, upload.single('photo'), async (req, res) => {
   const db = req.app.get('db');

@@ -13,6 +13,9 @@ export default function ServiceHistory({ initialVin = '' }) {
   const [editingId, setEditingId] = useState(null)
   const [editingEntry, setEditingEntry] = useState(null)
 
+  // Stan dla ładnego modala usuwania
+  const [deletingId, setDeletingId] = useState(null)
+
   const token = localStorage.getItem('employeeToken')
 
   useEffect(() => {
@@ -142,27 +145,36 @@ export default function ServiceHistory({ initialVin = '' }) {
     }
   }
 
-  const deleteEntry = async (id) => {
-    if (!window.confirm('Delete this service entry?')) return
+  const confirmDelete = async () => {
+    if (!deletingId) return
     setError('')
     try {
-      const res = await fetch(`${API_BASE}/cars/service/${id}`, {
+      const res = await fetch(`${API_BASE}/cars/service/${deletingId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       })
       if (res.ok || res.status === 204) {
+        setDeletingId(null)
         if (car?.id) await loadCarDetails(car.id)
       } else {
         setError('Failed to delete entry')
+        setDeletingId(null)
       }
     } catch (e) {
       console.error('deleteEntry error:', e)
       setError(e.message)
+      setDeletingId(null)
     }
   }
 
+  // Znajdź wpis serwisowy, który aktualnie chcemy usunąć (dla wyświetlenia nazwy w modalu)
+  const entryToDelete = history.find(e => e.id === deletingId)
+  const entryNameDisplay = entryToDelete 
+    ? `${entryToDelete.service_type} (${entryToDelete.service_date?.split('T')[0] || ''})` 
+    : 'this record'
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       {/* Vehicle Selection & VIN Lookup */}
       <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
         <h3 className="text-lg font-semibold">Select or Lookup Vehicle</h3>
@@ -327,11 +339,34 @@ export default function ServiceHistory({ initialVin = '' }) {
                     </div>
                   ) : (
                     <>
-                      {entry.description && <p className="text-sm text-gray-700 mt-2">{entry.description}</p>}
-                      <div className="text-xs text-gray-500 mt-2">Mileage: {entry.mileage_km ?? '—'} km · Cost: {entry.cost ?? '—'}</div>
-                      <div className="mt-3 flex gap-2">
-                        <button onClick={() => startEdit(entry)} className="text-sm bg-blue-600 text-white px-3 py-1 rounded">Edit</button>
-                        <button onClick={() => deleteEntry(entry.id)} className="text-sm bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+                      {entry.description && <p className="text-sm text-gray-700 mt-1">{entry.description}</p>}
+
+                      <div className="mt-1 flex items-center justify-between gap-2">
+                        <div className="text-xs text-gray-500">
+                          Mileage: {entry.mileage_km ?? '—'} km · Cost: {entry.cost ?? '—'}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => startEdit(entry)} 
+                            title="Edit" 
+                            className="text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button 
+                            onClick={() => setDeletingId(entry.id)} 
+                            title="Delete"
+                            className="text-sm hover:bg-red-100 text-red-600 px-2 py-1 rounded flex items-center gap-1 transition-colors"
+                          >
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <path d="M3 6h18" />
+                              <path d="M8 6V4h8v2" />
+                              <path d="M19 6l-1 14H6L5 6" />
+                              <path d="M10 11v5M14 11v5" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     </>
                   )}
@@ -344,6 +379,39 @@ export default function ServiceHistory({ initialVin = '' }) {
 
       {car && !loading && (
         <ServiceEntryForm car={car} onEntryAdded={handleEntryAdded} />
+      )}
+
+      {deletingId && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 flex-shrink-0">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900">Delete: "{entryNameDisplay}"</h4>
+                <p className="text-sm text-gray-500">Are you sure you want to remove this record? This action cannot be undone.</p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button 
+                onClick={() => setDeletingId(null)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-sm"
+              >
+                Delete Entry
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

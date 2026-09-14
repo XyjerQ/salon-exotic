@@ -1,6 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 export default function CarList({ cars = [], employees = [], userRole, onEdit, onDelete, onAdd, loading, onViewHistory, onViewDetails }) {
+  const [deletingId, setDeletingId] = useState(null)
+
   const mediaBase = (import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/?api\/?$/, '')
   const frontendBase = import.meta.env.BASE_URL || '/'
   const resolveImageUrl = (imagePath) => {
@@ -48,6 +50,17 @@ export default function CarList({ cars = [], employees = [], userRole, onEdit, o
 
     return `${formatted} €`
   }
+
+  const confirmDelete = () => {
+    if (deletingId) {
+      onDelete(deletingId)
+      setDeletingId(null)
+    }
+  }
+
+  // Znajdź auto, które aktualnie chcemy usunąć (dla wyświetlenia nazwy w modalu)
+  const carToDelete = safeCars.find(c => c.id === deletingId)
+  const carNameDisplay = carToDelete ? `${carToDelete.make} ${carToDelete.model}` : 'this car'
 
   return (
     <div>
@@ -123,7 +136,7 @@ export default function CarList({ cars = [], employees = [], userRole, onEdit, o
                       </div>
 
                       {!isCustomerVehicle && (
-                        <div className="rounded-xl bg-black px-4 py-2 text-right text-white shadow-sm">
+                        <div className="rounded-xl bg-gray-900 hover:bg-black px-4 py-2 text-right text-white shadow-sm">
                           <div className="text-[10px] uppercase tracking-[0.2em] text-gray-400">Price</div>
                           <div className="text-lg font-bold">{formatPrice(car.price)}</div>
                         </div>
@@ -174,6 +187,20 @@ export default function CarList({ cars = [], employees = [], userRole, onEdit, o
                     )}
 
                     <div className="mt-6 flex flex-wrap gap-3">
+                      {canViewServiceHistory && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            onViewHistory(car.id)
+                          }}
+                          className="text-sm font-medium text-white bg-gray-900 hover:bg-black px-3.5 py-1.5 rounded-lg transition-colors shadow-sm flex items-center gap-1.5"
+                        >
+                          Service History
+                        </button>
+                      )}
+
                       {allowAction && (
                         <>
                           <button
@@ -183,7 +210,7 @@ export default function CarList({ cars = [], employees = [], userRole, onEdit, o
                               e.stopPropagation()
                               onEdit(car.id)
                             }}
-                            className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+                            className="text-md text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded transition-colors"
                           >
                             Edit
                           </button>
@@ -192,27 +219,18 @@ export default function CarList({ cars = [], employees = [], userRole, onEdit, o
                             onClick={(e) => {
                               e.preventDefault()
                               e.stopPropagation()
-                              onDelete(car.id)
+                              setDeletingId(car.id)
                             }}
-                            className="rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition-colors hover:bg-red-700"
+                            className="hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-md text-xs font-medium transition"
                           >
-                            Delete
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <path d="M3 6h18" />
+                              <path d="M8 6V4h8v2" />
+                              <path d="M19 6l-1 14H6L5 6" />
+                              <path d="M10 11v5M14 11v5" />
+                            </svg>
                           </button>
                         </>
-                      )}
-
-                      {canViewServiceHistory && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            onViewHistory(car.id)
-                          }}
-                          className="rounded-lg bg-gray-200 px-4 py-2 font-medium text-black transition-colors hover:bg-gray-300"
-                        >
-                          Service History
-                        </button>
                       )}
                     </div>
                   </div>
@@ -220,6 +238,42 @@ export default function CarList({ cars = [], employees = [], userRole, onEdit, o
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* Modal potwierdzenia usunięcia z dynamiczną nazwą auta */}
+      {deletingId && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in duration-150" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 flex-shrink-0">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900">Delete: "{carNameDisplay}"</h4>
+                <p className="text-sm text-gray-500">Are you sure you want to delete this vehicle? This action cannot be undone.</p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button 
+                type="button"
+                onClick={() => setDeletingId(null)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                type="button"
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-sm"
+              >
+                Delete Car
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
