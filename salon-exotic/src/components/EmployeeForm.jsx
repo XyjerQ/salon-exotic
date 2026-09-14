@@ -14,6 +14,9 @@ export default function EmployeeForm({ empId, token, currentUserRole, onSave, on
   })
   const [formError, setFormError] = useState('')
 
+  // Bezpieczne pobieranie tokena (z propsa lub localStorage jako fallback)
+  const activeToken = token || localStorage.getItem('employeeToken')
+
   // Bezpieczne pobranie roli: sprawdza prop, a w razie braku sięga do 'employeeUser' w localStorage
   const getUserRole = () => {
     if (currentUserRole) return currentUserRole
@@ -32,12 +35,12 @@ export default function EmployeeForm({ empId, token, currentUserRole, onSave, on
     if (empId) {
       fetchEmployee()
     }
-  }, [empId, token])
+  }, [empId, activeToken])
 
   const fetchEmployee = async () => {
     try {
       const response = await fetch(`${API_BASE}/employees/${empId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${activeToken}` }
       })
       if (response.ok) {
         const data = await response.json()
@@ -72,7 +75,7 @@ export default function EmployeeForm({ empId, token, currentUserRole, onSave, on
         phone: formData.phone,
         description: formData.description,
         specialization: formData.specialization,
-        role: formData.role // Zawsze wysyłamy rolę (jeśli select jest zablokowany, wyśle aktualną wartość z formularza)
+        role: formData.role // Zawsze wysyłamy rolę
       }
 
       if (formData.password) payload.password = formData.password
@@ -86,7 +89,7 @@ export default function EmployeeForm({ empId, token, currentUserRole, onSave, on
         method,
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${activeToken}`
         },
         body: JSON.stringify(payload)
       })

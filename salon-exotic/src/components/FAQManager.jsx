@@ -14,6 +14,9 @@ export default function FAQManager({ token }) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  // Bezpieczne pobieranie tokena (z propsa lub localStorage jako fallback)
+  const activeToken = token || localStorage.getItem('employeeToken')
+
   const loadFaq = async () => {
     setLoading(true)
     try {
@@ -37,7 +40,7 @@ export default function FAQManager({ token }) {
   const request = async (url, options) => {
     const response = await fetch(url, {
       ...options,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${activeToken}` }
     })
     const data = await response.json()
     if (!response.ok) throw new Error(data.error || 'FAQ operation failed')

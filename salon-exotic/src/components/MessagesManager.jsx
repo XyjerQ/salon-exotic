@@ -11,11 +11,14 @@ export default function MessagesManager({ token }) {
   const [sendingId, setSendingId] = useState(null)
   const [selectedMessage, setSelectedMessage] = useState(null)
 
+  // Bezpieczne pobieranie tokena (z propsa lub localStorage jako fallback)
+  const activeToken = token || localStorage.getItem('employeeToken')
+
   const loadMessages = async () => {
     setLoading(true)
     try {
       const response = await fetch(`${API_BASE}/messages`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${activeToken}` }
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Unable to load messages')
@@ -30,7 +33,7 @@ export default function MessagesManager({ token }) {
 
   useEffect(() => {
     loadMessages()
-  }, [token])
+  }, [activeToken])
 
   const sendReply = async (messageId) => {
     const reply = (replies[messageId] || '').trim()
@@ -43,7 +46,7 @@ export default function MessagesManager({ token }) {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${activeToken}`
         },
         body: JSON.stringify({ reply })
       })
@@ -66,7 +69,7 @@ export default function MessagesManager({ token }) {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${activeToken}`
         },
         body: JSON.stringify({ status })
       })

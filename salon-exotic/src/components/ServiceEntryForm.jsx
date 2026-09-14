@@ -2,12 +2,12 @@ import React, { useState } from 'react'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
-export default function ServiceEntryForm({ car, onEntryAdded }) {
+export default function ServiceEntryForm({ car, onEntryAdded, token: propToken }) {
   const [entry, setEntry] = useState({ service_date: '', service_type: '', description: '', mileage_km: '', cost: '', provider: '' })
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState('')
 
-  const token = localStorage.getItem('employeeToken')
+  const token = propToken || localStorage.getItem('token') || localStorage.getItem('employeeToken')
 
   const handleEntryChange = (e) => {
     const { name, value } = e.target
@@ -28,10 +28,16 @@ export default function ServiceEntryForm({ car, onEntryAdded }) {
     
     setAdding(true)
     try {
+      const payload = {
+        ...entry,
+        mileage_km: entry.mileage_km !== '' ? Number(entry.mileage_km) : null,
+        cost: entry.cost !== '' ? Number(entry.cost) : null
+      }
+
       const res = await fetch(`${API_BASE}/cars/${car.id}/service`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(entry)
+        body: JSON.stringify(payload)
       })
       if (res.ok) {
         const created = await res.json()

@@ -14,10 +14,17 @@ export default function RolesManager({ token }) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  // Bezpieczne pobieranie tokena (z propsa lub localStorage jako fallback)
+  const activeToken = token || localStorage.getItem('employeeToken')
+
   const request = async (url, options = {}) => {
     const response = await fetch(url, {
       ...options,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, ...(options.headers || {}) }
+      headers: { 
+        'Content-Type': 'application/json', 
+        Authorization: `Bearer ${activeToken}`, 
+        ...(options.headers || {}) 
+      }
     })
     const data = await response.json()
     if (!response.ok) throw new Error(data.error || 'Role operation failed')
@@ -34,6 +41,7 @@ export default function RolesManager({ token }) {
       setRoles(roleData.roles)
       setPermissions(roleData.permissions)
       setEmployees(employeeData)
+      
       const first = roleData.roles[0]
       if (first && selectedRoleId === null) {
         setSelectedRoleId(first.id)
@@ -47,7 +55,9 @@ export default function RolesManager({ token }) {
     }
   }
 
-  useEffect(() => { loadData() }, [token])
+  useEffect(() => { 
+    loadData() 
+  }, [activeToken])
 
   const selectRole = (role) => {
     setSelectedRoleId(role.id)
@@ -64,8 +74,12 @@ export default function RolesManager({ token }) {
     event.preventDefault()
     setSaving(true)
     setError('')
+    setSuccess('')
     try {
-      await request(`${API_BASE}/roles/${selectedRoleId}`, { method: 'PUT', body: JSON.stringify({ display_name: form.display_name, permissions: form.permissions }) })
+      await request(`${API_BASE}/roles/${selectedRoleId}`, { 
+        method: 'PUT', 
+        body: JSON.stringify({ display_name: form.display_name, permissions: form.permissions }) 
+      })
       setSuccess('Role permissions saved.')
       await loadData()
     } catch (saveError) {
@@ -79,8 +93,12 @@ export default function RolesManager({ token }) {
     event.preventDefault()
     setSaving(true)
     setError('')
+    setSuccess('')
     try {
-      const created = await request(`${API_BASE}/roles`, { method: 'POST', body: JSON.stringify(newRole) })
+      const created = await request(`${API_BASE}/roles`, { 
+        method: 'POST', 
+        body: JSON.stringify(newRole) 
+      })
       setNewRole({ name: '', display_name: '', permissions: [] })
       setSelectedRoleId(created.id)
       setSuccess('Role created.')
@@ -94,6 +112,8 @@ export default function RolesManager({ token }) {
 
   const deleteRole = async (role) => {
     if (!window.confirm(`Delete role "${role.display_name}"?`)) return
+    setError('')
+    setSuccess('')
     try {
       await request(`${API_BASE}/roles/${role.id}`, { method: 'DELETE' })
       setSelectedRoleId(null)
@@ -105,8 +125,13 @@ export default function RolesManager({ token }) {
   }
 
   const assignRole = async (employeeId, roleId) => {
+    setError('')
+    setSuccess('')
     try {
-      await request(`${API_BASE}/roles/employees/${employeeId}/role`, { method: 'PUT', body: JSON.stringify({ role_id: Number(roleId) }) })
+      await request(`${API_BASE}/roles/employees/${employeeId}/role`, { 
+        method: 'PUT', 
+        body: JSON.stringify({ role_id: Number(roleId) }) 
+      })
       setSuccess('Employee role updated.')
       await loadData()
     } catch (assignError) {
@@ -114,7 +139,8 @@ export default function RolesManager({ token }) {
     }
   }
 
-  if (loading) return <p className="text-gray-600">Loading roles...</p>
+  if (loading) return <p className="text-gray-600 p-6">Loading roles...</p>
+  
   const selectedRole = roles.find((role) => role.id === selectedRoleId)
 
   return (
@@ -126,6 +152,7 @@ export default function RolesManager({ token }) {
         </div>
         <button onClick={loadData} className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm">Refresh</button>
       </div>
+
       {error && <div className="mb-4 bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg text-sm">{error}</div>}
       {success && <div className="mb-4 bg-green-50 border border-green-200 text-green-700 p-3 rounded-lg text-sm">{success}</div>}
 
@@ -154,9 +181,23 @@ export default function RolesManager({ token }) {
               </div>
             ))}
           </div>
+
           <form onSubmit={createRole} className="border-t border-gray-200 mt-4 pt-4 space-y-2">
-            <input required pattern="[a-z][a-z0-9_-]{1,30}" value={newRole.name} onChange={(event) => setNewRole({ ...newRole, name: event.target.value })} placeholder="role-key" className="w-full border rounded px-2 py-1.5 text-sm" />
-            <input required value={newRole.display_name} onChange={(event) => setNewRole({ ...newRole, display_name: event.target.value })} placeholder="Display name" className="w-full border rounded px-2 py-1.5 text-sm" />
+            <input 
+              required 
+              pattern="[a-z][a-z0-9_-]{1,30}" 
+              value={newRole.name} 
+              onChange={(event) => setNewRole({ ...newRole, name: event.target.value })} 
+              placeholder="role-key" 
+              className="w-full border rounded px-2 py-1.5 text-sm" 
+            />
+            <input 
+              required 
+              value={newRole.display_name} 
+              onChange={(event) => setNewRole({ ...newRole, display_name: event.target.value })} 
+              placeholder="Display name" 
+              className="w-full border rounded px-2 py-1.5 text-sm" 
+            />
             <button disabled={saving} className="w-full bg-black text-white rounded px-3 py-2 text-sm disabled:opacity-50">Add role</button>
           </form>
         </aside>
@@ -171,15 +212,26 @@ export default function RolesManager({ token }) {
                 </div>
                 {selectedRole.is_system && <span className="text-xs bg-gray-100 px-2 py-1 rounded">System role</span>}
               </div>
+
               <div className="grid sm:grid-cols-2 gap-2">
                 {permissions.map((permission) => (
                   <label key={permission.key} className={`flex items-center gap-2 border rounded px-3 py-2 text-sm ${selectedRole.name === 'admin' ? 'opacity-60' : ''}`}>
-                    <input type="checkbox" disabled={selectedRole.name === 'admin'} checked={form.permissions.includes(permission.key)} onChange={() => setForm(togglePermission(form, permission.key))} />
+                    <input 
+                      type="checkbox" 
+                      disabled={selectedRole.name === 'admin'} 
+                      checked={form.permissions.includes(permission.key)} 
+                      onChange={() => setForm(togglePermission(form, permission.key))} 
+                    />
                     {permission.label}
                   </label>
                 ))}
               </div>
-              {selectedRole.name !== 'admin' && <button disabled={saving} className="mt-5 bg-blackline-accent text-black px-5 py-2 rounded font-semibold disabled:opacity-50">Save permissions</button>}
+
+              {selectedRole.name !== 'admin' && (
+                <button disabled={saving} className="mt-5 bg-black text-white px-5 py-2 rounded font-semibold disabled:opacity-50">
+                  Save permissions
+                </button>
+              )}
             </form>
           )}
 
@@ -188,8 +240,15 @@ export default function RolesManager({ token }) {
             <div className="space-y-3">
               {employees.map((employee) => (
                 <div key={employee.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-3">
-                  <div><p className="font-semibold">{employee.name}</p><p className="text-sm text-gray-500">{employee.email}</p></div>
-                  <select value={employee.role_id || ''} onChange={(event) => assignRole(employee.id, event.target.value)} className="border rounded px-3 py-2 bg-white text-sm">
+                  <div>
+                    <p className="font-semibold">{employee.name}</p>
+                    <p className="text-sm text-gray-500">{employee.email}</p>
+                  </div>
+                  <select 
+                    value={employee.role_id || ''} 
+                    onChange={(event) => assignRole(employee.id, event.target.value)} 
+                    className="border rounded px-3 py-2 bg-white text-sm"
+                  >
                     {roles.map((role) => <option key={role.id} value={role.id}>{role.display_name}</option>)}
                   </select>
                 </div>

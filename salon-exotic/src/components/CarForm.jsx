@@ -9,6 +9,9 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
   const userRole = (user.role || '').toLowerCase()
   const isService = userRole === 'service'
 
+  // Bezpieczne pobieranie tokena (z propsa lub localStorage jako fallback)
+  const activeToken = token || localStorage.getItem('employeeToken')
+
   const [formData, setFormData] = useState({
     make: '',
     model: '',
@@ -48,11 +51,13 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
     }
 
     fetchCar()
-  }, [carId])
+  }, [carId, activeToken])
 
   const fetchCar = async () => {
     try {
-      const res = await fetch(`${API_BASE}/cars/${carId}`)
+      const res = await fetch(`${API_BASE}/cars/${carId}`, {
+        headers: { Authorization: `Bearer ${activeToken}` }
+      })
       if (!res.ok) return
       const data = await res.json()
 
@@ -81,7 +86,7 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
       setFeatures(data.features || [])
       setImagesPayload({ files: [], paths: (data.images || []).map((image) => image.image_path) })
     } catch (err) {
-      // ignore
+      setFormError(err.message)
     }
   }
 
@@ -142,7 +147,7 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
         method,
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${activeToken}`
         },
         body: JSON.stringify(payload)
       })
@@ -164,7 +169,7 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
     <div className="max-w-3xl bg-white border border-gray-200 rounded-lg p-8">
       <h2 className="text-2xl font-bold mb-2">{carId ? 'Edit' : 'Add'} Car</h2>
       <p className="text-sm text-gray-500 mb-6">Update the car data shown on the details page and inventory.</p>
-      {formError && <div className="mb-4 text-red-700">{formError}</div>}
+      {formError && <div className="mb-4 text-red-700 bg-red-50 border border-red-200 p-3 rounded">{formError}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <section className="space-y-4">
@@ -302,23 +307,26 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
           <ImagesUploader initial={imagesPayload.paths} onChange={handleImagesChange} />
         </section>
 
-        {/* Visibility is editable by admin and sales; advisor/featured stay admin-only. */}
         {(isAdmin || userRole === 'sales') && !isService && (
           <section className="space-y-4">
             <h3 className="text-lg font-semibold">Inventory options</h3>
             <div className={`grid ${isAdmin && !isCustomerVehicle ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-4`}>
-              {isAdmin && <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Advisor</label>
-                <select name="advisor_id" value={formData.advisor_id} onChange={handleInputChange} className="border px-3 py-2 rounded w-full">
-                  <option value="">Assign advisor</option>
-                  {employees.map((employee) => <option key={employee.id} value={employee.id}>{employee.name}</option>)}
-                </select>
-              </div>}
+              {isAdmin && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Advisor</label>
+                  <select name="advisor_id" value={formData.advisor_id} onChange={handleInputChange} className="border px-3 py-2 rounded w-full">
+                    <option value="">Assign advisor</option>
+                    {employees.map((employee) => <option key={employee.id} value={employee.id}>{employee.name}</option>)}
+                  </select>
+                </div>
+              )}
               {!isCustomerVehicle && (
                 <div className="space-y-3 pt-8">
-                  {isAdmin && <label className="flex items-center gap-2">
-                    <input type="checkbox" name="featured" checked={formData.featured} onChange={handleInputChange} /> Featured
-                  </label>}
+                  {isAdmin && (
+                    <label className="flex items-center gap-2">
+                      <input type="checkbox" name="featured" checked={formData.featured} onChange={handleInputChange} /> Featured
+                    </label>
+                  )}
                   <label className="flex items-center gap-2">
                     <input type="checkbox" name="inventory_visible" checked={formData.inventory_visible} onChange={handleInputChange} /> Visible in public inventory
                   </label>
@@ -329,8 +337,12 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
         )}
 
         <div className="flex gap-3">
-          <button type="submit" disabled={loading} className="flex-1 bg-blackline-accent text-black py-3 rounded">{loading ? 'Saving...' : carId ? 'Update' : 'Create'}</button>
-          <button type="button" onClick={onCancel} className="flex-1 bg-gray-300 text-black py-3 rounded">Cancel</button>
+          <button type="submit" disabled={loading} className="flex-1 bg-blackline-accent text-black font-bold py-3 rounded disabled:opacity-50">
+            {loading ? 'Saving...' : carId ? 'Update' : 'Create'}
+          </button>
+          <button type="button" onClick={onCancel} className="flex-1 bg-gray-300 hover:bg-gray-400 text-black font-bold py-3 rounded">
+            Cancel
+          </button>
         </div>
       </form>
     </div>

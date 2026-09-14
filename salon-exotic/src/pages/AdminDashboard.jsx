@@ -73,6 +73,13 @@ export default function AdminDashboard() {
     try {
       const q = vin ? `?vin=${encodeURIComponent(vin)}` : ''
       const carsRes = await fetch(`${API_BASE}/cars${q}`)
+      
+      // Jeśli endpoint samochodów wymaga autoryzacji i zwróci 401
+      if (carsRes.status === 401 || carsRes.status === 403) {
+        handleUnauthorized(navigate)
+        return
+      }
+
       const carsData = await carsRes.json()
       
       if (user.role === 'sales') {
@@ -85,6 +92,12 @@ export default function AdminDashboard() {
         const empRes = await fetch(`${API_BASE}/employees`, {
           headers: { Authorization: `Bearer ${token}` }
         })
+
+        if (empRes.status === 401 || empRes.status === 403) {
+          handleUnauthorized(navigate)
+          return
+        }
+
         if (empRes.ok) {
           setEmployees(await empRes.json())
         }
@@ -151,6 +164,30 @@ export default function AdminDashboard() {
     if (user.role === 'manager') return 'Management Dashboard'
     if (user.role === 'service') return 'Service Dashboard'
     return 'Sales Dashboard'
+  }
+
+  const handleUnauthorized = () => {
+    localStorage.removeItem('employeeToken')
+    localStorage.removeItem('employeeUser')
+    navigate('/employee/login')
+  }
+
+  const authFetch = async (url, options = {}) => {
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        ...(options.headers || {})
+      }
+    })
+
+    // Jeśli token wygasł lub brak uprawnień
+    if (res.status === 401 || res.status === 403) {
+      handleUnauthorized()
+      throw new Error('Sesja wygasła. Zaloguj się ponownie.')
+    }
+
+    return res
   }
 
   return (
@@ -367,7 +404,7 @@ export default function AdminDashboard() {
             carId={editingCarId}
             isAdmin={isPrivileged}
             employees={employees}
-            token={token}
+            authFetch={authFetch}
             onSave={handleSaveCar}
             onCancel={() => {
               setView('cars-list')
@@ -380,6 +417,7 @@ export default function AdminDashboard() {
         {view === 'employees-list' && isAdminOrManager && (
           <EmployeesList
             employees={employees}
+            authFetch={authFetch}
             onEdit={(id) => {
               setEditingEmployeeId(id)
               setView('employee-form')
@@ -395,7 +433,7 @@ export default function AdminDashboard() {
         {view === 'employee-form' && isAdminOrManager && (
           <EmployeeForm
             empId={editingEmployeeId}
-            token={token}
+            authFetch={authFetch}
             onSave={handleSaveEmployee}
             onCancel={() => {
               setView('employees-list')
@@ -410,27 +448,27 @@ export default function AdminDashboard() {
         )}
 
         {view === 'test-drives' && canViewTestDrives && (
-          <TestDrivesManager token={token} userRole={user.role} />
+          <TestDrivesManager authFetch={authFetch} userRole={user.role} />
         )}
 
         {view === 'messages' && canViewMessages && (
-          <MessagesManager token={token} />
+          <MessagesManager authFetch={authFetch} />
         )}
 
         {view === 'transactions' && canViewTransactions && (
-          <TransactionHistoryManager token={token} userRole={user.role} userPermissions={activePermissions} />
+          <TransactionHistoryManager authFetch={authFetch} userRole={user.role} userPermissions={activePermissions} />
         )}
 
         {view === 'site-settings' && hasPermission('site_settings.manage') && (
-          <SiteSettingsManager token={token} />
+          <SiteSettingsManager authFetch={authFetch} />
         )}
 
         {view === 'faq' && hasPermission('faq.manage') && (
-          <FAQManager token={token} />
+          <FAQManager authFetch={authFetch} />
         )}
 
         {view === 'roles' && isAdmin && (
-          <RolesManager token={token} />
+          <RolesManager authFetch={authFetch} />
         )}
       </div>
     </main>

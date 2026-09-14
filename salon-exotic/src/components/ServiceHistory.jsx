@@ -15,67 +15,37 @@ export default function ServiceHistory({ initialVin = '' }) {
 
   const token = localStorage.getItem('employeeToken')
 
-  // Pobierz listę wszystkich aut przy montowaniu komponentu
+  // Pobierz listę aut i obsłuż initialVin w jednym miejscu
   useEffect(() => {
-    fetchAllCars()
-  }, [])
-
-  useEffect(() => {
-    if (initialVin) {
-      lookupByVin(initialVin)
-    }
+    fetchAllCarsAndInit()
   }, [initialVin])
 
-  const fetchAllCars = async () => {
+  const fetchAllCarsAndInit = async () => {
+    setLoading(true)
     try {
       const res = await fetch(`${API_BASE}/cars`)
       const arr = await res.json()
       if (Array.isArray(arr)) {
         setAllCars(arr)
-        // Jeśli mamy wstępny VIN, spróbujmy ustawić konkretne auto
+        
         if (initialVin) {
+          setVinLookup(initialVin)
           const found = arr.find(c => c.vin?.toLowerCase() === initialVin.toLowerCase())
           if (found) {
-            handleSelectCarFromDropdown(found.id)
+            await loadCarDetails(found.id)
+            setLoading(false)
+            return
           }
         }
       }
     } catch (e) {
-      console.error('fetchAllCars error:', e)
-    }
-  }
-
-  const lookupByVin = async (value) => {
-    const vin = value ?? vinLookup
-    if (!vin) return
-    setError('')
-    setLoading(true)
-    try {
-      const res = await fetch(`${API_BASE}/cars?vin=${encodeURIComponent(vin)}`)
-      const arr = await res.json()
-      if (arr && arr.length > 0) {
-        const basicCar = arr[0]
-        // Pobieramy pełne dane z relacjami (w tym service_history)
-        const detailRes = await fetch(`${API_BASE}/cars/${basicCar.id}`)
-        const fullCar = await detailRes.json()
-        
-        setCar(fullCar)
-        setHistory(fullCar.service_history || [])
-      } else {
-        setCar(null)
-        setHistory([])
-        setError('No car found with this VIN')
-      }
-    } catch (e) {
-      console.error('lookupByVin error:', e)
-      setCar(null)
-      setHistory([])
-      setError(e.message)
+      console.error('Initialization error:', e)
+      setError('Failed to load vehicle list')
     }
     setLoading(false)
   }
 
-  const handleSelectCarFromDropdown = async (carId) => {
+  const loadCarDetails = async (carId) => {
     if (!carId) {
       setCar(null)
       setHistory([])
@@ -85,7 +55,6 @@ export default function ServiceHistory({ initialVin = '' }) {
     setError('')
     setLoading(true)
     try {
-      // Pobieramy pełne dane bezpośrednio po ID auta
       const res = await fetch(`${API_BASE}/cars/${carId}`)
       const fullCar = await res.json()
       if (res.ok) {
@@ -96,24 +65,46 @@ export default function ServiceHistory({ initialVin = '' }) {
         setError(fullCar.error || 'Failed to load car details')
       }
     } catch (e) {
-      console.error('handleSelectCarFromDropdown error:', e)
+      console.error('loadCarDetails error:', e)
       setError(e.message)
+    }
+    setLoading(false)
+  }
+
+  const lookupByVin = async () => {
+    if (!vinLookup) return
+    setError('')
+    setLoading(true)
+    try {
+      const res = await fetch(`${API_BASE}/cars?vin=${encodeURIComponent(vinLookup)}`)
+      const arr = await res.json()
+      if (arr && arr.length > 0) {
+        await loadCarDetails(arr[0].id)
+      } else {
+        setCar(null)
+        setHistory([])
+        setError('No car found with this VIN')
+      }
+    } catch (e) {
+      console.error('lookupByVin error:', e)
+      setError(e.message)
+      setCar(null)
+      setHistory([])
     }
     setLoading(false)
   }
 
   const handleEntryAdded = async () => {
     if (car?.id) {
-      await handleSelectCarFromDropdown(car.id)
+      await loadCarDetails(car.id)
     }
-    await fetchAllCars()
   }
 
   const startEdit = (e) => {
     setEditingId(e.id)
     setEditingEntry({ 
-      service_date: e.service_date, 
-      service_type: e.service_type, 
+      service_date: e.service_date?.split('T')[0] || '', // Format YYYY-MM-DD dla input type="date"
+      service_type: e.service_type || '', 
       description: e.description || '', 
       mileage_km: e.mileage_km || '', 
       cost: e.cost || '', 
@@ -132,17 +123,19 @@ export default function ServiceHistory({ initialVin = '' }) {
     try {
       const res = await fetch(`${API_BASE}/cars/service/${editingId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 
+          'Content-Type': 'application/json', 
+          Authorization: `Bearer ${token}` 
+        },
         body: JSON.stringify(editingEntry)
       })
+      
       if (res.ok) {
-        await res.json()
         cancelEdit()
-        if (car?.id) await handleSelectCarFromDropdown(car.id)
-        await fetchAllCars()
+        if (car?.id) await loadCarDetails(car.id)
       } else {
         const data = await res.json().catch(() => ({}))
-        setError(data.error || 'Failed to update')
+        setError(data.error || 'Failed to update entry')
       }
     } catch (e) {
       console.error('submitEdit error:', e)
@@ -151,18 +144,17 @@ export default function ServiceHistory({ initialVin = '' }) {
   }
 
   const deleteEntry = async (id) => {
-    if (!confirm('Delete this service entry?')) return
+    if (!window.confirm('Delete this service entry?')) return
     setError('')
     try {
       const res = await fetch(`${API_BASE}/cars/service/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       })
-      if (res.status === 204) {
-        if (car?.id) await handleSelectCarFromDropdown(car.id)
-        await fetchAllCars()
+      if (res.ok || res.status === 204) {
+        if (car?.id) await loadCarDetails(car.id)
       } else {
-        setError('Failed to delete')
+        setError('Failed to delete entry')
       }
     } catch (e) {
       console.error('deleteEntry error:', e)
@@ -177,12 +169,11 @@ export default function ServiceHistory({ initialVin = '' }) {
         <h3 className="text-lg font-semibold">Select or Lookup Vehicle</h3>
         
         <div className="grid md:grid-cols-2 gap-4">
-          {/* Dropdown ze wszystkimi autami */}
           <div>
             <label className="block text-xs text-gray-600 mb-1">Choose from all cars in system</label>
             <select
               value={car?.id || ''}
-              onChange={(e) => handleSelectCarFromDropdown(e.target.value)}
+              onChange={(e) => loadCarDetails(e.target.value)}
               className="border px-3 py-2 rounded w-full bg-white"
             >
               <option value="">-- Select a car --</option>
@@ -194,7 +185,6 @@ export default function ServiceHistory({ initialVin = '' }) {
             </select>
           </div>
 
-          {/* Wyszukiwanie po VIN */}
           <div>
             <label className="block text-xs text-gray-600 mb-1">Or lookup by VIN</label>
             <div className="flex items-center gap-2">
@@ -204,28 +194,25 @@ export default function ServiceHistory({ initialVin = '' }) {
                 placeholder="Enter VIN" 
                 className="border px-3 py-2 rounded flex-1" 
               />
-              <button onClick={() => lookupByVin()} className="bg-black text-white px-4 py-2 rounded font-medium">Find</button>
+              <button onClick={lookupByVin} className="bg-black text-white px-4 py-2 rounded font-medium">Find</button>
               <button onClick={() => { setVinLookup(''); setCar(null); setHistory([]); setError('') }} className="bg-gray-200 px-3 py-2 rounded font-medium">Clear</button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Error Message */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-700">{error}</p>
         </div>
       )}
 
-      {/* Loading */}
       {loading && (
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <p className="text-gray-600">Loading...</p>
         </div>
       )}
 
-      {/* Car Details */}
       {car && !loading && (
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h3 className="text-2xl font-bold mb-4">{car.make} {car.model}</h3>
@@ -267,7 +254,6 @@ export default function ServiceHistory({ initialVin = '' }) {
         </div>
       )}
 
-      {/* Service History */}
       {car && !loading && (
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold mb-4">Service History ({history.length})</h3>
@@ -281,7 +267,7 @@ export default function ServiceHistory({ initialVin = '' }) {
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <div className="font-semibold text-base">{entry.service_type}</div>
-                      <div className="text-sm text-gray-600">{entry.service_date}</div>
+                      <div className="text-sm text-gray-600">{entry.service_date?.split('T')[0]}</div>
                     </div>
                     <div className="text-sm text-gray-600">{entry.provider || '—'}</div>
                   </div>
@@ -357,7 +343,6 @@ export default function ServiceHistory({ initialVin = '' }) {
         </div>
       )}
 
-      {/* Add Service Entry Form */}
       {car && !loading && (
         <ServiceEntryForm car={car} onEntryAdded={handleEntryAdded} />
       )}

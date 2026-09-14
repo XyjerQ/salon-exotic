@@ -28,7 +28,7 @@ const typeDescriptions = {
   detailing: 'Detailing service, such as paint correction, ceramic coating, or interior care.'
 }
 
-export default function TransactionHistoryManager({ token, userRole, userPermissions = [] }) {
+export default function TransactionHistoryManager({ authFetch, userRole, userPermissions = [] }) {
   const [records, setRecords] = useState([])
   const [cars, setCars] = useState([])
   const [form, setForm] = useState(emptyForm)
@@ -57,9 +57,9 @@ export default function TransactionHistoryManager({ token, userRole, userPermiss
   const availableTypes = canManageAll ? ['vehicle_sale', 'service', 'detailing'] : userRole === 'service' ? ['service', 'detailing'] : ['vehicle_sale']
 
   const request = async (url, options = {}) => {
-    const response = await fetch(url, {
+    const response = await authFetch(url, {
       ...options,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, ...(options.headers || {}) }
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }
     })
     const data = await response.json().catch(() => ({}))
     if (!response.ok) throw new Error(data.error || 'Transaction operation failed')
@@ -71,7 +71,7 @@ export default function TransactionHistoryManager({ token, userRole, userPermiss
     try {
       const [history, carsResponse] = await Promise.all([
         request(`${API_BASE}/transaction-history`),
-        fetch(`${API_BASE}/cars`)
+        authFetch(`${API_BASE}/cars`)
       ])
       setRecords(history)
       if (carsResponse.ok) setCars(await carsResponse.json())
@@ -83,7 +83,7 @@ export default function TransactionHistoryManager({ token, userRole, userPermiss
     }
   }
 
-  useEffect(() => { loadData() }, [token])
+  useEffect(() => { loadData() }, [])
 
   const updateForm = (event) => setForm((current) => ({ ...current, [event.target.name]: event.target.value }))
 
@@ -209,7 +209,7 @@ export default function TransactionHistoryManager({ token, userRole, userPermiss
 
   // Formatowanie waluty w EUR (€)
   const money = (value) => new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR' }).format(Number(value || 0))
-
+  
   return (
     <div className="space-y-6">
       {/* KAFEL 1: Formularz dodawania / edycji transakcji */}

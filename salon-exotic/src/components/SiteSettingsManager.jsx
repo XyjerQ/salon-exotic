@@ -17,7 +17,7 @@ const fields = [
   ['copyright_text', 'Copyright text']
 ]
 
-export default function SiteSettingsManager({ token }) {
+export default function SiteSettingsManager({ authFetch }) {
   const { settings, setSettings } = useSiteSettings()
   const [form, setForm] = useState(settings)
   const [loading, setLoading] = useState(false)
@@ -39,15 +39,14 @@ export default function SiteSettingsManager({ token }) {
     setSuccess('')
 
     try {
-      const response = await fetch(`${API_BASE}/settings`, {
+      const response = await authFetch(`${API_BASE}/settings`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(form)
       })
-      const data = await response.json()
+      const data = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(data.error || 'Unable to save settings')
       setSettings(data)
       setForm(data)
@@ -88,7 +87,7 @@ export default function SiteSettingsManager({ token }) {
           <button
             type="submit"
             disabled={loading}
-            className="bg-blackline-accent text-black px-6 py-3 rounded-md font-semibold disabled:opacity-50"
+            className="bg-black text-white hover:bg-gray-800 px-6 py-3 rounded-md font-semibold disabled:opacity-50 transition-colors"
           >
             {loading ? 'Saving...' : 'Save settings'}
           </button>

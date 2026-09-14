@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
-export default function TestDrivesManager({ token, userRole }) {
+export default function TestDrivesManager({ authFetch, userRole }) {
   const canManage = ['admin', 'manager'].includes(userRole)
   const [testDrives, setTestDrives] = useState([])
   const [cars, setCars] = useState([])
@@ -24,9 +24,7 @@ export default function TestDrivesManager({ token, userRole }) {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`${API_BASE}/test-drives`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      const res = await authFetch(`${API_BASE}/test-drives`)
       if (!res.ok) throw new Error('Failed to fetch test drives')
       const data = await res.json()
 
@@ -35,7 +33,7 @@ export default function TestDrivesManager({ token, userRole }) {
       
       setTestDrives(data)
 
-      const carsRes = await fetch(`${API_BASE}/cars`)
+      const carsRes = await authFetch(`${API_BASE}/cars`)
       if (canManage && carsRes.ok) {
         const carsData = await carsRes.json()
         const dealerCars = carsData.filter(car => !car.is_customer_vehicle && car.type !== 'customer' && car.owner_type !== 'customer')
@@ -67,11 +65,10 @@ export default function TestDrivesManager({ token, userRole }) {
     setError('')
     setSuccess('')
     try {
-      const res = await fetch(`${API_BASE}/test-drives/${id}`, {
+      const res = await authFetch(`${API_BASE}/test-drives/${id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           customer_name: editCustomerName,
@@ -99,9 +96,8 @@ export default function TestDrivesManager({ token, userRole }) {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this test drive request?')) return
     try {
-      const res = await fetch(`${API_BASE}/test-drives/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await authFetch(`${API_BASE}/test-drives/${id}`, {
+        method: 'DELETE'
       })
       if (!res.ok) throw new Error('Failed to delete')
       setTestDrives(testDrives.filter(td => td.id !== id))
