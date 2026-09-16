@@ -158,9 +158,14 @@ async function upsertCarRelations(db, carId, payload) {
     const oldImages = await db.all('SELECT image_path FROM car_images WHERE car_id = ?', [carId]);
     for (const img of oldImages) {
       if (img.image_path) {
-        const filePath = path.join(uploadDir, '..', img.image_path.replace(/^\/uploads/, ''));
-        if (fs.existsSync(filePath)) {
-          try { fs.unlinkSync(filePath); } catch (e) { console.error('Błąd usuwania pliku:', e); }
+        try {
+          const cleanPath = img.image_path.replace(/^\/uploads/, '').replace(/^\//, '');
+          const filePath = path.join(uploadDir, cleanPath);
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+        } catch (e) {
+          console.error('Nie udało się usunąć fizycznego pliku (kontynuujemy):', e);
         }
       }
     }
@@ -482,7 +487,7 @@ router.post(
     await db.exec('BEGIN');
     try {
       const result = await db.run(
-        'INSERT INTO cars (make, model, year, price, description, transmission, drivetrain, fuel_type, engine, mileage_km, horsepower_hp, exterior_color, interior_color, image_path, advisor_id, featured, vin, vehicle_type, owner_name, owner_contact, status, inventory_visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO cars (make, model, year, price, description, transmission, drivetrain, fuel_type, engine, mileage_km, horsepower_hp, exterior_color, interior_color, advisor_id, featured, vin, vehicle_type, owner_name, owner_contact, status, inventory_visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
           make ?? null,
           model ?? null,
@@ -497,7 +502,6 @@ router.post(
           maybeNumber(horsepower_hp),
           exterior_color ?? null,
           interior_color ?? null,
-          null,
           advisor_id,
           isFeatured,
           vin ?? null,

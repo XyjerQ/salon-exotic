@@ -63,10 +63,9 @@ export default function CarDetails() {
       setLoading(true)
 
       try {
-        // Pobieramy auto oraz listę pracowników równolegle z API
         const [carRes, empRes] = await Promise.all([
           fetch(`${API_BASE}/cars/${encodeURIComponent(id)}`),
-          fetch(`${API_BASE}/employees/public`) // Używamy ścieżki /public
+          fetch(`${API_BASE}/employees/public`)
         ])
 
         if (carRes.ok) {
@@ -112,6 +111,22 @@ export default function CarDetails() {
     .filter(Boolean)
 
   const featuresList = car?.features || []
+
+  const recentService = (() => {
+    if (car?.recent_service) return car.recent_service;
+    if (Array.isArray(car?.service_history) && car.service_history.length > 0) {
+      const s = car.service_history[0];
+      // Mapowanie pól z bazy SQL na format używany w widoku
+      return {
+        type: s.type || s.service_type,
+        date: s.date || s.service_date,
+        mileage: s.mileage || s.mileage_km,
+        center: s.center || s.provider,
+        description: s.description || s.details
+      };
+    }
+    return null;
+  })();
 
   useEffect(() => {
     if (!isLightboxOpen || imageList.length === 0) return
@@ -222,7 +237,7 @@ export default function CarDetails() {
 
       <section className="max-w-7xl mx-auto px-4 md:px-8 pt-8">
         <div className="grid lg:grid-cols-[1.2fr,1fr] gap-12">
-          <div ref={leftContentRef} className="flex flex-col">
+          <div ref={leftContentRef} className="flex flex-col space-y-6">
             <button
               onClick={() => setIsLightboxOpen(true)}
               className="rounded-lg overflow-hidden bg-gray-900 shadow-xl cursor-pointer hover:opacity-95 transition-opacity w-full mb-2"
@@ -304,6 +319,48 @@ export default function CarDetails() {
                 <p className="text-gray-700 leading-relaxed">{car.description}</p>
               </div>
             )}
+
+            {recentService && (
+              <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-extrabold flex items-center gap-2">
+                    Recent Service History
+                  </h3>
+                  {recentService.date && (
+                    <span className="text-xs font-semibold uppercase tracking-wider bg-gray-100 text-gray-700 px-3 py-1 rounded-full">
+                      {recentService.date}
+                    </span>
+                  )}
+                </div>
+                
+                <div className="space-y-2 text-sm text-gray-700">
+                  {recentService.center && (
+                    <div className="flex justify-between border-b border-gray-100 pb-2">
+                      <span className="text-gray-500 font-medium">Provider:</span>
+                      <span className="font-bold text-black">{recentService.center}</span>
+                    </div>
+                  )}
+                  {recentService.mileage && (
+                    <div className="flex justify-between border-b border-gray-100 pb-2">
+                      <span className="text-gray-500 font-medium">Mileage:</span>
+                      <span className="font-bold text-black">{formatMileage(recentService.mileage)}</span>
+                    </div>
+                  )}
+                  {recentService.type && (
+                    <div className="flex justify-between border-b border-gray-100 pb-2">
+                      <span className="text-gray-500 font-medium">Type:</span>
+                      <span className="font-bold text-black">{formatMileage(recentService.type)}</span>
+                    </div>
+                  )}
+                  <div className="pt-2">
+                    <span className="text-gray-500 font-medium block mb-1">Description:</span>
+                    <p className="text-gray-800 bg-gray-50 p-3 rounded-md border border-gray-100">
+                      {typeof recentService === 'string' ? recentService : (recentService.description || recentService.details || 'Regular maintenance inspection and service completed.')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div ref={rightContentRef} className="space-y-6">
@@ -339,12 +396,22 @@ export default function CarDetails() {
                     <p className="text-lg font-bold text-black mt-1">{car.engine || '—'}</p>
                   </div>
 
+                  <div>
+                    <p className="text-sm text-gray-500 uppercase tracking-wider">Fuel Type</p>
+                    <p className="text-lg font-bold text-black mt-1">{car.fuel_type || car.fuel || '—'}</p>
+                  </div>
+
                   {!isCustomerVehicle && (
                     <div>
                       <p className="text-sm text-gray-500 uppercase tracking-wider">Drivetrain</p>
                       <p className="text-lg font-bold text-black mt-1">{car.drivetrain || '—'}</p>
                     </div>
                   )}
+
+                  <div>
+                    <p className="text-sm text-gray-500 uppercase tracking-wider">VIN</p>
+                    <p className="text-lg font-bold text-black mt-1">{car.vin || '—'}</p>
+                  </div>
 
                   <div>
                     <p className="text-sm text-gray-500 uppercase tracking-wider">Exterior Color</p>
@@ -358,17 +425,6 @@ export default function CarDetails() {
                     </div>
                   )}
                 </div>
-
-                {isCustomerVehicle && (
-                  <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4">
-                    <div className="text-xs font-bold uppercase tracking-wider text-amber-900 mb-2">Owner Details & Contact</div>
-                    <div className="grid gap-1 text-sm text-gray-800">
-                      <div><span className="font-medium text-gray-500">Name:</span> {car.owner_name || '—'}</div>
-                      <div><span className="font-medium text-gray-500">Phone:</span> {car.owner_contact || '—'}</div>
-                      <div><span className="font-medium text-gray-500">Email:</span> {car.owner_email || '—'}</div>
-                    </div>
-                  </div>
-                )}
 
                 {featuresList.length > 0 && (
                   <div>
@@ -439,7 +495,6 @@ export default function CarDetails() {
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
           onClick={() => setIsLightboxOpen(false)}
         >
-          {/* Przycisk zamknięcia (krzyżyk) w prawym górnym rogu */}
           <button
             onClick={() => setIsLightboxOpen(false)}
             className="absolute top-6 right-6 text-white bg-black/50 hover:bg-black/80 p-3 rounded-full transition-colors z-20"
@@ -450,12 +505,10 @@ export default function CarDetails() {
             </svg>
           </button>
 
-          {/* Opcjonalny licznik w lewym górnym rogu (lub na środku u góry) */}
           <div className="absolute top-6 left-6 text-white/80 text-sm font-medium z-10">
             {selectedImage + 1} / {imageList.length}
           </div>
 
-          {/* Przycisk w lewo */}
           <button
             onClick={(e) => {
               e.stopPropagation()
@@ -469,7 +522,6 @@ export default function CarDetails() {
             </svg>
           </button>
 
-          {/* Wyświetlane zdjęcie */}
           <img
             src={resolveImageUrl(imageList[selectedImage])}
             alt={`${car.make} ${car.model}`}
@@ -478,7 +530,6 @@ export default function CarDetails() {
             onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = withBase('img/ui/fallback.svg') }}
           />
 
-          {/* Przycisk w prawo */}
           <button
             onClick={(e) => {
               e.stopPropagation()

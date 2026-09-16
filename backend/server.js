@@ -54,7 +54,10 @@ const publicFormLimiter = rateLimit({
   message: { error: 'Too many requests. Try again later.' }
 });
 
-app.use('/uploads', express.static(uploadDir));
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(uploadDir));
 app.use('/api/auth/login', loginLimiter);
 app.use('/api/test-drives', publicFormLimiter, testDrivesRouter);
 app.use('/api/contact', publicFormLimiter, contactRoutes);
