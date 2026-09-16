@@ -38,10 +38,12 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
   const [formError, setFormError] = useState('')
 
   // Unified image payload state:
-  // - paths: existing paths in the database (strings)
-  // - files: new files cropped from the cropper (File objects)
-  // - previews: local preview URLs for new files
-  const [imagesPayload, setImagesPayload] = useState({ paths: [], files: [], previews: [] })
+  const [imagesPayload, setImagesPayload] = useState({ 
+    paths: [], 
+    files: [], 
+    previews: [],
+    primary: { type: 'path', index: 0 } 
+  })
 
   // State for the cropping modal
   const [isCropperOpen, setIsCropperOpen] = useState(false)
@@ -54,7 +56,7 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
         vehicle_type: isService ? 'customer' : prev.vehicle_type
       }))
       setFeatures([])
-      setImagesPayload({ paths: [], files: [], previews: [] })
+      setImagesPayload({ paths: [], files: [], previews: [], primary: { type: 'path', index: 0 } })
       return
     }
 
@@ -93,11 +95,23 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
       })
       setFeatures(data.features || [])
       
-      // Load existing image paths from database
+      const loadedPaths = (data.images || []).map((image) => ({
+        path: image.image_path || image.url || image,
+        id: image.id,
+        is_primary: image.is_primary === 1 || image.is_primary === true
+      }))
+      
+      let primaryObj = { type: 'path', index: 0 }
+      const primaryIndexFromDb = loadedPaths.findIndex(img => img.is_primary)
+      if (primaryIndexFromDb !== -1) {
+        primaryObj = { type: 'path', index: primaryIndexFromDb }
+      }
+
       setImagesPayload({
-        paths: (data.images || []).map((image) => image.image_path || image.url || image),
+        paths: loadedPaths,
         files: [],
-        previews: []
+        previews: [],
+        primary: primaryObj
       })
     } catch (err) {
       setFormError(err.message)
@@ -112,39 +126,111 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
   // Handle approved cropped file from modal
   const handleCroppedImage = (file) => {
     const totalImagesCount = imagesPayload.paths.length + imagesPayload.files.length
-    if (totalImagesCount >= 6) {
-      alert('You can add a maximum of 6 images.')
+    if (totalImagesCount >= 30) {
+      alert('You can add a maximum of 30 images.')
       setIsCropperOpen(false)
       return
     }
 
     const previewUrl = URL.createObjectURL(file)
-    setImagesPayload((prev) => ({
-      ...prev,
-      files: [...prev.files, file],
-      previews: [...prev.previews, previewUrl]
-    }))
+    setImagesPayload((prev) => {
+      const newFilesCount = prev.files.length
+      const shouldBePrimary = totalImagesCount === 0
+
+      return {
+        ...prev,
+        files: [...prev.files, file],
+        previews: [...prev.previews, previewUrl],
+        primary: shouldBePrimary ? { type: 'file', index: newFilesCount } : prev.primary
+      }
+    })
     setIsCropperOpen(false)
   }
 
   // Remove existing path (from database)
   const removeExistingPath = (indexToRemove) => {
-    setImagesPayload((prev) => ({
-      ...prev,
-      paths: prev.paths.filter((_, idx) => idx !== indexToRemove)
-    }))
+    setImagesPayload((prev) => {
+      const newPaths = prev.paths.filter((_, idx) => idx !== indexToRemove)
+      let newPrimary = prev.primary
+
+      if (prev.primary.type === 'path' && prev.primary.index === indexToRemove) {
+        if (newPaths.length > 0) {
+          newPrimary = { type: 'path', index: 0 }
+        } else if (prev.files.length > 0) {
+          newPrimary = { type: 'file', index: 0 }
+        } else {
+          newPrimary = { type: 'path', index: 0 }
+        }
+      } else if (prev.primary.type === 'path' && prev.primary.index > indexToRemove) {
+        newPrimary = { ...prev.primary, index: prev.primary.index - 1 }
+      }
+
+      return {
+        ...prev,
+        paths: newPaths,
+        primary: newPrimary
+      }
+    })
   }
 
   // Remove new file (before submit)
   const removeNewFile = (indexToRemove) => {
     setImagesPayload((prev) => {
       URL.revokeObjectURL(prev.previews[indexToRemove])
+      const newFiles = prev.files.filter((_, idx) => idx !== indexToRemove)
+      const newPreviews = prev.previews.filter((_, idx) => idx !== indexToRemove)
+      let newPrimary = prev.primary
+
+      if (prev.primary.type === 'file' && prev.primary.index === indexToRemove) {
+        if (prev.paths.length > 0) {
+          newPrimary = { type: 'path', index: 0 }
+        } else if (newFiles.length > 0) {
+          newPrimary = { type: 'file', index: 0 }
+        } else {
+          newPrimary = { type: 'path', index: 0 }
+        }
+      } else if (prev.primary.type === 'file' && prev.primary.index > indexToRemove) {
+        newPrimary = { ...prev.primary, index: prev.primary.index - 1 }
+      }
+
       return {
         ...prev,
-        files: prev.files.filter((_, idx) => idx !== indexToRemove),
-        previews: prev.previews.filter((_, idx) => idx !== indexToRemove)
+        files: newFiles,
+        previews: newPreviews,
+        primary: newPrimary
       }
     })
+  }
+
+  // Natychmiastowe ustawienie zdjęcia jako główne
+  const setAsPrimary = async (type, index) => {
+    setImagesPayload((prev) => ({
+      ...prev,
+      primary: { type, index },
+      paths: prev.paths.map((p, idx) => ({
+        ...p,
+        is_primary: type === 'path' && idx === index
+      }))
+    }))
+
+    // Jeśli edytujemy istniejące auto i kliknięto zdjęcie z bazy, wysyłamy PATCH do właściwego endpointu
+    if (carId && type === 'path') {
+      const selectedImage = imagesPayload.paths[index]
+      if (selectedImage) {
+        try {
+          await fetch(`${API_BASE}/cars/${carId}/primary-image`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${activeToken}`
+            },
+            body: JSON.stringify({ image_path: selectedImage.path })
+          })
+        } catch (err) {
+          console.error("Failed to set primary image on server immediately:", err)
+        }
+      }
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -182,8 +268,30 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
       data.append('featured', featuredVal ? 1 : 0)
 
       data.append('features', JSON.stringify(features || []))
-      data.append('image_paths', JSON.stringify(imagesPayload.paths || []))
+      
+      // Wysyłamy tablicę ścieżek istniejących zdjęć
+      const pathsOnly = imagesPayload.paths.map(p => p.path)
+      data.append('image_paths', JSON.stringify(pathsOnly))
 
+      // Wyliczanie ogólnego indeksu głównego zdjęcia w sklejonej tablicy (paths + files)
+      // Zgodnie z backendem: najpierw idą image_paths, potem uploadedImages
+      let calculatedPrimaryIndex = 0;
+      let calculatedPrimaryPath = '';
+
+      if (imagesPayload.primary.type === 'path') {
+        calculatedPrimaryIndex = imagesPayload.primary.index;
+        calculatedPrimaryPath = pathsOnly[imagesPayload.primary.index] || '';
+      } else {
+        // Jeśli główne to świeżo dodany plik, jego indeks w kombinowanej tablicy to długość paths + jego indeks pliku
+        calculatedPrimaryIndex = pathsOnly.length + imagesPayload.primary.index;
+      }
+
+      data.append('primary_image_index', calculatedPrimaryIndex);
+      if (calculatedPrimaryPath) {
+        data.append('primary_image_path', calculatedPrimaryPath);
+      }
+
+      // Dołączanie nowych plików graficznych
       if (imagesPayload.files && imagesPayload.files.length > 0) {
         imagesPayload.files.forEach((file) => {
           data.append('images', file)
@@ -217,7 +325,6 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
 
   return (
     <div className="max-w-7xl mx-auto bg-white border border-gray-200 rounded-lg p-8">
-      {/* NAGŁÓWERK POZA UKŁADEM DWUKOLUMNOWYM */}
       <div className="mb-6 border-b border-gray-200 pb-4">
         <h2 className="text-2xl font-bold">{carId ? 'Edit Car' : 'Add Car'}</h2>
         <p className="text-sm text-gray-500 mt-1">Update the car data shown on the details page and inventory.</p>
@@ -227,7 +334,7 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* LEWA STRONA: GŁÓWNY FORMULARZ (2 kolumny na dużych ekranach) */}
+        {/* LEWA STRONA: GŁÓWNY FORMULARZ */}
         <div className="lg:col-span-2 space-y-6">
           <section className="space-y-4">
             <h3 className="text-lg font-semibold">Basic information</h3>
@@ -356,7 +463,6 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
             <textarea name="description" value={formData.description} onChange={handleInputChange} rows="6" className="w-full border px-3 py-2 rounded" />
           </section>
 
-          {/* Przywrócony edytor cech / wyposażenia */}
           <section className="space-y-4">
             <h3 className="text-lg font-semibold">Features & Equipment</h3>
             <FeaturesEditor value={features} onChange={setFeatures} />
@@ -401,14 +507,14 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
           </div>
         </div>
 
-        {/* PRAWA STRONA: GALERIA I PODGLĄD ZDJĘĆ W STYLU "CAR DETAILS" */}
+        {/* PRAWA STRONA: GALERIA I WYBÓR GŁÓWNEGO ZDJĘCIA */}
         <div className="lg:col-span-1 space-y-4 bg-gray-50 p-5 rounded-lg border border-gray-200 h-fit sticky top-6">
           <div className="flex justify-between items-center">
             <div>
               <h3 className="text-lg font-semibold">Vehicle Images</h3>
-              <p className="text-xs text-gray-500">{totalImagesCount}/6 photos added</p>
+              <p className="text-xs text-gray-500">{totalImagesCount}/30 photos added</p>
             </div>
-            {totalImagesCount < 6 && (
+            {totalImagesCount < 30 && (
               <button
                 type="button"
                 onClick={() => setIsCropperOpen(true)}
@@ -421,42 +527,79 @@ export default function CarForm({ carId, isAdmin, employees = [], token, onSave,
 
           <div className="space-y-3">
             {/* 1. Existing images from DB */}
-            {imagesPayload.paths.map((path, index) => {
+            {imagesPayload.paths.map((imgObj, index) => {
+              const path = imgObj.path
               const fullImageUrl = path.startsWith('http') 
                 ? path 
                 : `${API_BASE.replace(/\/api$/, '')}${path}`
 
+              const isPrimary = imagesPayload.primary.type === 'path' && imagesPayload.primary.index === index
+
               return (
-                <div key={`existing-${index}`} className="relative group border rounded-lg overflow-hidden bg-white shadow-sm h-48 flex items-center justify-center">
+                <div key={`existing-${index}`} className={`relative group border rounded-lg overflow-hidden bg-white shadow-sm h-48 flex items-center justify-center ${isPrimary ? 'ring-2 ring-black' : ''}`}>
                   <img src={fullImageUrl} alt={`Car existing ${index}`} className="w-full h-full object-cover" />
+                  
                   <button
                     type="button"
                     onClick={() => removeExistingPath(index)}
-                    className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full text-xs opacity-80 group-hover:opacity-100 transition shadow"
+                    className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full text-xs opacity-80 group-hover:opacity-100 transition shadow z-10"
                     title="Remove image"
                   >
                     ✕
                   </button>
-                  <span className="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded backdrop-blur-sm">Saved</span>
+
+                  <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
+                    <span className="bg-black/70 text-white text-[10px] px-2 py-0.5 rounded backdrop-blur-sm">Saved</span>
+                    {isPrimary ? (
+                      <span className="bg-black text-white text-[10px] px-2 py-0.5 rounded font-medium">Primary</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setAsPrimary('path', index)}
+                        className="bg-white/90 hover:bg-white text-black text-[10px] px-2 py-0.5 rounded shadow transition font-medium"
+                      >
+                        Set as primary
+                      </button>
+                    )}
+                  </div>
                 </div>
               )
             })}
 
             {/* 2. New cropped preview images */}
-            {imagesPayload.previews.map((preview, index) => (
-              <div key={`new-${index}`} className="relative group border rounded-lg overflow-hidden bg-white shadow-sm h-48 flex items-center justify-center">
-                <img src={preview} alt={`Car new preview ${index}`} className="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => removeNewFile(index)}
-                  className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full text-xs opacity-80 group-hover:opacity-100 transition shadow"
-                  title="Remove image"
-                >
-                  ✕
-                </button>
-                <span className="absolute bottom-2 left-2 bg-green-600 text-white text-[10px] px-2 py-0.5 rounded">New</span>
-              </div>
-            ))}
+            {imagesPayload.previews.map((preview, index) => {
+              const isPrimary = imagesPayload.primary.type === 'file' && imagesPayload.primary.index === index
+
+              return (
+                <div key={`new-${index}`} className={`relative group border rounded-lg overflow-hidden bg-white shadow-sm h-48 flex items-center justify-center ${isPrimary ? 'ring-2 ring-black' : ''}`}>
+                  <img src={preview} alt={`Car new preview ${index}`} className="w-full h-full object-cover" />
+                  
+                  <button
+                    type="button"
+                    onClick={() => removeNewFile(index)}
+                    className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full text-xs opacity-80 group-hover:opacity-100 transition shadow z-10"
+                    title="Remove image"
+                  >
+                    ✕
+                  </button>
+
+                  <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
+                    <span className="bg-green-600 text-white text-[10px] px-2 py-0.5 rounded">New</span>
+                    {isPrimary ? (
+                      <span className="bg-black text-white text-[10px] px-2 py-0.5 rounded font-medium">Primary</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setAsPrimary('file', index)}
+                        className="bg-white/90 hover:bg-white text-black text-[10px] px-2 py-0.5 rounded shadow transition font-medium"
+                      >
+                        Set as primary
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
 
             {totalImagesCount === 0 && (
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-400 bg-white">

@@ -5,7 +5,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-const multer = require('multer');
 const fs = require('fs');
 
 const { init } = require('./db');
@@ -23,7 +22,15 @@ const transactionHistoryRoutes = require('./routes/transactionHistory');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const uploadDir = path.resolve(process.env.UPLOAD_DIR || './public/uploads');
+
+// Poprawione ścieżki bezwzględne, żeby pliki zawsze trafiały do dobrego folderu
+const uploadDir = path.resolve(__dirname, process.env.UPLOAD_DIR || './public/uploads');
+
+// Upewnij się od razu, że katalog na zdjęcia istnieje
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173,http://localhost:5174')
   .split(',')
   .map((origin) => origin.trim())
@@ -33,10 +40,12 @@ if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'changeme') {
   throw new Error('JWT_SECRET must be set to a strong value in backend/.env');
 }
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(cors({ origin: allowedOrigins }));
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -54,10 +63,12 @@ const publicFormLimiter = rateLimit({
   message: { error: 'Too many requests. Try again later.' }
 });
 
+// Kluczowe: Prawidłowe i jawne udostępnienie folderu uploads dla przeglądarki
 app.use('/uploads', (req, res, next) => {
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   next();
 }, express.static(uploadDir));
+
 app.use('/api/auth/login', loginLimiter);
 app.use('/api/test-drives', publicFormLimiter, testDrivesRouter);
 app.use('/api/contact', publicFormLimiter, contactRoutes);
@@ -66,17 +77,16 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/faq', faqRoutes);
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
-// ensure upload dir exists
-fs.mkdirSync(uploadDir, { recursive: true });
-
 const frontendPublicDir = path.resolve(__dirname, '../salon-exotic/public');
-app.use(express.static(frontendPublicDir));
+if (fs.existsSync(frontendPublicDir)) {
+  app.use(express.static(frontendPublicDir));
+}
 
-// init DB and attach to req
+// Inicjalizacja bazy danych i podpięcie reszty routerów zależnych od DB
 init().then(db => {
   app.set('db', db);
 
-  // routers
+  // Podpięcie routerów API
   app.use('/api/auth', authRoutes);
   app.use('/api/cars', carsRoutes);
   app.use('/api/employees', employeesRoutes);
@@ -84,6 +94,7 @@ init().then(db => {
   app.use('/api/roles', rolesRoutes);
   app.use('/api/transaction-history', transactionHistoryRoutes);
 
+  // Globalna obsługa błędów API
   app.use((err, req, res, next) => {
     if (res.headersSent) return next(err);
     if (err.code === 'LIMIT_FILE_SIZE') {

@@ -148,90 +148,103 @@ async function upsertCarRelations(db, carId, payload) {
     imagePaths = [],
     features = [],
     serviceHistory = [],
-    replaceImages = false,
     replaceFeatures = false,
     replaceServiceHistory = false,
-    primaryImageIndex = 0
+    primaryImageIndex = 0,
+    primaryImagePath = null
   } = payload;
-
-  if (replaceImages) {
-    const oldImages = await db.all('SELECT image_path FROM car_images WHERE car_id = ?', [carId]);
-    for (const img of oldImages) {
-      if (img.image_path) {
-        try {
-          const cleanPath = img.image_path.replace(/^\/uploads/, '').replace(/^\//, '');
-          const filePath = path.join(uploadDir, cleanPath);
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-          }
-        } catch (e) {
-          console.error('Nie udało się usunąć fizycznego pliku (kontynuujemy):', e);
-        }
-      }
-    }
-    await db.run('DELETE FROM car_images WHERE car_id = ?', [carId]);
-  }
 
   const normalizedUploaded = (uploadedImages || []).map((f) => '/uploads/' + path.basename(f.path));
   const normalizedImagePaths = (imagePaths || [])
     .filter((p) => typeof p === 'string' && p.trim() !== '')
     .map((p) => p.trim());
 
-  const allImages = normalizedUploaded.concat(normalizedImagePaths);
+  const combinedImages = [...normalizedImagePaths, ...normalizedUploaded];
+  const uniqueImages = [...new Set(combinedImages)];
 
-  if (allImages.length > 0) {
-    for (let i = 0; i < allImages.length; i += 1) {
-      await db.run(
-        'INSERT INTO car_images (car_id, image_path, is_primary, sort_order) VALUES (?, ?, ?, ?)',
-        [carId, allImages[i], i === Number(primaryImageIndex) ? 1 : 0, i]
-      );
+  const oldImages = await db.all('SELECT image_path FROM car_images WHERE car_id = ?', [carId]);
+  const newImagesSet = new Set(uniqueImages);
+
+  for (const oldImg of oldImages) {
+    if (oldImg.image_path && !newImagesSet.has(oldImg.image_path)) {
+      try {
+        const cleanPath = oldImg.image_path.replace(/^\/uploads/, '').replace(/^\//, '');
+        const filePath = path.join(uploadDir, cleanPath);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (e) {
+        console.error('Nie udało się usunąć fizycznego pliku:', e);
+      }
+    }
+  }
+
+  await db.run('DELETE FROM car_images WHERE car_id = ?', [carId]);
+
+  if (uniqueImages.length > 0) {
+    let targetPrimaryPath = primaryImagePath;
+    const numericPrimaryIndex = Number(primaryImageIndex);
+    
+    if (!targetPrimaryPath && uniqueImages[numericPrimaryIndex]) {
+      targetPrimaryPath = uniqueImages[numericPrimaryIndex];
+    }
+    if (!targetPrimaryPath) {
+      targetPrimaryPath = uniqueImages[0];
     }
 
-    const first = await db.get(
-      'SELECT image_path FROM car_images WHERE car_id = ? ORDER BY is_primary DESC, sort_order ASC, id ASC LIMIT 1',
+    for (let i = 0; i < uniqueImages.length; i += 1) {
+      const imgPath = uniqueImages[i];
+      const isPrimary = (imgPath === targetPrimaryPath) ? 1 : 0;
+      await db.run(
+        'INSERT INTO car_images (car_id, image_path, is_primary, sort_order) VALUES (?, ?, ?, ?)',
+        [carId, imgPath, isPrimary, i]
+      );
+    }
+    
+    const primaryRecord = await db.get(
+      'SELECT image_path FROM car_images WHERE car_id = ? AND is_primary = 1 LIMIT 1',
       [carId]
     );
-
-    await db.run('UPDATE cars SET image_path = ? WHERE id = ?', [first?.image_path || null, carId]);
+    await db.run('UPDATE cars SET image_path = ? WHERE id = ?', [primaryRecord?.image_path || uniqueImages[0], carId]);
+  } else {
+    await db.run('UPDATE cars SET image_path = NULL WHERE id = ?', [carId]);
   }
 
   if (replaceFeatures) {
     await db.run('DELETE FROM car_features WHERE car_id = ?', [carId]);
-  }
+    if (Array.isArray(features) && features.length > 0) {
+      for (let i = 0; i < features.length; i += 1) {
+        const item = features[i];
+        const featureText = typeof item === 'string' ? item : item?.feature;
+        if (!featureText || !String(featureText).trim()) continue;
 
-  if (Array.isArray(features) && features.length > 0) {
-    for (let i = 0; i < features.length; i += 1) {
-      const item = features[i];
-      const featureText = typeof item === 'string' ? item : item?.feature;
-      if (!featureText || !String(featureText).trim()) continue;
-
-      await db.run(
-        'INSERT INTO car_features (car_id, feature, sort_order) VALUES (?, ?, ?)',
-        [carId, String(featureText).trim(), i]
-      );
+        await db.run(
+          'INSERT INTO car_features (car_id, feature, sort_order) VALUES (?, ?, ?)',
+          [carId, String(featureText).trim(), i]
+        );
+      }
     }
   }
 
   if (replaceServiceHistory) {
     await db.run('DELETE FROM car_service_history WHERE car_id = ?', [carId]);
-  }
+    if (Array.isArray(serviceHistory) && serviceHistory.length > 0) {
+      for (const entry of serviceHistory) {
+        if (!entry || !entry.service_date || !entry.service_type) continue;
 
-  if (Array.isArray(serviceHistory) && serviceHistory.length > 0) {
-    for (const entry of serviceHistory) {
-      if (!entry || !entry.service_date || !entry.service_type) continue;
-
-      await db.run(
-        'INSERT INTO car_service_history (car_id, service_date, service_type, description, mileage_km, cost, provider) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [
-          carId,
-          entry.service_date,
-          entry.service_type,
-          entry.description ?? null,
-          maybeNumber(entry.mileage_km),
-          maybeNumber(entry.cost),
-          entry.provider ?? null
-        ]
-      );
+        await db.run(
+          'INSERT INTO car_service_history (car_id, service_date, service_type, description, mileage_km, cost, provider) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [
+            carId,
+            entry.service_date,
+            entry.service_type,
+            entry.description ?? null,
+            maybeNumber(entry.mileage_km),
+            maybeNumber(entry.cost),
+            entry.provider ?? null
+          ]
+        );
+      }
     }
   }
 }
@@ -305,7 +318,6 @@ router.get('/', async (req, res) => {
   res.json(enriched);
 });
 
-// add single service entry for car (Service ma pełny dostęp)
 router.post('/:id/service', auth, async (req, res) => {
   if (!canManageCars(req)) return res.status(403).json({ error: 'Forbidden' });
 
@@ -345,7 +357,6 @@ router.post('/:id/service', auth, async (req, res) => {
   }
 });
 
-// update a service entry (Service ma pełny dostęp)
 router.put('/service/:id', auth, async (req, res) => {
   if (!canManageCars(req)) return res.status(403).json({ error: 'Forbidden' });
 
@@ -355,7 +366,6 @@ router.put('/service/:id', auth, async (req, res) => {
   const existing = await db.get('SELECT * FROM car_service_history WHERE id = ?', [id]);
   if (!existing) return res.status(404).json({ error: 'Not found' });
 
-  // Uprawnienia: admin/manager, serwis ma pełny dostęp, a sales tylko do swoich aut
   if (!isManagerOrAdmin(req) && !isService(req)) {
     const car = await db.get('SELECT advisor_id FROM cars WHERE id = ?', [existing.car_id]);
     if (!car || car.advisor_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
@@ -394,7 +404,6 @@ router.put('/service/:id', auth, async (req, res) => {
   }
 });
 
-// delete a service entry (Service ma pełny dostęp)
 router.delete('/service/:id', auth, async (req, res) => {
   if (!canManageCars(req)) return res.status(403).json({ error: 'Forbidden' });
 
@@ -439,30 +448,12 @@ router.post(
 
     const db = req.app.get('db');
     const {
-      make,
-      model,
-      year,
-      price,
-      description,
-      featured,
-      advisor_id: advisorBody,
-      transmission,
-      drivetrain,
-      fuel_type,
-      engine,
-      mileage_km,
-      horsepower_hp,
-      exterior_color,
-      interior_color,
-      vin,
-      vehicle_type,
-      owner_name,
-      owner_contact,
-      status,
-      inventory_visible
+      make, model, year, price, description, featured, advisor_id: advisorBody,
+      transmission, drivetrain, fuel_type, engine, mileage_km, horsepower_hp,
+      exterior_color, interior_color, vin, vehicle_type, owner_name, owner_contact,
+      status, inventory_visible
     } = req.body;
 
-    // Rola service może tworzyć wyłącznie auta typu 'customer'
     const targetVehicleType = vehicle_type ?? 'inventory';
     if (status && !validCarStatuses.has(status)) return res.status(400).json({ error: 'Invalid vehicle status' });
     const isInventoryVisible = isManagerOrAdmin(req) || hasPermission(req, 'cars.edit')
@@ -483,31 +474,18 @@ router.post(
     const features = parseArrayField(req.body.features, []);
     const serviceHistory = parseArrayField(req.body.service_history, []);
     const primaryImageIndex = req.body.primary_image_index ?? 0;
+    const primaryImagePath = req.body.primary_image_path ?? null;
 
     await db.exec('BEGIN');
     try {
       const result = await db.run(
         'INSERT INTO cars (make, model, year, price, description, transmission, drivetrain, fuel_type, engine, mileage_km, horsepower_hp, exterior_color, interior_color, advisor_id, featured, vin, vehicle_type, owner_name, owner_contact, status, inventory_visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
-          make ?? null,
-          model ?? null,
-          maybeNumber(year),
-          maybeNumber(price),
-          description ?? null,
-          transmission ?? null,
-          drivetrain ?? null,
-          fuel_type ?? null,
-          engine ?? null,
-          maybeNumber(mileage_km),
-          maybeNumber(horsepower_hp),
-          exterior_color ?? null,
-          interior_color ?? null,
-          advisor_id,
-          isFeatured,
-          vin ?? null,
-          targetVehicleType,
-          owner_name ?? null,
-          owner_contact ?? null,
+          make ?? null, model ?? null, maybeNumber(year), maybeNumber(price), description ?? null,
+          transmission ?? null, drivetrain ?? null, fuel_type ?? null, engine ?? null,
+          maybeNumber(mileage_km), maybeNumber(horsepower_hp), exterior_color ?? null,
+          interior_color ?? null, advisor_id, isFeatured, vin ?? null, targetVehicleType,
+          owner_name ?? null, owner_contact ?? null,
           status && validCarStatuses.has(status) ? status : 'available',
           isInventoryVisible
         ]
@@ -518,10 +496,10 @@ router.post(
         imagePaths,
         features,
         serviceHistory,
-        replaceImages: true,
         replaceFeatures: true,
         replaceServiceHistory: true,
-        primaryImageIndex
+        primaryImageIndex,
+        primaryImagePath
       });
 
       await db.exec('COMMIT');
@@ -551,9 +529,7 @@ router.put(
     const existing = await db.get('SELECT * FROM cars WHERE id = ?', [carId]);
     if (!existing) return res.status(404).json({ error: 'Not found' });
 
-    // Sprawdzenie uprawnień do edycji auta
     if (isService(req)) {
-      // Serwis może edytować tylko auta typu 'customer'
       if (existing.vehicle_type !== 'customer') {
         return res.status(403).json({ error: 'Service role can only manage customer vehicles' });
       }
@@ -562,27 +538,10 @@ router.put(
     }
 
     const {
-      make,
-      model,
-      year,
-      price,
-      description,
-      featured,
-      advisor_id: advisorBody,
-      transmission,
-      drivetrain,
-      fuel_type,
-      engine,
-      mileage_km,
-      horsepower_hp,
-      exterior_color,
-      interior_color,
-      vin,
-      vehicle_type,
-      owner_name,
-      owner_contact,
-      status,
-      inventory_visible
+      make, model, year, price, description, featured, advisor_id: advisorBody,
+      transmission, drivetrain, fuel_type, engine, mileage_km, horsepower_hp,
+      exterior_color, interior_color, vin, vehicle_type, owner_name, owner_contact,
+      status, inventory_visible
     } = req.body;
 
     const targetVehicleType = vehicle_type ?? existing.vehicle_type;
@@ -607,46 +566,29 @@ router.put(
       .concat(req.files?.image || [])
       .concat(req.files?.images || []);
 
-    const hasImagePaths = req.body.image_paths !== undefined;
-    const hasFeatures = req.body.features !== undefined;
-    const hasServiceHistory = req.body.service_history !== undefined;
-
     const imagePaths = parseArrayField(req.body.image_paths, []);
     const features = parseArrayField(req.body.features, []);
     const serviceHistory = parseArrayField(req.body.service_history, []);
     const primaryImageIndex = req.body.primary_image_index ?? 0;
+    const primaryImagePath = req.body.primary_image_path ?? null;
 
-    const replaceImages = toBoolInt(req.body.replace_images, 0) === 1 || hasImagePaths || uploaded.length > 0;
-    const replaceFeatures = toBoolInt(req.body.replace_features, 0) === 1 || hasFeatures;
-    const replaceServiceHistory = toBoolInt(req.body.replace_service_history, 0) === 1 || hasServiceHistory;
+    const replaceFeatures = toBoolInt(req.body.replace_features, 0) === 1 || req.body.features !== undefined;
+    const replaceServiceHistory = toBoolInt(req.body.replace_service_history, 0) === 1 || req.body.service_history !== undefined;
 
     await db.exec('BEGIN');
     try {
       await db.run(
         'UPDATE cars SET make=?, model=?, year=?, price=?, description=?, transmission=?, drivetrain=?, fuel_type=?, engine=?, mileage_km=?, horsepower_hp=?, exterior_color=?, interior_color=?, advisor_id=?, featured=?, vin=?, vehicle_type=?, owner_name=?, owner_contact=?, status=?, inventory_visible=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
         [
-          make ?? existing.make,
-          model ?? existing.model,
-          maybeNumber(year) ?? existing.year,
-          maybeNumber(price) ?? existing.price,
-          description ?? existing.description,
-          transmission ?? existing.transmission,
-          drivetrain ?? existing.drivetrain,
-          fuel_type ?? existing.fuel_type,
-          engine ?? existing.engine,
-          maybeNumber(mileage_km) ?? existing.mileage_km,
-          maybeNumber(horsepower_hp) ?? existing.horsepower_hp,
-          exterior_color ?? existing.exterior_color,
-          interior_color ?? existing.interior_color,
-          advisor_id,
-          isFeatured,
-          vin ?? existing.vin,
-          targetVehicleType,
-          owner_name ?? existing.owner_name,
-          owner_contact ?? existing.owner_contact,
-          status ?? existing.status,
-          nextInventoryVisible,
-          carId
+          make ?? existing.make, model ?? existing.model, maybeNumber(year) ?? existing.year,
+          maybeNumber(price) ?? existing.price, description ?? existing.description,
+          transmission ?? existing.transmission, drivetrain ?? existing.drivetrain,
+          fuel_type ?? existing.fuel_type, engine ?? existing.engine,
+          maybeNumber(mileage_km) ?? existing.mileage_km, maybeNumber(horsepower_hp) ?? existing.horsepower_hp,
+          exterior_color ?? existing.exterior_color, interior_color ?? existing.interior_color,
+          advisor_id, isFeatured, vin ?? existing.vin, targetVehicleType,
+          owner_name ?? existing.owner_name, owner_contact ?? existing.owner_contact,
+          status ?? existing.status, nextInventoryVisible, carId
         ]
       );
 
@@ -655,10 +597,10 @@ router.put(
         imagePaths,
         features,
         serviceHistory,
-        replaceImages,
         replaceFeatures,
         replaceServiceHistory,
-        primaryImageIndex
+        primaryImageIndex,
+        primaryImagePath
       });
 
       await db.exec('COMMIT');
@@ -695,7 +637,8 @@ router.delete('/:id', auth, async (req, res) => {
     const images = await db.all('SELECT image_path FROM car_images WHERE car_id = ?', [carId]);
     for (const img of images) {
       if (img.image_path) {
-        const filePath = path.join(uploadDir, '..', img.image_path.replace(/^\/uploads/, ''));
+        const cleanPath = img.image_path.replace(/^\/uploads/, '').replace(/^\//, '');
+        const filePath = path.join(uploadDir, cleanPath);
         if (fs.existsSync(filePath)) {
           try { fs.unlinkSync(filePath); } catch (e) { console.error('Błąd usuwania pliku:', e); }
         }
@@ -712,6 +655,76 @@ router.delete('/:id', auth, async (req, res) => {
   } catch (err) {
     await db.exec('ROLLBACK');
     res.status(500).json({ error: 'Delete failed', details: err.message });
+  }
+});
+
+router.patch('/:id/primary-image', auth, async (req, res) => {
+  if (!canManageCars(req)) {
+    return res.status(403).json({ error: 'Only authorized roles can manage cars' });
+  }
+
+  const db = req.app.get('db');
+  const carId = req.params.id;
+  const { image_path, image_index } = req.body;
+
+  if (!image_path && image_index === undefined) {
+    return res.status(400).json({ error: 'image_path or image_index is required' });
+  }
+
+  const existingCar = await db.get('SELECT * FROM cars WHERE id = ?', [carId]);
+  if (!existingCar) return res.status(404).json({ error: 'Car not found' });
+
+  if (isService(req)) {
+    if (existingCar.vehicle_type !== 'customer') {
+      return res.status(403).json({ error: 'Service role can only manage customer vehicles' });
+    }
+  } else if (!isManagerOrAdmin(req) && existingCar.advisor_id !== req.user.id) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  try {
+    await db.exec('BEGIN');
+
+    let targetPath = image_path;
+
+    // Jeśli podano indeks zamiast ścieżki, pobieramy obrazek z bazy na podstawie sortowania i ID
+    if (!targetPath && image_index !== undefined) {
+      const allImages = await db.all(
+        'SELECT image_path FROM car_images WHERE car_id = ? ORDER BY is_primary DESC, sort_order ASC, id ASC',
+        [carId]
+      );
+      const targetImg = allImages[Number(image_index)];
+      if (targetImg) {
+        targetPath = targetImg.image_path;
+      }
+    }
+
+    if (!targetPath) {
+      await db.exec('ROLLBACK');
+      return res.status(404).json({ error: 'Image not found for this car' });
+    }
+
+    await db.run('UPDATE car_images SET is_primary = 0 WHERE car_id = ?', [carId]);
+
+    const result = await db.run(
+      'UPDATE car_images SET is_primary = 1 WHERE car_id = ? AND image_path = ?',
+      [carId, targetPath]
+    );
+
+    if (result.changes === 0) {
+      await db.exec('ROLLBACK');
+      return res.status(404).json({ error: 'Image not found for this car' });
+    }
+
+    await db.run('UPDATE cars SET image_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [targetPath, carId]);
+
+    await db.exec('COMMIT');
+
+    const updatedCar = await getCarWithRelations(db, carId);
+    return res.json(updatedCar);
+  } catch (err) {
+    await db.exec('ROLLBACK');
+    return res.status(500).json({ error: 'Failed to update primary image', details: err.message });
   }
 });
 
